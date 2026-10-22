@@ -1,0 +1,589 @@
+<script setup lang="ts">
+import { ref, computed, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+interface FormData {
+  name: string
+  homeAccountId: string
+  purpose: string
+  targetAmount?: number
+  targetDate?: string
+  scheduleType?: string
+  dayOfMonth?: number
+  paymentDates?: string[]
+  isAutomaticWithdrawal?: boolean
+  withdrawalFrequency?: string
+  linkedEnvelopeId?: string
+  sharedPercentage?: number
+  isShared?: boolean
+}
+
+const props = withDefaults(defineProps<{
+  isOpen: boolean
+  envelope?: any | null
+  accountId: string
+  availableAccounts?: any[]
+  availableEnvelopes?: any[]
+}>(), {
+  isOpen: false,
+  envelope: null,
+  availableAccounts: () => [],
+  availableEnvelopes: () => []
+})
+
+const emit = defineEmits<{
+  close: []
+  save: [data: FormData]
+}>()
+
+const { t } = useI18n()
+
+const formData = ref<FormData>({
+  name: props.envelope?.name || '',
+  homeAccountId: props.accountId,
+  purpose: props.envelope?.purpose || 'SavingsGoal',
+  targetAmount: props.envelope?.targetAmount?.amount,
+  targetDate: props.envelope?.targetDate,
+  scheduleType: props.envelope?.scheduleType,
+  dayOfMonth: props.envelope?.dayOfMonth,
+  paymentDates: props.envelope?.paymentDates || [],
+  isAutomaticWithdrawal: props.envelope?.isAutomaticWithdrawal || false,
+  withdrawalFrequency: props.envelope?.withdrawalFrequency,
+  linkedEnvelopeId: props.envelope?.linkedEnvelopeId,
+  sharedPercentage: props.envelope?.sharedPercentage,
+  isShared: props.envelope?.isShared || false
+})
+
+const validationError = ref<string>('')
+const showPaymentDateInput = ref(false)
+const newPaymentDate = ref<string>('')
+
+watch(() => props.envelope, (newEnvelope) => {
+  if (newEnvelope) {
+    formData.value = {
+      name: newEnvelope.name || '',
+      homeAccountId: newEnvelope.homeAccountId || props.accountId,
+      purpose: newEnvelope.purpose || 'SavingsGoal',
+      targetAmount: newEnvelope.targetAmount?.amount,
+      targetDate: newEnvelope.targetDate,
+      scheduleType: newEnvelope.scheduleType,
+      dayOfMonth: newEnvelope.dayOfMonth,
+      paymentDates: newEnvelope.paymentDates || [],
+      isAutomaticWithdrawal: newEnvelope.isAutomaticWithdrawal || false,
+      withdrawalFrequency: newEnvelope.withdrawalFrequency,
+      linkedEnvelopeId: newEnvelope.linkedEnvelopeId,
+      sharedPercentage: newEnvelope.sharedPercentage,
+      isShared: newEnvelope.isShared || false
+    }
+  }
+}, { deep: true })
+
+const isEditing = computed(() => !!props.envelope?.id)
+const isBillPurpose = computed(() => formData.value.purpose === 'Bill')
+const isAnnualSchedule = computed(() => formData.value.scheduleType === 'AnnualScheduled')
+
+const handleSubmit = () => {
+  validationError.value = ''
+
+  if (!formData.value.name || !formData.value.name.trim()) {
+    validationError.value = 'Le nom est requis'
+    return
+  }
+
+  if (isBillPurpose.value && !formData.value.scheduleType) {
+    validationError.value = 'Le type de calendrier est requis pour une facture'
+    return
+  }
+
+  if (isBillPurpose.value && isAnnualSchedule.value && formData.value.paymentDates?.length === 0) {
+    validationError.value = 'Au moins une date de paiement est requise pour un calendrier annuel'
+    return
+  }
+
+  if (formData.value.isAutomaticWithdrawal && !formData.value.withdrawalFrequency) {
+    validationError.value = 'La fréquence de prélèvement est requise'
+    return
+  }
+
+  emit('save', formData.value)
+}
+
+const handleClose = () => {
+  emit('close')
+  validationError.value = ''
+  showPaymentDateInput.value = false
+  newPaymentDate.value = ''
+  formData.value = {
+    name: '',
+    homeAccountId: props.accountId,
+    purpose: 'SavingsGoal',
+    isAutomaticWithdrawal: false,
+    isShared: false
+  }
+}
+
+const addPaymentDate = () => {
+  if (newPaymentDate.value) {
+    if (!formData.value.paymentDates) {
+      formData.value.paymentDates = []
+    }
+    formData.value.paymentDates.push(newPaymentDate.value)
+    newPaymentDate.value = ''
+  }
+}
+
+const removePaymentDate = (index: number) => {
+  formData.value.paymentDates?.splice(index, 1)
+}
+
+const purposes = [
+  { value: 'GeneralReserve', label: 'Réserve générale' },
+  { value: 'SavingsGoal', label: 'Objectif d\'épargne' },
+  { value: 'Bill', label: 'Facture' },
+  { value: 'DebtPayment', label: 'Remboursement de dette' },
+  { value: 'WeeklyExpenses', label: 'Dépenses hebdomadaires' },
+  { value: 'Mortgage', label: 'Hypothèque/Loyer' }
+]
+
+const billScheduleTypes = [
+  { value: 'Monthly', label: 'Mensuel' },
+  { value: 'AnnualScheduled', label: 'Annuel (dates spécifiques)' }
+]
+
+const withdrawalFrequencies = [
+  { value: 'Weekly', label: 'Hebdomadaire' },
+  { value: 'BiWeekly', label: 'Tous les 2 semaines' },
+  { value: 'Monthly', label: 'Mensuel' },
+  { value: 'Quarterly', label: 'Trimestriel' },
+  { value: 'SemiAnnual', label: 'Semestriel' },
+  { value: 'Annual', label: 'Annuel' }
+]
+</script>
+
+<template>
+  <div v-if="isOpen" class="modal-overlay" @click="handleClose">
+    <div class="modal" @click.stop>
+      <div class="modal-header">
+        <h2>{{ isEditing ? 'Éditer' : 'Ajouter' }} Enveloppe</h2>
+        <button class="modal-close" @click="handleClose">
+          <i class="mdi mdi-close"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div v-if="validationError" class="error-message">
+          {{ validationError }}
+        </div>
+
+        <!-- Basic Info -->
+        <div class="form-group">
+          <label>Nom de l'enveloppe *</label>
+          <input v-model="formData.name" type="text" placeholder="Ex: Loyer, Épicerie..." />
+        </div>
+
+        <div class="form-group">
+          <label>Objectif *</label>
+          <select v-model="formData.purpose">
+            <option v-for="p in purposes" :key="p.value" :value="p.value">
+              {{ p.label }}
+            </option>
+          </select>
+        </div>
+
+        <!-- For Bills: Payment Schedule -->
+        <div v-if="isBillPurpose" class="section-divider">
+          <h3>Montant et calendrier de paiement</h3>
+
+          <div class="form-group">
+            <label>Montant de la facture</label>
+            <input v-model.number="formData.targetAmount" type="number" placeholder="0.00" />
+          </div>
+
+          <div class="form-group">
+            <label>Calendrier de paiement *</label>
+            <select v-model="formData.scheduleType">
+              <option value="">-- Sélectionner --</option>
+              <option v-for="type in billScheduleTypes" :key="type.value" :value="type.value">
+                {{ type.label }}
+              </option>
+            </select>
+          </div>
+
+          <div v-if="formData.scheduleType === 'Monthly'" class="form-group">
+            <label>Jour du mois où la facture est due (1-31)</label>
+            <input v-model.number="formData.dayOfMonth" type="number" min="1" max="31" placeholder="15" />
+          </div>
+
+          <div v-if="isAnnualSchedule" class="form-group">
+            <label>Dates de paiement dans l'année</label>
+            <div class="date-list">
+              <div v-for="(date, idx) in formData.paymentDates" :key="idx" class="date-item">
+                <span>{{ date }}</span>
+                <button type="button" class="btn-remove" @click="removePaymentDate(idx)">×</button>
+              </div>
+            </div>
+            <div class="date-input-group">
+              <input v-model="newPaymentDate" type="date" placeholder="Sélectionner une date" />
+              <button type="button" class="btn-add" @click="addPaymentDate">Ajouter</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- For Non-Bills: Target Amount & Date -->
+        <div v-if="!isBillPurpose" class="section-divider">
+          <h3>Objectif</h3>
+
+          <div class="form-group">
+            <label>Montant cible</label>
+            <input v-model.number="formData.targetAmount" type="number" placeholder="0.00" />
+          </div>
+
+          <div class="form-group">
+            <label>Date cible (quand atteindre cet objectif)</label>
+            <input v-model="formData.targetDate" type="date" />
+          </div>
+        </div>
+
+        <!-- Automatic Withdrawal Section -->
+        <div class="section-divider">
+          <h3>Prélèvement automatique</h3>
+
+          <div class="form-group">
+            <label>
+              <input v-model="formData.isAutomaticWithdrawal" type="checkbox" />
+              Activer le prélèvement automatique
+            </label>
+          </div>
+
+          <div v-if="formData.isAutomaticWithdrawal" class="form-group">
+            <label>Fréquence de prélèvement *</label>
+            <select v-model="formData.withdrawalFrequency">
+              <option value="">-- Sélectionner --</option>
+              <option v-for="freq in withdrawalFrequencies" :key="freq.value" :value="freq.value">
+                {{ freq.label }}
+              </option>
+            </select>
+          </div>
+
+          <div v-if="formData.isAutomaticWithdrawal" class="form-group">
+            <label>Enveloppe liée</label>
+            <select v-model="formData.linkedEnvelopeId">
+              <option value="">-- Aucune --</option>
+              <option v-for="env in availableEnvelopes" :key="env.id" :value="env.id">
+                {{ env.name }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Sharing -->
+        <div class="section-divider">
+          <div class="form-group">
+            <label>
+              <input v-model="formData.isShared" type="checkbox" />
+              Partager avec les membres du ménage
+            </label>
+          </div>
+
+          <div v-if="formData.isShared" class="form-group">
+            <label>Pourcentage partagé (0-100)</label>
+            <input v-model.number="formData.sharedPercentage" type="number" min="0" max="100" placeholder="0" />
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" @click="handleClose">{{ t('common.cancel') || 'Annuler' }}</button>
+        <button class="btn-primary" @click="handleSubmit">{{ t('common.save') || 'Enregistrer' }}</button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn var(--transition-fast);
+}
+
+.modal {
+  background: var(--bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideUp var(--transition-base);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-lg);
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-header h2 {
+  font-size: var(--font-size-2xl);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.modal-close {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: var(--font-size-2xl);
+  padding: 0;
+  transition: all var(--transition-fast);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-close:hover {
+  color: var(--text-primary);
+  background: var(--surface);
+  border-radius: var(--radius-md);
+}
+
+.modal-body {
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.error-message {
+  background: #fee;
+  border: 1px solid #fcc;
+  color: #c33;
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.form-group label {
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group input[type="date"],
+.form-group select {
+  padding: var(--space-md);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  transition: border-color var(--transition-fast);
+  font-family: inherit;
+  background: var(--surface);
+  color: var(--text-primary);
+}
+
+.form-group input[type="text"]:focus,
+.form-group input[type="number"]:focus,
+.form-group input[type="date"]:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-group input[type="checkbox"] {
+  cursor: pointer;
+}
+
+.section-divider {
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--border);
+}
+
+.section-divider h3 {
+  font-size: var(--font-size-lg);
+  color: var(--text-primary);
+  margin: 0 0 var(--space-md) 0;
+  font-weight: var(--font-weight-semibold);
+}
+
+.date-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.date-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--surface);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+}
+
+.btn-remove {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: var(--font-size-lg);
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+.btn-remove:hover {
+  color: #c33;
+  background: #fee;
+  border-radius: var(--radius-sm);
+}
+
+.date-input-group {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.date-input-group input {
+  flex: 1;
+  padding: var(--space-md);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  font-family: inherit;
+  background: var(--surface);
+  color: var(--text-primary);
+}
+
+.btn-add {
+  padding: var(--space-md) var(--space-lg);
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-size: var(--font-size-sm);
+}
+
+.btn-add:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.modal-footer {
+  display: flex;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  border-top: 1px solid var(--border);
+}
+
+.btn-primary,
+.btn-secondary {
+  flex: 1;
+  padding: var(--space-md) var(--space-lg);
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-size: var(--font-size-sm);
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.btn-secondary {
+  background: var(--surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+  background: var(--border);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 640px) {
+  .modal {
+    width: 95%;
+    border-radius: var(--radius-md);
+  }
+
+  .modal-header {
+    padding: var(--space-md);
+  }
+
+  .modal-body {
+    padding: var(--space-md);
+  }
+
+  .modal-footer {
+    flex-direction: column;
+    padding: var(--space-md);
+  }
+
+  .date-input-group {
+    flex-direction: column;
+  }
+}
+</style>

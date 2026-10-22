@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Karo - Dashboard avec Enveloppes par Compte</title>
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #3b82f6;
+            --secondary: #8b5cf6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --neutral: #64748b;
+            --bg: #ffffff;
+            --surface: #f8fafc;
+            --border: #e2e8f0;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--surface);
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .app-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            grid-column: 1 / -1;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-sm);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            cursor: pointer;
+        }
+
+        .header-left i {
+            font-size: 2rem;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--bg);
+            border-right: 1px solid var(--border);
+            padding: 2rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .sidebar-section {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .sidebar-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+            padding: 0.5rem 1rem;
+        }
+
+        .sidebar-link {
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            text-decoration: none;
+            color: var(--text-secondary);
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-link:hover {
+            background: var(--surface);
+            color: var(--primary);
+        }
+
+        .sidebar-link.active {
+            background: var(--surface);
+            color: var(--primary);
+            border-left-color: var(--primary);
+            font-weight: 600;
+        }
+
+        .sidebar-link i {
+            font-size: 1.25rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        /* Page Header */
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            font-size: 1rem;
+            color: var(--text-muted);
+        }
+
+        /* Subscription Tier Badge */
+        .tier-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-bottom: 2rem;
+        }
+
+        .tier-badge.pro {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        /* Stats Row */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        /* Section */
+        .section {
+            margin-bottom: 3rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .section-title i {
+            font-size: 1.75rem;
+            color: var(--primary);
+        }
+
+        /* Account Container (Expandable) */
+        .account-container {
+            background: var(--bg);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .account-container:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* Account Header (Clickable to expand) */
+        .account-header-main {
+            padding: 1.5rem;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 1rem;
+            align-items: center;
+            cursor: pointer;
+            background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+            border-bottom: 1px solid var(--border);
+            transition: all 0.3s;
+        }
+
+        .account-header-main:hover {
+            background: linear-gradient(135deg, #f0f4ff 0%, #ffffff 100%);
+        }
+
+        .account-header-main.expanded {
+            border-bottom-color: var(--primary);
+        }
+
+        .account-info {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .account-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 1.5rem;
+        }
+
+        .account-info-text {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .account-name {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .account-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .account-balance {
+            text-align: right;
+        }
+
+        .account-balance-label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .account-balance-amount {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--success);
+        }
+
+        .expand-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: var(--primary);
+            transition: all 0.3s;
+            font-size: 1.5rem;
+        }
+
+        .expand-toggle:hover {
+            background: var(--surface);
+        }
+
+        .expand-toggle.rotated {
+            transform: rotate(180deg);
+        }
+
+        /* Account Body (Enveloppes) */
+        .account-body {
+            padding: 1.5rem;
+            display: none;
+            background: var(--surface);
+        }
+
+        .account-body.expanded {
+            display: block;
+        }
+
+        /* Envelopes Grid */
+        .envelopes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        /* Envelope Card */
+        .envelope-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            transition: all 0.3s;
+        }
+
+        .envelope-card:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .envelope-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .envelope-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .envelope-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .envelope-badge.essential {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .envelope-badge.savings {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .envelope-badge.discretionary {
+            background: #dbeafe;
+            color: #0c4a6e;
+        }
+
+        .envelope-amount {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        .envelope-balance {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .envelope-target {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Progress Bar */
+        .envelope-progress {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .progress-bar-bg {
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Shared Badge */
+        .shared-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            background: #fef3c7;
+            color: #92400e;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        /* Empty Envelopes */
+        .empty-envelopes {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: var(--text-muted);
+        }
+
+        .empty-envelopes i {
+            font-size: 2rem;
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--border);
+        }
+
+        .empty-envelopes p {
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary-sm {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary-sm:hover {
+            background: #2563eb;
+        }
+
+        .btn-secondary-sm {
+            background: var(--surface);
+            color: var(--primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary-sm:hover {
+            background: var(--border);
+        }
+
+        /* Bills Section */
+        .section {
+            margin-bottom: 3rem;
+        }
+
+        .bills-section {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .bill-card {
+            background: var(--bg);
+            border-left: 4px solid var(--danger);
+            border-radius: 8px;
+            padding: 1.5rem;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.3s;
+        }
+
+        .bill-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateX(4px);
+        }
+
+        .bill-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .bill-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            width: fit-content;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .bill-name {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .bill-details {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .bill-amount {
+            text-align: right;
+        }
+
+        .bill-price {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--danger);
+        }
+
+        .bill-due {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .envelopes-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+        }
+
+        @media (max-width: 640px) {
+            .header {
+                padding: 1rem;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            .page-title {
+                font-size: 1.5rem;
+            }
+
+            .stats-row {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .account-info {
+                grid-template-columns: 1fr;
+            }
+
+            .account-balance {
+                text-align: left;
+            }
+
+            .envelopes-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .bill-card {
+                grid-template-columns: 1fr;
+            }
+
+            .bill-amount {
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <i class="mdi mdi-wallet-outline"></i>
+                Karo
+            </div>
+            <div class="header-right">
+                <div class="user-profile">
+                    <div>Jérôme B.</div>
+                    <div class="user-avatar">JB</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-link active">
+                    <i class="mdi mdi-home"></i>
+                    <span>Dashboard</span>
+                </div>
+                <div class="sidebar-link">
+                    <i class="mdi mdi-bank"></i>
+                    <span>Tous les comptes</span>
+                </div>
+                <div class="sidebar-link">
+                    <i class="mdi mdi-envelope-open"></i>
+                    <span>Enveloppes</span>
+                </div>
+                <div class="sidebar-link">
+                    <i class="mdi mdi-bill"></i>
+                    <span>Factures</span>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">Ajouter</div>
+                <div class="sidebar-link">
+                    <i class="mdi mdi-plus"></i>
+                    <span>Compte</span>
+                </div>
+                <div class="sidebar-link">
+                    <i class="mdi mdi-plus"></i>
+                    <span>Enveloppe</span>
+                </div>
+                <div class="sidebar-link">
+                    <i class="mdi mdi-plus"></i>
+                    <span>Facture</span>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">Paramètres</div>
+                <div class="sidebar-link">
+                    <i class="mdi mdi-account-multiple"></i>
+                    <span>Membres</span>
+                </div>
+                <div class="sidebar-link">
+                    <i class="mdi mdi-cog"></i>
+                    <span>Paramètres</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="tier-badge pro">
+                    <i class="mdi mdi-star"></i>
+                    Plan Pro - $9.99/mois
+                </div>
+                <div class="page-title">Tableau de bord</div>
+                <div class="page-subtitle">Solde total: <strong>$7,500.00</strong> • Enveloppes: <strong>8</strong> • Factures dues: <strong>2</strong></div>
+            </div>
+
+            <!-- Stats Row -->
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="stat-label">Solde total</div>
+                    <div class="stat-value">$7,500.00</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Enveloppes</div>
+                    <div class="stat-value">8</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Factures dues</div>
+                    <div class="stat-value" style="color: var(--danger);">2</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Dépenses ce mois</div>
+                    <div class="stat-value" style="color: var(--warning);">$1,250.00</div>
+                </div>
+            </div>
+
+            <!-- Accounts with Envelopes Section -->
+            <div class="section">
+                <div class="section-title">
+                    <i class="mdi mdi-bank"></i>
+                    Vos comptes et enveloppes
+                </div>
+
+                <!-- Account 1: Compte Chèques -->
+                <div class="account-container">
+                    <div class="account-header-main expanded" onclick="toggleAccount(this)">
+                        <div class="account-info">
+                            <div class="account-icon">
+                                <i class="mdi mdi-bank"></i>
+                            </div>
+                            <div class="account-info-text">
+                                <div class="account-name">Compte Chèques</div>
+                                <div class="account-meta">
+                                    <span><i class="mdi mdi-globe" style="font-size: 0.75rem;"></i> CAD</span>
+                                    <span>Chèques</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="account-balance">
+                            <div class="account-balance-label">Solde</div>
+                            <div class="account-balance-amount">$2,500.00</div>
+                        </div>
+                        <button class="expand-toggle rotated" onclick="event.stopPropagation()">
+                            <i class="mdi mdi-chevron-up"></i>
+                        </button>
+                    </div>
+
+                    <div class="account-body expanded">
+                        <h4 style="margin-bottom: 1rem; color: var(--text-primary);">Enveloppes (5/20)</h4>
+                        <div class="envelopes-grid">
+                            <!-- Envelope 1 -->
+                            <div class="envelope-card">
+                                <div class="envelope-header">
+                                    <div class="envelope-name">Loyer</div>
+                                    <div class="envelope-badge essential">
+                                        <i class="mdi mdi-alert-circle-outline"></i>
+                                        Essentiel
+                                    </div>
+                                </div>
+
+                                <div class="envelope-amount">
+                                    <div class="envelope-balance">$1,500</div>
+                                    <div class="envelope-target">/ $1,500</div>
+                                </div>
+
+                                <div class="envelope-progress">
+                                    <div class="progress-bar-bg">
+                                        <div class="progress-bar-fill" style="width: 100%"></div>
+                                    </div>
+                                    <div class="progress-text">
+                                        <span>100% rempli</span>
+                                        <span><i class="mdi mdi-calendar"></i> Oct 20</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Envelope 2 -->
+                            <div class="envelope-card">
+                                <div class="envelope-header">
+                                    <div class="envelope-name">Épicerie</div>
+                                    <div class="envelope-badge essential">Essentiel</div>
+                                </div>
+
+                                <div class="envelope-amount">
+                                    <div class="envelope-balance">$350</div>
+                                    <div class="envelope-target">/ $400</div>
+                                </div>
+
+                                <div class="envelope-progress">
+                                    <div class="progress-bar-bg">
+                                        <div class="progress-bar-fill" style="width: 87.5%"></div>
+                                    </div>
+                                    <div class="progress-text">
+                                        <span>87.5% rempli</span>
+                                        <span style="color: var(--success);"><i class="mdi mdi-check"></i> OK</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Envelope 3 -->
+                            <div class="envelope-card">
+                                <div class="envelope-header">
+                                    <div class="envelope-name">Transport</div>
+                                    <div class="envelope-badge essential">Essentiel</div>
+                                </div>
+
+                                <div class="envelope-amount">
+                                    <div class="envelope-balance">$120</div>
+                                    <div class="envelope-target">/ $200</div>
+                                </div>
+
+                                <div class="envelope-progress">
+                                    <div class="progress-bar-bg">
+                                        <div class="progress-bar-fill" style="width: 60%"></div>
+                                    </div>
+                                    <div class="progress-text">
+                                        <span>60% rempli</span>
+                                        <span><i class="mdi mdi-check"></i> OK</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Envelope 4 -->
+                            <div class="envelope-card">
+                                <div class="envelope-header">
+                                    <div class="envelope-name">Divertissement</div>
+                                    <div class="envelope-badge discretionary">Loisir</div>
+                                </div>
+
+                                <div class="envelope-amount">
+                                    <div class="envelope-balance">$75</div>
+                                    <div class="envelope-target">/ $150</div>
+                                </div>
+
+                                <div class="envelope-progress">
+                                    <div class="progress-bar-bg">
+                                        <div class="progress-bar-fill" style="width: 50%"></div>
+                                    </div>
+                                    <div class="progress-text">
+                                        <span>50% rempli</span>
+                                        <span><i class="mdi mdi-check"></i> OK</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Envelope 5 -->
+                            <div class="envelope-card">
+                                <div class="envelope-header">
+                                    <div class="envelope-name">Électricité</div>
+                                    <div class="envelope-badge essential">Essentiel</div>
+                                </div>
+
+                                <div class="envelope-amount">
+                                    <div class="envelope-balance">$105.50</div>
+                                    <div class="envelope-target">/ $150</div>
+                                </div>
+
+                                <div class="envelope-progress">
+                                    <div class="progress-bar-bg">
+                                        <div class="progress-bar-fill" style="width: 70.3%"></div>
+                                    </div>
+                                    <div class="progress-text">
+                                        <span>70.3% rempli</span>
+                                        <span><i class="mdi mdi-check"></i> OK</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 1rem; display: flex; gap: 0.75rem;">
+                            <button class="btn btn-primary-sm">
+                                <i class="mdi mdi-plus"></i>
+                                Ajouter une enveloppe
+                            </button>
+                            <button class="btn btn-secondary-sm">
+                                <i class="mdi mdi-eye"></i>
+                                Voir les détails
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Account 2: Épargne -->
+                <div class="account-container">
+                    <div class="account-header-main" onclick="toggleAccount(this)">
+                        <div class="account-info">
+                            <div class="account-icon" style="background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); color: var(--success);">
+                                <i class="mdi mdi-piggy-bank"></i>
+                            </div>
+                            <div class="account-info-text">
+                                <div class="account-name">Compte Épargne</div>
+                                <div class="account-meta">
+                                    <span><i class="mdi mdi-globe" style="font-size: 0.75rem;"></i> CAD</span>
+                                    <span>Épargne</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="account-balance">
+                            <div class="account-balance-label">Solde</div>
+                            <div class="account-balance-amount">$5,000.00</div>
+                        </div>
+                        <button class="expand-toggle" onclick="event.stopPropagation()">
+                            <i class="mdi mdi-chevron-up"></i>
+                        </button>
+                    </div>
+
+                    <div class="account-body">
+                        <h4 style="margin-bottom: 1rem; color: var(--text-primary);">Enveloppes (3/20)</h4>
+                        <div class="envelopes-grid">
+                            <!-- Envelope 1 -->
+                            <div class="envelope-card">
+                                <div class="envelope-header">
+                                    <div class="envelope-name">Vacances</div>
+                                    <div class="envelope-badge savings">Épargne</div>
+                                </div>
+
+                                <div class="envelope-amount">
+                                    <div class="envelope-balance">$2,000</div>
+                                    <div class="envelope-target">/ $3,000</div>
+                                </div>
+
+                                <div class="envelope-progress">
+                                    <div class="progress-bar-bg">
+                                        <div class="progress-bar-fill" style="width: 66.7%"></div>
+                                    </div>
+                                    <div class="progress-text">
+                                        <span>66.7% rempli</span>
+                                        <span><i class="mdi mdi-check"></i> OK</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Envelope 2 -->
+                            <div class="envelope-card">
+                                <div class="envelope-header">
+                                    <div class="envelope-name">Urgences</div>
+                                    <div class="envelope-badge savings">Épargne</div>
+                                </div>
+
+                                <div class="envelope-amount">
+                                    <div class="envelope-balance">$3,000</div>
+                                    <div class="envelope-target">/ $3,000</div>
+                                </div>
+
+                                <div class="envelope-progress">
+                                    <div class="progress-bar-bg">
+                                        <div class="progress-bar-fill" style="width: 100%"></div>
+                                    </div>
+                                    <div class="progress-text">
+                                        <span>100% rempli</span>
+                                        <span style="color: var(--success);"><i class="mdi mdi-check-circle"></i> Plein</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Envelope 3 -->
+                            <div class="envelope-card">
+                                <div class="envelope-header">
+                                    <div class="envelope-name">Rénovations</div>
+                                    <div class="envelope-badge savings">Épargne</div>
+                                </div>
+
+                                <div class="envelope-amount">
+                                    <div class="envelope-balance">$0</div>
+                                    <div class="envelope-target">/ $5,000</div>
+                                </div>
+
+                                <div class="envelope-progress">
+                                    <div class="progress-bar-bg">
+                                        <div class="progress-bar-fill" style="width: 0%"></div>
+                                    </div>
+                                    <div class="progress-text">
+                                        <span>0% rempli</span>
+                                        <span style="color: var(--warning);"><i class="mdi mdi-alert-outline"></i> Vide</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 1rem; display: flex; gap: 0.75rem;">
+                            <button class="btn btn-primary-sm">
+                                <i class="mdi mdi-plus"></i>
+                                Ajouter une enveloppe
+                            </button>
+                            <button class="btn btn-secondary-sm">
+                                <i class="mdi mdi-eye"></i>
+                                Voir les détails
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Factures Urgentes -->
+            <div class="section">
+                <div class="section-title">
+                    <i class="mdi mdi-alert-circle"></i>
+                    Factures urgentes
+                </div>
+
+                <div class="bills-section">
+                    <div class="bill-card">
+                        <div class="bill-info">
+                            <div>
+                                <div class="bill-status-badge">
+                                    <i class="mdi mdi-alert"></i>
+                                    Dû aujourd'hui
+                                </div>
+                            </div>
+                            <div class="bill-name">Électricité</div>
+                            <div class="bill-details">Hydro-Québec • Compte chèques • Facture mensuelle</div>
+                        </div>
+                        <div class="bill-amount">
+                            <div class="bill-price">$125.50</div>
+                            <div class="bill-due">18 oct 2026</div>
+                        </div>
+                    </div>
+
+                    <div class="bill-card">
+                        <div class="bill-info">
+                            <div>
+                                <div class="bill-status-badge">
+                                    <i class="mdi mdi-alert-outline"></i>
+                                    Dû dans 2 jours
+                                </div>
+                            </div>
+                            <div class="bill-name">Internet & Téléphone</div>
+                            <div class="bill-details">Vidéotron • Compte chèques • Facture mensuelle</div>
+                        </div>
+                        <div class="bill-amount">
+                            <div class="bill-price">$89.99</div>
+                            <div class="bill-due">20 oct 2026</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleAccount(headerElement) {
+            const container = headerElement.parentElement;
+            const body = container.querySelector('.account-body');
+            const toggle = headerElement.querySelector('.expand-toggle');
+
+            body.classList.toggle('expanded');
+            headerElement.classList.toggle('expanded');
+            toggle.classList.toggle('rotated');
+        }
+    </script>
+</body>
+</html>
