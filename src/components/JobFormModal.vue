@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { formatRuleAmount, type DistributionRule } from '../utils/distributionRules'
 
 interface Job {
   id?: string
@@ -8,6 +9,7 @@ interface Job {
   frequency: string
   homeAccountId: string
   lastPayment?: string
+  rules?: DistributionRule[]
 }
 
 const validationError = ref<string>('')
@@ -163,6 +165,21 @@ const formatDate = (dateString: string | undefined) => {
             </option>
           </select>
         </div>
+
+        <!-- Distribution rules (read-only; rules are added from the envelope form) -->
+        <div v-if="isEditing" class="rules-preview">
+          <div class="rules-header">Répartition prévue</div>
+          <ul v-if="job?.rules?.length" class="rules-list">
+            <li v-for="(rule, index) in job.rules" :key="index" class="rule-row">
+              <span class="rule-envelope">{{ rule.envelopeName }}</span>
+              <span class="rule-amount">{{ formatRuleAmount(rule) }}</span>
+            </li>
+          </ul>
+          <p v-else class="rules-empty">
+            <i class="mdi mdi-alert-outline"></i>
+            Aucune règle : cette paie n'alloue rien aux enveloppes. Ajoute une règle depuis le formulaire d'enveloppe (prélèvement automatique).
+          </p>
+        </div>
       </div>
 
       <div class="modal-footer">
@@ -306,6 +323,50 @@ const formatDate = (dateString: string | undefined) => {
   outline: none;
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.rules-preview {
+  padding: var(--space-md);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+}
+
+.rules-header {
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin-bottom: var(--space-sm);
+}
+
+.rules-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs, 4px);
+}
+
+.rule-row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-md);
+  color: var(--text-primary);
+}
+
+.rule-amount {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.rules-empty {
+  margin: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  color: var(--warning, #b45309);
 }
 
 .modal-footer {
