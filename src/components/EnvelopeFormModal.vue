@@ -58,25 +58,30 @@ const validationError = ref<string>('')
 const showPaymentDateInput = ref(false)
 const newPaymentDate = ref<string>('')
 
-watch(() => props.envelope, (newEnvelope) => {
-  if (newEnvelope) {
-    formData.value = {
-      name: newEnvelope.name || '',
-      homeAccountId: newEnvelope.homeAccountId || props.accountId,
-      purpose: newEnvelope.purpose || 'SavingsGoal',
-      targetAmount: newEnvelope.targetAmount?.amount,
-      targetDate: newEnvelope.targetDate,
-      scheduleType: newEnvelope.scheduleType,
-      dayOfMonth: newEnvelope.dayOfMonth,
-      paymentDates: newEnvelope.paymentDates || [],
-      isAutomaticWithdrawal: newEnvelope.isAutomaticWithdrawal || false,
-      withdrawalFrequency: newEnvelope.withdrawalFrequency,
-      linkedEnvelopeId: newEnvelope.linkedEnvelopeId,
-      sharedPercentage: newEnvelope.sharedPercentage,
-      isShared: newEnvelope.isShared || false
-    }
+// Reload the form each time the modal opens: handleClose() resets formData, and reopening
+// the same envelope object does not change the prop, so a watch on props.envelope would miss it
+const loadFormFromEnvelope = () => {
+  const envelope = props.envelope
+  formData.value = {
+    name: envelope?.name || '',
+    homeAccountId: envelope?.homeAccountId || props.accountId,
+    purpose: envelope?.purpose || 'SavingsGoal',
+    targetAmount: envelope?.targetAmount?.amount,
+    targetDate: envelope?.targetDate,
+    scheduleType: envelope?.scheduleType,
+    dayOfMonth: envelope?.dayOfMonth,
+    paymentDates: envelope?.paymentDates || [],
+    isAutomaticWithdrawal: envelope?.isAutomaticWithdrawal || false,
+    withdrawalFrequency: envelope?.withdrawalFrequency,
+    linkedEnvelopeId: envelope?.linkedEnvelopeId,
+    sharedPercentage: envelope?.sharedPercentage,
+    isShared: envelope?.isShared || false
   }
-}, { deep: true })
+}
+
+watch(() => props.isOpen, (open) => {
+  if (open) loadFormFromEnvelope()
+})
 
 const isEditing = computed(() => !!props.envelope?.id)
 const isBillPurpose = computed(() => formData.value.purpose === 'Bill')
