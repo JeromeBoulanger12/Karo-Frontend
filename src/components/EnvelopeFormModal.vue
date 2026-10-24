@@ -37,6 +37,7 @@ const props = withDefaults(defineProps<{
 const emit = defineEmits<{
   close: []
   save: [data: FormData]
+  delete: [envelopeId: string]
 }>()
 
 const { t } = useI18n()
@@ -116,6 +117,15 @@ const handleSubmit = () => {
   }
 
   emit('save', formData.value)
+}
+
+// Deleting also removes the envelope from any distribution plan rules (done by the backend)
+const handleDelete = () => {
+  if (!props.envelope?.id) return
+  const confirmed = window.confirm(
+    `Supprimer l'enveloppe « ${props.envelope.name} » ? Elle sera aussi retirée des règles de distribution.`
+  )
+  if (confirmed) emit('delete', props.envelope.id)
 }
 
 const handleClose = () => {
@@ -314,6 +324,10 @@ const withdrawalFrequencies = [
       </div>
 
       <div class="modal-footer">
+        <button v-if="isEditing" class="btn-danger" @click="handleDelete">
+          <i class="mdi mdi-trash-can-outline"></i>
+          Supprimer
+        </button>
         <button class="btn-secondary" @click="handleClose">{{ t('common.cancel') || 'Annuler' }}</button>
         <button class="btn-primary" @click="handleSubmit">{{ t('common.save') || 'Enregistrer' }}</button>
       </div>
@@ -529,6 +543,28 @@ const withdrawalFrequencies = [
   gap: var(--space-md);
   padding: var(--space-lg);
   border-top: 1px solid var(--border);
+}
+
+.btn-danger {
+  flex: 0 0 auto;
+  margin-right: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs, 4px);
+  padding: var(--space-md) var(--space-lg);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--danger, #dc2626);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-danger:hover {
+  background: rgba(220, 38, 38, 0.08);
+  border-color: var(--danger, #dc2626);
 }
 
 .btn-primary,

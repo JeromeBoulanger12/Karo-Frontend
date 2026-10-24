@@ -160,6 +160,17 @@ const handleEnvelopeSave = async (envelopeData: any) => {
   }
 }
 
+const handleEnvelopeDelete = async (envelopeId: string) => {
+  try {
+    await envelopesApi.deleteEnvelope(envelopeId)
+    showEnvelopeModal.value = false
+    // Reload so the removed rule also disappears from the plans
+    await loadDashboard()
+  } catch (err) {
+    console.error('Error deleting envelope:', err)
+  }
+}
+
 // Modal handlers - Job
 const openAddJobModal = (accountId: string = '') => {
   selectedJob.value = null
@@ -444,6 +455,7 @@ onMounted(() => {
       :plans="jobs"
       @close="showEnvelopeModal = false"
       @save="handleEnvelopeSave"
+      @delete="handleEnvelopeDelete"
     />
 
     <JobFormModal
