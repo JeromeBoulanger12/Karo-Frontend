@@ -237,7 +237,11 @@ const handleDepositPaycheck = async (depositData: any) => {
   try {
     if (selectedJobForDeposit.value?.id) {
       // Distribute paycheck to the selected job
-      await jobsApi.distributePaycheck(selectedJobForDeposit.value.id, depositData)
+      await jobsApi.distributePaycheck(selectedJobForDeposit.value.id, {
+        amount: depositData.amount,
+        receivedAt: new Date(depositData.date).toISOString(),
+        accountBalance: depositData.accountBalance
+      })
     }
     showDepositModal.value = false
     await loadDashboard()

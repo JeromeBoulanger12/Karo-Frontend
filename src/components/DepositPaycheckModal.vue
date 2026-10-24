@@ -11,6 +11,7 @@ interface Job {
 
 interface DepositData {
   amount: number
+  accountBalance: number | null
   jobId?: string
   date?: string
 }
@@ -41,6 +42,7 @@ const defaultJobId = computed(() => {
 
 const formData = ref<DepositData>({
   amount: 0,
+  accountBalance: null,
   jobId: defaultJobId.value,
   date: new Date().toISOString().split('T')[0]
 })
@@ -58,7 +60,7 @@ watch(() => defaultJobId.value, (newJobId) => {
 })
 
 const handleSubmit = () => {
-  if (!formData.value.jobId || formData.value.amount <= 0) {
+  if (!formData.value.jobId || formData.value.amount <= 0 || formData.value.accountBalance === null) {
     console.error('Missing required fields for deposit')
     return
   }
@@ -69,6 +71,7 @@ const handleClose = () => {
   emit('close')
   formData.value = {
     amount: 0,
+    accountBalance: null,
     jobId: props.job?.id,
     date: new Date().toISOString().split('T')[0]
   }
@@ -105,6 +108,17 @@ const handleClose = () => {
             type="number"
             step="0.01"
             min="0"
+            placeholder="0.00"
+          />
+        </div>
+
+        <!-- Account Balance Input (after paycheck) -->
+        <div class="form-group">
+          <label>Solde du compte chèques (après paie)</label>
+          <input
+            v-model.number="formData.accountBalance"
+            type="number"
+            step="0.01"
             placeholder="0.00"
           />
         </div>
