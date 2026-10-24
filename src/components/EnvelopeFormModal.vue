@@ -65,17 +65,31 @@ const newPaymentDate = ref<string>('')
 
 // Reload the form each time the modal opens: handleClose() resets formData, and reopening
 // the same envelope object does not change the prop, so a watch on props.envelope would miss it
+// The list endpoint only returns the bill schedule as JSON (billPaymentScheduleJson);
+// the single-envelope fields (scheduleType, dayOfMonth, paymentDates) are only set on detail
+const parseBillSchedule = (envelope: any) => {
+  if (envelope?.scheduleType) return envelope
+  if (!envelope?.billPaymentScheduleJson) return {}
+  try {
+    return JSON.parse(envelope.billPaymentScheduleJson)
+  } catch {
+    return {}
+  }
+}
+
 const loadFormFromEnvelope = () => {
   const envelope = props.envelope
+  const schedule = parseBillSchedule(envelope)
   formData.value = {
     name: envelope?.name || '',
     homeAccountId: envelope?.homeAccountId || props.accountId,
     purpose: envelope?.purpose || 'SavingsGoal',
     targetAmount: envelope?.targetAmount?.amount,
     targetDate: envelope?.targetDate,
-    scheduleType: envelope?.scheduleType,
-    dayOfMonth: envelope?.dayOfMonth,
-    paymentDates: envelope?.paymentDates || [],
+    scheduleType: schedule.scheduleType,
+    dayOfMonth: schedule.dayOfMonth,
+    // Payment dates come back as ISO timestamps; the date inputs expect YYYY-MM-DD
+    paymentDates: (schedule.paymentDates || []).map((d: string) => d.slice(0, 10)),
     isAutomaticWithdrawal: envelope?.isAutomaticWithdrawal || false,
     withdrawalFrequency: envelope?.withdrawalFrequency,
     linkedEnvelopeId: envelope?.linkedEnvelopeId,
