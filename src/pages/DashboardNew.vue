@@ -130,13 +130,28 @@ const openEditEnvelopeModal = (envelope: any) => {
 }
 
 const handleEnvelopeSave = async (envelopeData: any) => {
+  const { selectedPlanId, ...payload } = envelopeData
   try {
     if (selectedEnvelope.value?.id) {
       // Edit existing
-      await envelopesApi.updateEnvelope(selectedEnvelope.value.id, envelopeData)
+      await envelopesApi.updateEnvelope(selectedEnvelope.value.id, payload)
     } else {
       // Create new
-      await envelopesApi.createEnvelope(envelopeData)
+      const { data: created } = await envelopesApi.createEnvelope(payload)
+      // Automatic withdrawal chosen with a distribution plan: add the Automatic rule to that plan
+      if (payload.isAutomaticWithdrawal && selectedPlanId) {
+        try {
+          await jobsApi.addRule(selectedPlanId, {
+            envelopeId: created.id,
+            allocationType: 'Automatic',
+            fixedAmount: null,
+            percentageValue: null,
+            priority: 'Medium'
+          })
+        } catch (ruleErr) {
+          console.error('Envelope created but adding its rule to the plan failed:', ruleErr)
+        }
+      }
     }
     showEnvelopeModal.value = false
     await loadDashboard()
@@ -426,6 +441,7 @@ onMounted(() => {
       :accountId="currentAccountIdForEnvelope"
       :availableAccounts="accounts"
       :availableEnvelopes="envelopes"
+      :plans="jobs"
       @close="showEnvelopeModal = false"
       @save="handleEnvelopeSave"
     />

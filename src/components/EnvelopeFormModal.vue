@@ -16,6 +16,7 @@ interface FormData {
   linkedEnvelopeId?: string
   sharedPercentage?: number
   isShared?: boolean
+  selectedPlanId?: string | null
 }
 
 const props = withDefaults(defineProps<{
@@ -24,11 +25,13 @@ const props = withDefaults(defineProps<{
   accountId: string
   availableAccounts?: any[]
   availableEnvelopes?: any[]
+  plans?: any[]
 }>(), {
   isOpen: false,
   envelope: null,
   availableAccounts: () => [],
-  availableEnvelopes: () => []
+  availableEnvelopes: () => [],
+  plans: () => []
 })
 
 const emit = defineEmits<{
@@ -51,7 +54,8 @@ const formData = ref<FormData>({
   withdrawalFrequency: props.envelope?.withdrawalFrequency,
   linkedEnvelopeId: props.envelope?.linkedEnvelopeId,
   sharedPercentage: props.envelope?.sharedPercentage,
-  isShared: props.envelope?.isShared || false
+  isShared: props.envelope?.isShared || false,
+  selectedPlanId: null
 })
 
 const validationError = ref<string>('')
@@ -75,7 +79,8 @@ const loadFormFromEnvelope = () => {
     withdrawalFrequency: envelope?.withdrawalFrequency,
     linkedEnvelopeId: envelope?.linkedEnvelopeId,
     sharedPercentage: envelope?.sharedPercentage,
-    isShared: envelope?.isShared || false
+    isShared: envelope?.isShared || false,
+    selectedPlanId: null
   }
 }
 
@@ -276,6 +281,17 @@ const withdrawalFrequencies = [
               <option value="">-- Aucune --</option>
               <option v-for="env in availableEnvelopes" :key="env.id" :value="env.id">
                 {{ env.name }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Creates an Automatic rule on the chosen distribution plan once the envelope is saved -->
+          <div v-if="formData.isAutomaticWithdrawal && !isEditing" class="form-group">
+            <label>Ajouter à un plan de distribution</label>
+            <select v-model="formData.selectedPlanId">
+              <option :value="null">-- Aucun --</option>
+              <option v-for="plan in plans" :key="plan.id" :value="plan.id">
+                {{ plan.name }}
               </option>
             </select>
           </div>
