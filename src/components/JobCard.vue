@@ -17,14 +17,13 @@ interface Job {
   id: string
   name: string
   frequency: 'weekly' | 'biweekly' | 'monthly' | 'annual'
-  amount: Money
   homeAccountId?: string
   accountName?: string
   lastPayment?: string
-  lastAmount?: Money
   nextPayment?: string
   isMainJob?: boolean
   rules?: DistributionRule[]
+  lastPaycheck?: { amount: Money; date: string } | null
 }
 
 const props = withDefaults(defineProps<{
@@ -100,12 +99,13 @@ const formatDate = (dateString: string | undefined) => {
 
     <div class="job-amount">
       <div>
-        <div class="job-label">Montant</div>
-        <div class="job-value">{{ formatCurrency(job.amount) }}</div>
-      </div>
-      <div v-if="job.lastAmount" class="job-last-amount">
         <div class="job-label">Dernière paie</div>
-        <div class="job-last-value">{{ formatCurrency(job.lastAmount) }}</div>
+        <div v-if="job.lastPaycheck" class="job-value">{{ formatCurrency(job.lastPaycheck.amount) }}</div>
+        <div v-else class="job-value job-value-empty">Aucune paie distribuée</div>
+      </div>
+      <div v-if="job.lastPaycheck" class="job-last-amount">
+        <div class="job-label">Date</div>
+        <div class="job-last-value">{{ formatDate(job.lastPaycheck.date) }}</div>
       </div>
     </div>
 
@@ -270,6 +270,12 @@ const formatDate = (dateString: string | undefined) => {
   font-size: 1.75rem;
   font-weight: 800;
   color: var(--success);
+}
+
+.job-value-empty {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-muted);
 }
 
 .job-last-amount {

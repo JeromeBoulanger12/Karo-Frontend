@@ -240,6 +240,17 @@ const loadDashboard = async () => {
       ...job,
       accountName: accounts.value.find(a => a.id === job.homeAccountId)?.name || 'Account'
     }))
+
+    // The plan has no amount of its own: take the last distributed paycheck from its history
+    // (events are returned oldest first)
+    jobs.value = await Promise.all(jobs.value.map(async job => {
+      const events = await jobsApi.listEvents(job.id).then(res => res.data || []).catch(() => [])
+      const last = events[events.length - 1]
+      return {
+        ...job,
+        lastPaycheck: last ? { amount: last.amount, date: last.occurredAt } : null
+      }
+    }))
   } catch (err: any) {
     error.value = err?.message || t('common.errorLoading') || 'Erreur lors du chargement'
     console.error('Error loading dashboard:', err)
