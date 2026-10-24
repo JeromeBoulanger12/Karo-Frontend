@@ -138,12 +138,12 @@ const handleEnvelopeSave = async (envelopeData: any) => {
     } else {
       // Create new
       const { data: created } = await envelopesApi.createEnvelope(payload)
-      // Automatic withdrawal chosen with a distribution plan: add the Automatic rule to that plan
-      if (payload.isAutomaticWithdrawal && selectedPlanId) {
+      // Bills are prorated across the plan's paychecks; automatic withdrawals take their full amount each paycheck
+      if (selectedPlanId && (payload.isAutomaticWithdrawal || payload.purpose === 'Bill')) {
         try {
           await jobsApi.addRule(selectedPlanId, {
             envelopeId: created.id,
-            allocationType: 'Automatic',
+            allocationType: payload.purpose === 'Bill' ? 'BillProrated' : 'Automatic',
             fixedAmount: null,
             percentageValue: null,
             priority: 'Medium'

@@ -309,8 +309,8 @@ const withdrawalFrequencies = [
             </select>
           </div>
 
-          <!-- Creates an Automatic rule on the chosen distribution plan once the envelope is saved -->
-          <div v-if="formData.isAutomaticWithdrawal && !isEditing" class="form-group">
+          <!-- Adds a rule on the chosen distribution plan once the envelope is saved (prorated for bills) -->
+          <div v-if="(formData.isAutomaticWithdrawal || isBillPurpose) && !isEditing" class="form-group">
             <label>Ajouter à un plan de distribution</label>
             <select v-model="formData.selectedPlanId">
               <option :value="null">-- Aucun --</option>
