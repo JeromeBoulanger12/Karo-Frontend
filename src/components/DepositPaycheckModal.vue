@@ -1,14 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-
-interface DistributionRule {
-  envelopeId: string
-  envelopeName: string
-  allocationType: 'FixedAmount' | 'Percentage' | 'BillProrated' | 'Automatic'
-  fixedAmount?: { amount: number; currency: string } | null
-  percentageValue?: number | null
-}
+import { formatRuleAmount, type DistributionRule } from '../utils/distributionRules'
 
 interface Job {
   id: string
@@ -59,19 +52,6 @@ const formData = ref<DepositData>({
 // Distribution rules of the selected job, shown read-only so the user knows where the paycheck goes
 const selectedJob = computed(() => props.jobs?.find(j => j.id === formData.value.jobId) ?? null)
 
-const formatRuleAmount = (rule: DistributionRule) => {
-  switch (rule.allocationType) {
-    case 'FixedAmount':
-      return new Intl.NumberFormat('fr-CA', {
-        style: 'currency',
-        currency: rule.fixedAmount?.currency || 'CAD'
-      }).format(rule.fixedAmount?.amount ?? 0)
-    case 'Percentage':
-      return `${rule.percentageValue ?? 0} %`
-    default:
-      return 'Calculé automatiquement'
-  }
-}
 
 watch(() => props.job, (newJob) => {
   if (newJob?.id) {

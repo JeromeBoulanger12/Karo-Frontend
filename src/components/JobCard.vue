@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { formatRuleAmount, type DistributionRule } from '../utils/distributionRules'
 
 interface Money {
   amount: number
@@ -23,6 +24,7 @@ interface Job {
   lastAmount?: Money
   nextPayment?: string
   isMainJob?: boolean
+  rules?: DistributionRule[]
 }
 
 const props = withDefaults(defineProps<{
@@ -120,6 +122,21 @@ const formatDate = (dateString: string | undefined) => {
         <span>Prochain versement:</span>
         <strong>{{ formatDate(job.nextPayment) }}</strong>
       </div>
+    </div>
+
+    <!-- Distribution rules: where each paycheck goes -->
+    <div class="job-rules">
+      <div class="job-label">Répartition</div>
+      <ul v-if="job.rules?.length" class="job-rules-list">
+        <li v-for="(rule, index) in job.rules" :key="index" class="job-rule-row">
+          <span>{{ rule.envelopeName }}</span>
+          <strong>{{ formatRuleAmount(rule) }}</strong>
+        </li>
+      </ul>
+      <p v-else class="job-rules-empty">
+        <i class="mdi mdi-alert-outline"></i>
+        Aucune règle : cette paie n'alloue rien aux enveloppes.
+      </p>
     </div>
 
     <div class="job-actions">
@@ -274,6 +291,42 @@ const formatDate = (dateString: string | undefined) => {
   gap: 0.5rem;
   font-size: 0.875rem;
   color: var(--text-muted);
+}
+
+.job-rules {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  font-size: 0.875rem;
+}
+
+.job-rules-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.job-rule-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  color: var(--text-primary);
+}
+
+.job-rule-row strong {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.job-rules-empty {
+  margin: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  color: var(--warning, #b45309);
 }
 
 .job-detail-item {
