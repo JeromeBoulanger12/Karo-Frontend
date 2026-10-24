@@ -26,6 +26,10 @@ jobs:
       - name: Build
         run: npm run build
 
+      # GitHub Pages serves 404.html for unknown paths, so deep links (F5 on /dashboard) load the SPA
+      - name: Add SPA fallback for deep links
+        run: cp dist/index.html dist/404.html
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3.9.3
         with:
