@@ -130,29 +130,40 @@ const openEditEnvelopeModal = (envelope: any) => {
 }
 
 const handleEnvelopeSave = async (envelopeData: any) => {
-  const { selectedPlanId, ...payload } = envelopeData
+  const { selectedPlanId, planAllocationType, planFixedAmount, planPercentage, ...payload } = envelopeData
   try {
+    let envelopeId: string
     if (selectedEnvelope.value?.id) {
       // Edit existing
-      await envelopesApi.updateEnvelope(selectedEnvelope.value.id, payload)
+      envelopeId = selectedEnvelope.value.id
+      await envelopesApi.updateEnvelope(envelopeId, payload)
     } else {
       // Create new
       const { data: created } = await envelopesApi.createEnvelope(payload)
-      // Bills are prorated across the plan's paychecks; automatic withdrawals take their full amount each paycheck
-      if (selectedPlanId && (payload.isAutomaticWithdrawal || payload.purpose === 'Bill')) {
+      envelopeId = created.id
+    }
+
+    if (selectedPlanId) {
+      // One rule per envelope per plan: skip if the plan already distributes to this envelope
+      const plan = jobs.value.find(j => j.id === selectedPlanId)
+      const alreadyInPlan = plan?.rules?.some((r: any) => r.envelopeId === envelopeId)
+      if (alreadyInPlan) {
+        console.warn('This envelope already has a rule in the selected plan; skipping.')
+      } else {
         try {
           await jobsApi.addRule(selectedPlanId, {
-            envelopeId: created.id,
-            allocationType: payload.purpose === 'Bill' ? 'BillProrated' : 'Automatic',
-            fixedAmount: null,
-            percentageValue: null,
+            envelopeId,
+            allocationType: planAllocationType,
+            fixedAmount: planAllocationType === 'FixedAmount' ? planFixedAmount : null,
+            percentageValue: planAllocationType === 'Percentage' ? planPercentage : null,
             priority: 'Medium'
           })
         } catch (ruleErr) {
-          console.error('Envelope created but adding its rule to the plan failed:', ruleErr)
+          console.error('Envelope saved but adding its rule to the plan failed:', ruleErr)
         }
       }
     }
+
     showEnvelopeModal.value = false
     await loadDashboard()
   } catch (err) {
