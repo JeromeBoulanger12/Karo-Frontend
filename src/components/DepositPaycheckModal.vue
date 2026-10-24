@@ -2,11 +2,20 @@
 import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+interface DistributionRule {
+  envelopeId: string
+  envelopeName: string
+  allocationType: 'FixedAmount' | 'Percentage' | 'BillProrated' | 'Automatic'
+  fixedAmount?: { amount: number; currency: string } | null
+  percentageValue?: number | null
+}
+
 interface Job {
   id: string
   name: string
   frequency: string
   isMainJob?: boolean
+  rules?: DistributionRule[]
 }
 
 interface DepositData {
@@ -46,6 +55,23 @@ const formData = ref<DepositData>({
   jobId: defaultJobId.value,
   date: new Date().toISOString().split('T')[0]
 })
+
+// Distribution rules of the selected job, shown read-only so the user knows where the paycheck goes
+const selectedJob = computed(() => props.jobs?.find(j => j.id === formData.value.jobId) ?? null)
+
+const formatRuleAmount = (rule: DistributionRule) => {
+  switch (rule.allocationType) {
+    case 'FixedAmount':
+      return new Intl.NumberFormat('fr-CA', {
+        style: 'currency',
+        currency: rule.fixedAmount?.currency || 'CAD'
+      }).format(rule.fixedAmount?.amount ?? 0)
+    case 'Percentage':
+      return `${rule.percentageValue ?? 0} %`
+    default:
+      return 'Calculé automatiquement'
+  }
+}
 
 watch(() => props.job, (newJob) => {
   if (newJob?.id) {
@@ -98,6 +124,21 @@ const handleClose = () => {
               {{ j.name }}
             </option>
           </select>
+
+          <!-- Distribution rules (read-only) -->
+          <div v-if="selectedJob" class="rules-preview">
+            <div class="rules-header">Répartition prévue</div>
+            <ul v-if="selectedJob.rules?.length" class="rules-list">
+              <li v-for="(rule, index) in selectedJob.rules" :key="index" class="rule-row">
+                <span class="rule-envelope">{{ rule.envelopeName }}</span>
+                <span class="rule-amount">{{ formatRuleAmount(rule) }}</span>
+              </li>
+            </ul>
+            <p v-else class="rules-empty">
+              <i class="mdi mdi-alert-outline"></i>
+              Aucune règle pour cette source : la paie sera enregistrée sans allocation aux enveloppes.
+            </p>
+          </div>
         </div>
 
         <!-- Amount Input -->
@@ -266,6 +307,51 @@ const handleClose = () => {
   outline: none;
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.rules-preview {
+  margin-top: var(--space-sm);
+  padding: var(--space-md);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+}
+
+.rules-header {
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin-bottom: var(--space-sm);
+}
+
+.rules-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs, 4px);
+}
+
+.rule-row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-md);
+  color: var(--text-primary);
+}
+
+.rule-amount {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.rules-empty {
+  margin: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  color: var(--warning, #b45309);
 }
 
 .modal-footer {
