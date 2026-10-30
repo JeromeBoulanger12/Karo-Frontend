@@ -9,6 +9,7 @@ import JobCard from '../components/JobCard.vue'
 import EnvelopeFormModal from '../components/EnvelopeFormModal.vue'
 import AccountFormModal from '../components/AccountFormModal.vue'
 import AccountBalanceModal from '../components/AccountBalanceModal.vue'
+import TransferEnvelopeModal from '../components/TransferEnvelopeModal.vue'
 import JobFormModal from '../components/JobFormModal.vue'
 import DepositPaycheckModal from '../components/DepositPaycheckModal.vue'
 import { accountsApi } from '../api/accounts'
@@ -39,6 +40,8 @@ const error = ref('')
 const showAccountModal = ref(false)
 const showAccountBalanceModal = ref(false)
 const showEnvelopeModal = ref(false)
+const showTransferModal = ref(false)
+const selectedTransferSource = ref<any>(null)
 const showJobModal = ref(false)
 const showDepositModal = ref(false)
 const selectedAccount = ref<any>(null)
@@ -194,6 +197,27 @@ const handleBillPaid = async (envelope: any) => {
     await loadDashboard()
   } catch (err) {
     console.error('Error marking bill as paid:', err)
+  }
+}
+
+// Transfer money from one envelope to another (no account balance change)
+const openTransferModal = (envelope: any) => {
+  selectedTransferSource.value = envelope
+  showTransferModal.value = true
+}
+
+const handleEnvelopeTransfer = async (payload: { toEnvelopeId: string; amount: number; memo?: string }) => {
+  if (!selectedTransferSource.value?.id) return
+  try {
+    await envelopesApi.transfer(selectedTransferSource.value.id, {
+      targetEnvelopeId: payload.toEnvelopeId,
+      amount: payload.amount,
+      memo: payload.memo
+    })
+    showTransferModal.value = false
+    await loadDashboard()
+  } catch (err) {
+    console.error('Error transferring between envelopes:', err)
   }
 }
 
@@ -424,6 +448,7 @@ onMounted(() => {
             @add-envelope="openAddEnvelopeModal($event)"
             @edit-envelope="openEditEnvelopeModal($event)"
             @pay-envelope="handleBillPaid($event)"
+            @transfer-envelope="openTransferModal($event)"
             @edit-account="openEditAccountModal($event)"
             @edit-balance="openAccountBalanceModal($event)"
           />
@@ -482,6 +507,14 @@ onMounted(() => {
       :account="selectedAccountForBalance"
       @close="showAccountBalanceModal = false"
       @save="handleAccountBalanceSave"
+    />
+
+    <TransferEnvelopeModal
+      :isOpen="showTransferModal"
+      :source="selectedTransferSource"
+      :envelopes="envelopes"
+      @close="showTransferModal = false"
+      @transfer="handleEnvelopeTransfer"
     />
 
     <EnvelopeFormModal

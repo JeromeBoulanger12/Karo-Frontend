@@ -40,6 +40,7 @@ const emit = defineEmits<{
   'add-envelope': [accountId: string]
   'edit-envelope': [envelope: Envelope]
   'pay-envelope': [envelope: Envelope]
+  'transfer-envelope': [envelope: Envelope]
   'edit-account': [account: Account]
   'edit-balance': [account: Account]
 }>()
@@ -148,6 +149,7 @@ const toggleExpand = () => {
           :envelope="envelope"
           @edit="emit('edit-envelope', $event)"
           @pay="emit('pay-envelope', $event)"
+          @transfer="emit('transfer-envelope', $event)"
         />
       </div>
 

@@ -28,9 +28,11 @@ const props = withDefaults(defineProps<{
 const emit = defineEmits<{
   edit: [envelope: Envelope]
   pay: [envelope: Envelope]
+  transfer: [envelope: Envelope]
 }>()
 
 const canPay = computed(() => props.envelope.purpose === 'Bill' && (props.envelope.balance?.amount ?? 0) > 0)
+const canTransfer = computed(() => (props.envelope.balance?.amount ?? 0) > 0)
 
 const { t } = useI18n()
 
@@ -116,10 +118,16 @@ const formatCurrency = (money: Money | undefined) => {
       {{ t('common.shared') || 'Partagé' }}
     </div>
 
-    <button v-if="canPay" class="btn-pay-bill" @click.stop="emit('pay', envelope)">
-      <i class="mdi mdi-check"></i>
-      Payé
-    </button>
+    <div v-if="canPay || canTransfer" class="envelope-actions">
+      <button v-if="canPay" class="btn-pay-bill" @click.stop="emit('pay', envelope)">
+        <i class="mdi mdi-check"></i>
+        Payé
+      </button>
+      <button v-if="canTransfer" class="btn-transfer" @click.stop="emit('transfer', envelope)">
+        <i class="mdi mdi-swap-horizontal"></i>
+        Transférer
+      </button>
+    </div>
   </div>
 </template>
 
@@ -261,6 +269,36 @@ const formatCurrency = (money: Money | undefined) => {
 
 .btn-pay-bill:hover {
   filter: brightness(0.92);
+}
+
+.envelope-actions {
+  margin-top: auto;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.envelope-actions button {
+  flex: 1;
+}
+
+.btn-transfer {
+  padding: 0.5rem 0.75rem;
+  background: white;
+  color: var(--primary);
+  border: 1px solid var(--primary);
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.btn-transfer:hover {
+  background: var(--primary);
+  color: white;
 }
 
 .envelope-shared-badge {
