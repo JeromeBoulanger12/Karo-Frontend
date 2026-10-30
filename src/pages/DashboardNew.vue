@@ -10,6 +10,7 @@ import EnvelopeFormModal from '../components/EnvelopeFormModal.vue'
 import AccountFormModal from '../components/AccountFormModal.vue'
 import AccountBalanceModal from '../components/AccountBalanceModal.vue'
 import TransferEnvelopeModal from '../components/TransferEnvelopeModal.vue'
+import PayBillModal from '../components/PayBillModal.vue'
 import JobFormModal from '../components/JobFormModal.vue'
 import DepositPaycheckModal from '../components/DepositPaycheckModal.vue'
 import { accountsApi } from '../api/accounts'
@@ -42,6 +43,8 @@ const showAccountBalanceModal = ref(false)
 const showEnvelopeModal = ref(false)
 const showTransferModal = ref(false)
 const selectedTransferSource = ref<any>(null)
+const showPayBillModal = ref(false)
+const selectedBill = ref<any>(null)
 const showJobModal = ref(false)
 const showDepositModal = ref(false)
 const selectedAccount = ref<any>(null)
@@ -185,15 +188,19 @@ const handleEnvelopeDelete = async (envelopeId: string) => {
   }
 }
 
-// Bill paid: the backend withdraws the envelope balance and debits its home account in one transaction
-const handleBillPaid = async (envelope: any) => {
-  const amount = envelope.balance?.amount ?? 0
-  const account = accounts.value.find((a: any) => a.id === envelope.homeAccountId)
-  if (amount <= 0 || !account) return
-  if (!window.confirm(`Marquer « ${envelope.name} » comme payé ? ${amount.toFixed(2)} $ seront retirés du compte ${account.name}.`)) return
+// Bill paid: the modal asks for the amount, then the backend withdraws it from the envelope
+// and debits the home account in one transaction
+const openPayBillModal = (envelope: any) => {
+  if (!(envelope.balance?.amount > 0)) return
+  selectedBill.value = envelope
+  showPayBillModal.value = true
+}
 
+const handleBillPay = async (amount: number) => {
+  if (!selectedBill.value?.id) return
   try {
-    await envelopesApi.pay(envelope.id)
+    await envelopesApi.pay(selectedBill.value.id, amount)
+    showPayBillModal.value = false
     await loadDashboard()
   } catch (err) {
     console.error('Error marking bill as paid:', err)
@@ -447,7 +454,7 @@ onMounted(() => {
             :envelopes="getAccountEnvelopes(account.id)"
             @add-envelope="openAddEnvelopeModal($event)"
             @edit-envelope="openEditEnvelopeModal($event)"
-            @pay-envelope="handleBillPaid($event)"
+            @pay-envelope="openPayBillModal($event)"
             @transfer-envelope="openTransferModal($event)"
             @edit-account="openEditAccountModal($event)"
             @edit-balance="openAccountBalanceModal($event)"
@@ -515,6 +522,13 @@ onMounted(() => {
       :envelopes="envelopes"
       @close="showTransferModal = false"
       @transfer="handleEnvelopeTransfer"
+    />
+
+    <PayBillModal
+      :isOpen="showPayBillModal"
+      :bill="selectedBill"
+      @close="showPayBillModal = false"
+      @pay="handleBillPay"
     />
 
     <EnvelopeFormModal
