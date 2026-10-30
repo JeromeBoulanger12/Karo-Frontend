@@ -25,6 +25,10 @@ export const envelopesApi = {
     return client.post(`/envelopes/${id}/withdraw`, data)
   },
 
+  pay(id: string) {
+    return client.post(`/envelopes/${id}/pay`)
+  },
+
   transfer(id: string, data: Record<string, unknown>) {
     return client.post(`/envelopes/${id}/transfer`, data)
   },

@@ -182,6 +182,21 @@ const handleEnvelopeDelete = async (envelopeId: string) => {
   }
 }
 
+// Bill paid: the backend withdraws the envelope balance and debits its home account in one transaction
+const handleBillPaid = async (envelope: any) => {
+  const amount = envelope.balance?.amount ?? 0
+  const account = accounts.value.find((a: any) => a.id === envelope.homeAccountId)
+  if (amount <= 0 || !account) return
+  if (!window.confirm(`Marquer « ${envelope.name} » comme payé ? ${amount.toFixed(2)} $ seront retirés du compte ${account.name}.`)) return
+
+  try {
+    await envelopesApi.pay(envelope.id)
+    await loadDashboard()
+  } catch (err) {
+    console.error('Error marking bill as paid:', err)
+  }
+}
+
 // Modal handlers - Job
 const openAddJobModal = (accountId: string = '') => {
   selectedJob.value = null
@@ -408,6 +423,7 @@ onMounted(() => {
             :envelopes="getAccountEnvelopes(account.id)"
             @add-envelope="openAddEnvelopeModal($event)"
             @edit-envelope="openEditEnvelopeModal($event)"
+            @pay-envelope="handleBillPaid($event)"
             @edit-account="openEditAccountModal($event)"
             @edit-balance="openAccountBalanceModal($event)"
           />

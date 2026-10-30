@@ -39,6 +39,7 @@ const props = withDefaults(defineProps<{
 const emit = defineEmits<{
   'add-envelope': [accountId: string]
   'edit-envelope': [envelope: Envelope]
+  'pay-envelope': [envelope: Envelope]
   'edit-account': [account: Account]
   'edit-balance': [account: Account]
 }>()
@@ -146,6 +147,7 @@ const toggleExpand = () => {
           :key="envelope.id"
           :envelope="envelope"
           @edit="emit('edit-envelope', $event)"
+          @pay="emit('pay-envelope', $event)"
         />
       </div>
 

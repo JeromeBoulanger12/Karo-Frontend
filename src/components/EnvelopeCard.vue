@@ -27,7 +27,10 @@ const props = withDefaults(defineProps<{
 
 const emit = defineEmits<{
   edit: [envelope: Envelope]
+  pay: [envelope: Envelope]
 }>()
+
+const canPay = computed(() => props.envelope.purpose === 'Bill' && (props.envelope.balance?.amount ?? 0) > 0)
 
 const { t } = useI18n()
 
@@ -112,6 +115,11 @@ const formatCurrency = (money: Money | undefined) => {
       <i class="mdi mdi-account-multiple"></i>
       {{ t('common.shared') || 'Partagé' }}
     </div>
+
+    <button v-if="canPay" class="btn-pay-bill" @click.stop="emit('pay', envelope)">
+      <i class="mdi mdi-check"></i>
+      Payé
+    </button>
   </div>
 </template>
 
@@ -232,6 +240,27 @@ const formatCurrency = (money: Money | undefined) => {
 
 .envelope-bill-date i {
   font-size: 0.75rem;
+}
+
+.btn-pay-bill {
+  margin-top: auto;
+  padding: 0.5rem 0.75rem;
+  background: var(--success);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  transition: all 0.3s ease;
+}
+
+.btn-pay-bill:hover {
+  filter: brightness(0.92);
 }
 
 .envelope-shared-badge {
