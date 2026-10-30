@@ -1,12 +1,9 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import EnvelopeCard from './EnvelopeCard.vue'
+import EnvelopeRow from './EnvelopeRow.vue'
 import AccountBalanceChart from './AccountBalanceChart.vue'
-
-interface Money {
-  amount: number
-  currency: string
-}
+import AccountSparkline from './AccountSparkline.vue'
+import type { EnvelopeSummary } from '../utils/envelopes'
 
 interface Account {
   id: string
@@ -17,36 +14,24 @@ interface Account {
   latestSnapshot?: { amount?: { amount?: number } }
 }
 
-interface Envelope {
-  id: string
-  name: string
-  homeAccountId: string
-  balance?: Money
-  targetAmount?: Money
-  purpose?: string
-  billDetails?: {
-    frequency?: string
-    targetDate?: string
-  }
-  isShared?: boolean
-}
-
 const props = withDefaults(defineProps<{
   account: Account
-  envelopes: Envelope[]
+  envelopes: EnvelopeSummary[]
 }>(), {})
 
 const emit = defineEmits<{
   'add-envelope': [accountId: string]
-  'edit-envelope': [envelope: Envelope]
-  'pay-envelope': [envelope: Envelope]
-  'transfer-envelope': [envelope: Envelope]
-  'withdraw-envelope': [envelope: Envelope]
+  'edit-envelope': [envelope: EnvelopeSummary]
+  'pay-envelope': [envelope: EnvelopeSummary]
+  'transfer-envelope': [envelope: EnvelopeSummary]
+  'withdraw-envelope': [envelope: EnvelopeSummary]
   'edit-account': [account: Account]
   'edit-balance': [account: Account]
 }>()
 
 const isExpanded = ref(true)
+// The full history chart is heavy; the header sparkline shows the trend, this opens the detail
+const showHistory = ref(false)
 
 const accountBalance = computed(() => {
   return props.account.latestBalance?.amount ?? props.account.latestSnapshot?.amount?.amount ?? 0
@@ -114,6 +99,7 @@ const toggleExpand = () => {
           </div>
         </div>
       </div>
+      <AccountSparkline :account-id="account.id" />
       <div class="account-balance-section">
         <div class="account-balance">
           <div class="account-balance-label">Solde</div>
@@ -130,21 +116,25 @@ const toggleExpand = () => {
 
     <!-- Account Body (Envelopes) -->
     <div v-show="isExpanded" class="account-body" :class="{ expanded: isExpanded }">
-      <!-- Balance History Chart -->
-      <div class="chart-section">
-        <h4 class="section-subtitle">Historique de solde</h4>
-        <AccountBalanceChart :account-id="account.id" :days="7" />
+      <div class="section-header">
+        <h4 class="section-subtitle">Enveloppes ({{ envelopesCount }}/20)</h4>
+        <button class="btn-link" @click="showHistory = !showHistory">
+          <i class="mdi" :class="showHistory ? 'mdi-chart-line-variant' : 'mdi-chart-line'"></i>
+          {{ showHistory ? "Masquer l'historique" : "Historique du solde" }}
+        </button>
       </div>
 
-      <h4 class="section-subtitle">Enveloppes ({{ envelopesCount }}/20)</h4>
+      <div v-if="showHistory" class="chart-section">
+        <AccountBalanceChart :account-id="account.id" :days="30" />
+      </div>
 
       <div v-if="envelopes.length === 0" class="empty-envelopes">
         <i class="mdi mdi-inbox-outline"></i>
         <p>Aucune enveloppe pour ce compte</p>
       </div>
 
-      <div v-else class="envelopes-grid">
-        <EnvelopeCard
+      <div v-else class="envelope-list">
+        <EnvelopeRow
           v-for="envelope in envelopes"
           :key="envelope.id"
           :envelope="envelope"
@@ -186,11 +176,10 @@ const toggleExpand = () => {
 }
 
 .account-header-main {
-  padding: 1.5rem;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  display: flex;
   align-items: center;
+  gap: 1.5rem;
   cursor: pointer;
   background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
   border-bottom: 1px solid var(--border);
@@ -210,6 +199,8 @@ const toggleExpand = () => {
   grid-template-columns: auto 1fr;
   gap: 1rem;
   align-items: center;
+  flex: 1;
+  min-width: 0;
 }
 
 .account-icon {
@@ -310,7 +301,7 @@ const toggleExpand = () => {
 }
 
 .account-body {
-  padding: 1.5rem;
+  padding: 1.25rem 1.5rem;
   background: var(--surface);
   display: none;
 }
@@ -331,16 +322,40 @@ const toggleExpand = () => {
   }
 }
 
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
 .section-subtitle {
-  margin-bottom: 1rem;
   color: var(--text-primary);
   font-size: 1rem;
   font-weight: 600;
+  margin: 0;
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.btn-link:hover {
+  text-decoration: underline;
 }
 
 .chart-section {
-  margin-bottom: 2rem;
-  padding-bottom: 1.5rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
   border-bottom: 1px solid var(--border);
 }
 
@@ -357,11 +372,11 @@ const toggleExpand = () => {
   color: var(--border);
 }
 
-.envelopes-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+.envelope-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
 }
 
 .account-actions {
@@ -407,19 +422,26 @@ const toggleExpand = () => {
 }
 
 @media (max-width: 1024px) {
-  .envelopes-grid {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  .account-header-main {
+    flex-wrap: wrap;
   }
 }
 
 @media (max-width: 640px) {
   .account-header-main {
-    grid-template-columns: 1fr;
     padding: 1rem;
+    flex-direction: column;
+    align-items: stretch;
+    position: relative;
   }
 
   .account-info {
     grid-template-columns: 1fr;
+  }
+
+  .account-balance-section {
+    justify-content: space-between;
+    flex-wrap: wrap;
   }
 
   .account-balance {
@@ -435,10 +457,6 @@ const toggleExpand = () => {
 
   .account-body {
     padding: 1rem;
-  }
-
-  .envelopes-grid {
-    grid-template-columns: 1fr;
   }
 
   .account-actions {
