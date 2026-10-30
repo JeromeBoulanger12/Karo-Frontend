@@ -11,6 +11,7 @@ import AccountFormModal from '../components/AccountFormModal.vue'
 import AccountBalanceModal from '../components/AccountBalanceModal.vue'
 import TransferEnvelopeModal from '../components/TransferEnvelopeModal.vue'
 import PayBillModal from '../components/PayBillModal.vue'
+import WithdrawEnvelopeModal from '../components/WithdrawEnvelopeModal.vue'
 import JobFormModal from '../components/JobFormModal.vue'
 import DepositPaycheckModal from '../components/DepositPaycheckModal.vue'
 import { accountsApi } from '../api/accounts'
@@ -45,6 +46,8 @@ const showTransferModal = ref(false)
 const selectedTransferSource = ref<any>(null)
 const showPayBillModal = ref(false)
 const selectedBill = ref<any>(null)
+const showWithdrawModal = ref(false)
+const selectedWithdrawSource = ref<any>(null)
 const showJobModal = ref(false)
 const showDepositModal = ref(false)
 const selectedAccount = ref<any>(null)
@@ -225,6 +228,23 @@ const handleEnvelopeTransfer = async (payload: { toEnvelopeId: string; amount: n
     await loadDashboard()
   } catch (err) {
     console.error('Error transferring between envelopes:', err)
+  }
+}
+
+// Withdraw money from an envelope: only the envelope balance changes, not the account balance
+const openWithdrawModal = (envelope: any) => {
+  selectedWithdrawSource.value = envelope
+  showWithdrawModal.value = true
+}
+
+const handleEnvelopeWithdraw = async (payload: { amount: number; payee?: string; memo?: string }) => {
+  if (!selectedWithdrawSource.value?.id) return
+  try {
+    await envelopesApi.withdraw(selectedWithdrawSource.value.id, payload)
+    showWithdrawModal.value = false
+    await loadDashboard()
+  } catch (err) {
+    console.error('Error withdrawing from envelope:', err)
   }
 }
 
@@ -456,6 +476,7 @@ onMounted(() => {
             @edit-envelope="openEditEnvelopeModal($event)"
             @pay-envelope="openPayBillModal($event)"
             @transfer-envelope="openTransferModal($event)"
+            @withdraw-envelope="openWithdrawModal($event)"
             @edit-account="openEditAccountModal($event)"
             @edit-balance="openAccountBalanceModal($event)"
           />
@@ -529,6 +550,13 @@ onMounted(() => {
       :bill="selectedBill"
       @close="showPayBillModal = false"
       @pay="handleBillPay"
+    />
+
+    <WithdrawEnvelopeModal
+      :isOpen="showWithdrawModal"
+      :source="selectedWithdrawSource"
+      @close="showWithdrawModal = false"
+      @withdraw="handleEnvelopeWithdraw"
     />
 
     <EnvelopeFormModal

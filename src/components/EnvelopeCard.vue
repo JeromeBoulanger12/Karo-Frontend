@@ -29,10 +29,13 @@ const emit = defineEmits<{
   edit: [envelope: Envelope]
   pay: [envelope: Envelope]
   transfer: [envelope: Envelope]
+  withdraw: [envelope: Envelope]
 }>()
 
 const canPay = computed(() => props.envelope.purpose === 'Bill' && (props.envelope.balance?.amount ?? 0) > 0)
 const canTransfer = computed(() => (props.envelope.balance?.amount ?? 0) > 0)
+// Debt envelopes are refused by the backend: withdrawing would change the debt account's balance
+const canWithdraw = computed(() => (props.envelope.balance?.amount ?? 0) > 0 && props.envelope.purpose !== 'DebtPayment')
 
 const { t } = useI18n()
 
@@ -118,7 +121,7 @@ const formatCurrency = (money: Money | undefined) => {
       {{ t('common.shared') || 'Partagé' }}
     </div>
 
-    <div v-if="canPay || canTransfer" class="envelope-actions">
+    <div v-if="canPay || canTransfer || canWithdraw" class="envelope-actions">
       <button v-if="canPay" class="btn-pay-bill" @click.stop="emit('pay', envelope)">
         <i class="mdi mdi-check"></i>
         Payé
@@ -126,6 +129,10 @@ const formatCurrency = (money: Money | undefined) => {
       <button v-if="canTransfer" class="btn-transfer" @click.stop="emit('transfer', envelope)">
         <i class="mdi mdi-swap-horizontal"></i>
         Transférer
+      </button>
+      <button v-if="canWithdraw" class="btn-withdraw" @click.stop="emit('withdraw', envelope)">
+        <i class="mdi mdi-cash-minus"></i>
+        Retirer
       </button>
     </div>
   </div>
@@ -298,6 +305,26 @@ const formatCurrency = (money: Money | undefined) => {
 
 .btn-transfer:hover {
   background: var(--primary);
+  color: white;
+}
+
+.btn-withdraw {
+  padding: 0.5rem 0.75rem;
+  background: white;
+  color: var(--danger);
+  border: 1px solid var(--danger);
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.btn-withdraw:hover {
+  background: var(--danger);
   color: white;
 }
 
