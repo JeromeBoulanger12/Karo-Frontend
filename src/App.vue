@@ -70,9 +70,10 @@ const loadUserRole = async () => {
 }
 
 // Watch for user changes (user loads from checkAuth after router guard)
-watch(() => user.value, (newUser) => {
-  console.log('[App.vue] User changed:', newUser)
-  if (newUser) {
+// Watch the id, not the object: auth can reassign the same user several times, which would reload the role each time
+watch(() => user.value?.id, (userId) => {
+  console.log('[App.vue] User changed:', userId)
+  if (userId) {
     loadUserRole()
   } else {
     userRole.value = null
