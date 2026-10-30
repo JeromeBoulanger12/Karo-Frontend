@@ -199,14 +199,21 @@ const openPayBillModal = (envelope: any) => {
   showPayBillModal.value = true
 }
 
+const isDebtPayment = computed(() => selectedBill.value?.purpose === 'DebtPayment')
+
+// Debt envelopes pay the debt account; bill envelopes pay the bill
 const handleBillPay = async (amount: number) => {
   if (!selectedBill.value?.id) return
   try {
-    await envelopesApi.pay(selectedBill.value.id, amount)
+    if (isDebtPayment.value) {
+      await envelopesApi.payDebt(selectedBill.value.id, amount)
+    } else {
+      await envelopesApi.pay(selectedBill.value.id, amount)
+    }
     showPayBillModal.value = false
     await loadDashboard()
   } catch (err) {
-    console.error('Error marking bill as paid:', err)
+    console.error('Error recording payment:', err)
   }
 }
 
@@ -548,6 +555,7 @@ onMounted(() => {
     <PayBillModal
       :isOpen="showPayBillModal"
       :bill="selectedBill"
+      :title="isDebtPayment ? 'Payer la dette' : 'Payer la facture'"
       @close="showPayBillModal = false"
       @pay="handleBillPay"
     />

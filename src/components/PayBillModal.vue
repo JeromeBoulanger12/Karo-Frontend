@@ -15,9 +15,11 @@ interface Envelope {
 const props = withDefaults(defineProps<{
   isOpen: boolean
   bill?: Envelope | null
+  title?: string
 }>(), {
   isOpen: false,
-  bill: null
+  bill: null,
+  title: 'Payer la facture'
 })
 
 const emit = defineEmits<{
@@ -65,7 +67,7 @@ const handleSubmit = () => {
   <div v-if="isOpen" class="modal-overlay" @click="emit('close')">
     <div class="modal" @click.stop>
       <div class="modal-header">
-        <h2>Payer la facture</h2>
+        <h2>{{ title }}</h2>
         <button class="modal-close" @click="emit('close')">
           <i class="mdi mdi-close"></i>
         </button>

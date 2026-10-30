@@ -32,7 +32,10 @@ const emit = defineEmits<{
   withdraw: [envelope: Envelope]
 }>()
 
-const canPay = computed(() => props.envelope.purpose === 'Bill' && (props.envelope.balance?.amount ?? 0) > 0)
+const isDebt = computed(() => props.envelope.purpose === 'DebtPayment')
+const canPay = computed(() =>
+  (props.envelope.purpose === 'Bill' || isDebt.value) && (props.envelope.balance?.amount ?? 0) > 0
+)
 const canTransfer = computed(() => (props.envelope.balance?.amount ?? 0) > 0)
 // Debt envelopes are refused by the backend: withdrawing would change the debt account's balance
 const canWithdraw = computed(() => (props.envelope.balance?.amount ?? 0) > 0 && props.envelope.purpose !== 'DebtPayment')
@@ -124,7 +127,7 @@ const formatCurrency = (money: Money | undefined) => {
     <div v-if="canPay || canTransfer || canWithdraw" class="envelope-actions">
       <button v-if="canPay" class="btn-pay-bill" @click.stop="emit('pay', envelope)">
         <i class="mdi mdi-check"></i>
-        Payé
+        {{ isDebt ? 'Payer la dette' : 'Payé' }}
       </button>
       <button v-if="canTransfer" class="btn-transfer" @click.stop="emit('transfer', envelope)">
         <i class="mdi mdi-swap-horizontal"></i>
