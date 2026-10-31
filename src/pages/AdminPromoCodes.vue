@@ -235,6 +235,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { apiUrl } from '../api/client'
 
 const { t } = useI18n()
 
@@ -265,7 +266,7 @@ const allCodes = ref<PromoCode[]>([])
 onMounted(async () => {
   try {
     loading.value = true
-    const response = await fetch('/api/admin/promo-codes', {
+    const response = await fetch(apiUrl('/admin/promo-codes'), {
       headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
     })
     if (response.ok) {

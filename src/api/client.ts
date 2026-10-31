@@ -3,6 +3,9 @@ import type { Router } from 'vue-router'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5274/api'
 
+// Absolute URL for raw fetch() calls (path starts with '/', e.g. '/admin/users')
+export const apiUrl = (path: string) => `${API_BASE_URL}${path}`
+
 const client = axios.create({
   baseURL: API_BASE_URL,
   headers: {

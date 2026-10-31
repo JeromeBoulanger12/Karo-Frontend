@@ -4,6 +4,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuth } from './composables/useAuth'
 import { householdsAPI } from './api/households'
+import client from './api/client'
 
 const router = useRouter()
 const route = useRoute()
@@ -13,8 +14,22 @@ const drawer = ref(true)
 const userMenuOpen = ref(false)
 const userRole = ref(null)
 const isLoadingRole = ref(true)
+const features = ref({ allowMembers: false, allowHousehold: false })
 
 const isAdmin = computed(() => userRole.value === 'Owner' || userRole.value === 'Admin')
+
+const loadFeatures = async () => {
+  try {
+    const response = await client.get('/subscriptions/my-features')
+    features.value = {
+      allowMembers: !!response.data?.allowMembers,
+      allowHousehold: !!response.data?.allowHousehold
+    }
+  } catch (err) {
+    console.error('[App.vue] Failed to load subscription features:', err)
+    features.value = { allowMembers: false, allowHousehold: false }
+  }
+}
 
 console.log('[App.vue] Initial state - user.value:', user.value, 'householdId:', localStorage.getItem('householdId'))
 
@@ -75,8 +90,10 @@ watch(() => user.value?.id, (userId) => {
   console.log('[App.vue] User changed:', userId)
   if (userId) {
     loadUserRole()
+    loadFeatures()
   } else {
     userRole.value = null
+    features.value = { allowMembers: false, allowHousehold: false }
     isLoadingRole.value = false
   }
 })
@@ -154,6 +171,7 @@ const goHome = () => {
         </v-btn>
 
         <v-btn
+          v-if="features.allowMembers"
           to="/members"
           :active="route.path === '/members'"
           variant="text"
@@ -164,6 +182,7 @@ const goHome = () => {
         </v-btn>
 
         <v-btn
+          v-if="features.allowHousehold"
           to="/household"
           :active="route.path === '/household'"
           variant="text"
@@ -243,13 +262,13 @@ const goHome = () => {
             </template>
             <v-list-item-title>{{ t('common.dashboard') }}</v-list-item-title>
           </v-list-item>
-          <v-list-item to="/members" @click="drawer = false">
+          <v-list-item v-if="features.allowMembers" to="/members" @click="drawer = false">
             <template #prepend>
               <v-icon>mdi-account-multiple</v-icon>
             </template>
             <v-list-item-title>{{ t('common.members') }}</v-list-item-title>
           </v-list-item>
-          <v-list-item to="/household" @click="drawer = false">
+          <v-list-item v-if="features.allowHousehold" to="/household" @click="drawer = false">
             <template #prepend>
               <v-icon>mdi-home-group</v-icon>
             </template>

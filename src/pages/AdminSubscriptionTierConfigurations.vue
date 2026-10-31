@@ -130,6 +130,22 @@
                   />
                   {{ t('admin.priority_support') }}
                 </label>
+                <label>
+                  <input
+                    v-model="tier.allowMembers"
+                    type="checkbox"
+                    :disabled="editingId !== tier.id"
+                  />
+                  {{ t('admin.members_access') }}
+                </label>
+                <label>
+                  <input
+                    v-model="tier.allowHousehold"
+                    type="checkbox"
+                    :disabled="editingId !== tier.id"
+                  />
+                  {{ t('admin.household_access') }}
+                </label>
               </div>
             </div>
 
@@ -255,6 +271,14 @@
               <input v-model="newTier.prioritySupport" type="checkbox" />
               {{ t('admin.priority_support') }}
             </label>
+            <label>
+              <input v-model="newTier.allowMembers" type="checkbox" />
+              {{ t('admin.members_access') }}
+            </label>
+            <label>
+              <input v-model="newTier.allowHousehold" type="checkbox" />
+              {{ t('admin.household_access') }}
+            </label>
           </div>
         </div>
 
@@ -270,6 +294,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { apiUrl } from '../api/client'
 
 const { t } = useI18n()
 
@@ -286,6 +311,8 @@ interface SubscriptionTier {
   allowAdvancedReporting: boolean
   allowCustomCategories: boolean
   prioritySupport: boolean
+  allowMembers: boolean
+  allowHousehold: boolean
   description: string
   isActive: boolean
   updatedAt: string
@@ -309,6 +336,8 @@ const newTier = ref({
   allowAdvancedReporting: false,
   allowCustomCategories: false,
   prioritySupport: false,
+  allowMembers: false,
+  allowHousehold: false,
   description: ''
 })
 
@@ -316,7 +345,7 @@ onMounted(async () => {
   loading.value = true
   try {
     const token = localStorage.getItem('token')
-    const response = await fetch('/api/admin/subscription-tier-configurations', {
+    const response = await fetch(apiUrl('/admin/subscription-tier-configurations'), {
       headers: { 'Authorization': `Bearer ${token}` }
     })
     if (response.ok) {
@@ -325,14 +354,14 @@ onMounted(async () => {
       // If no tiers found, initialize defaults
       if (tiers.value.length === 0) {
         console.log('No tiers found, initializing defaults...')
-        const initResponse = await fetch('/api/admin/subscription-tier-configurations/initialize', {
+        const initResponse = await fetch(apiUrl('/admin/subscription-tier-configurations/initialize'), {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${token}` }
         })
 
         if (initResponse.ok) {
           // Reload tiers after initialization
-          const reloadResponse = await fetch('/api/admin/subscription-tier-configurations', {
+          const reloadResponse = await fetch(apiUrl('/admin/subscription-tier-configurations'), {
             headers: { 'Authorization': `Bearer ${token}` }
           })
           if (reloadResponse.ok) {
@@ -367,7 +396,7 @@ const cancelEdit = () => {
 const saveEdit = async (tier: SubscriptionTier) => {
   try {
     const token = localStorage.getItem('token')
-    const response = await fetch(`/api/admin/subscription-tier-configurations/${tier.tier}`, {
+    const response = await fetch(apiUrl(`/admin/subscription-tier-configurations/${tier.tier}`), {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -383,7 +412,9 @@ const saveEdit = async (tier: SubscriptionTier) => {
         allowSharedExpenses: tier.allowSharedExpenses,
         allowAdvancedReporting: tier.allowAdvancedReporting,
         allowCustomCategories: tier.allowCustomCategories,
-        prioritySupport: tier.prioritySupport
+        prioritySupport: tier.prioritySupport,
+        allowMembers: tier.allowMembers,
+        allowHousehold: tier.allowHousehold
       })
     })
 
@@ -404,7 +435,7 @@ const saveEdit = async (tier: SubscriptionTier) => {
 const createTier = async () => {
   try {
     const token = localStorage.getItem('token')
-    const response = await fetch('/api/admin/subscription-tier-configurations', {
+    const response = await fetch(apiUrl('/admin/subscription-tier-configurations'), {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -434,7 +465,7 @@ const deleteTier = async (tier: SubscriptionTier) => {
 
   try {
     const token = localStorage.getItem('token')
-    const response = await fetch(`/api/admin/subscription-tier-configurations/${tier.tier}`, {
+    const response = await fetch(apiUrl(`/admin/subscription-tier-configurations/${tier.tier}`), {
       method: 'DELETE',
       headers: { 'Authorization': `Bearer ${token}` }
     })
@@ -463,6 +494,8 @@ const resetNewTierForm = () => {
     allowAdvancedReporting: false,
     allowCustomCategories: false,
     prioritySupport: false,
+    allowMembers: false,
+    allowHousehold: false,
     description: ''
   }
 }

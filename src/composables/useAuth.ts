@@ -307,6 +307,17 @@ export const useAuth = () => {
     }
   }
 
+  // Clears the browser session without calling Supabase (used after the account was deleted server-side,
+  // when a server-side sign-out would be rejected)
+  const clearLocalSession = async () => {
+    await supabase.auth.signOut({ scope: 'local' }).catch(() => {})
+    user.value = null
+    householdId.value = null
+    localStorage.removeItem('token')
+    localStorage.removeItem('householdId')
+    await router.push('/')
+  }
+
   return {
     user,
     householdId,
@@ -317,6 +328,7 @@ export const useAuth = () => {
     login,
     signup,
     logout,
+    clearLocalSession,
     checkAuth,
     handleEmailConfirmation
   }

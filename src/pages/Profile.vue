@@ -1,12 +1,22 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAuth } from '../composables/useAuth'
 import client from '../api/client'
 import '../styles/dashboard.css'
 
 const { t } = useI18n()
-const { user } = useAuth()
+const { user, clearLocalSession } = useAuth()
+
+// Account deletion
+const showDeleteDialog = ref(false)
+const deleteConfirmEmail = ref('')
+const deleting = ref(false)
+const deleteError = ref<string | null>(null)
+
+const canConfirmDelete = computed(() =>
+  deleteConfirmEmail.value.trim().toLowerCase() === (user.value?.email ?? '').toLowerCase()
+)
 
 const firstName = ref('')
 const lastName = ref('')
@@ -65,6 +75,38 @@ const handleSave = async () => {
     console.error('Profile update error:', err)
   } finally {
     loading.value = false
+  }
+}
+
+const openDeleteDialog = () => {
+  deleteConfirmEmail.value = ''
+  deleteError.value = null
+  showDeleteDialog.value = true
+}
+
+const confirmDeleteAccount = async () => {
+  if (!canConfirmDelete.value) return
+
+  deleting.value = true
+  deleteError.value = null
+
+  try {
+    await client.post('/account/delete', { confirmEmail: deleteConfirmEmail.value.trim() })
+    await clearLocalSession()
+  } catch (err: any) {
+    const code = err?.response?.data?.error
+    if (code === 'billing_cancel_failed') {
+      deleteError.value = t('profile.deleteAccountErrorBilling')
+    } else if (code === 'auth_not_configured') {
+      deleteError.value = t('profile.deleteAccountErrorNotConfigured')
+    } else if (code === 'auth_identity_not_removed') {
+      deleteError.value = t('profile.deleteAccountErrorPartial')
+    } else {
+      deleteError.value = t('profile.deleteAccountErrorGeneric')
+    }
+    console.error('Account deletion failed:', err)
+  } finally {
+    deleting.value = false
   }
 }
 </script>
@@ -222,6 +264,57 @@ const handleSave = async () => {
         <p>{{ t('profile.noPurchases') || 'Pas de transactions' }}</p>
       </div>
     </section>
+
+    <!-- Danger Zone: account deletion -->
+    <section class="section danger-zone">
+      <h2 class="section-title">
+        <i class="mdi mdi-alert-octagon"></i>
+        {{ t('profile.deleteAccountTitle') }}
+      </h2>
+
+      <div class="card danger-card">
+        <div class="card-body">
+          <p class="danger-text">{{ t('profile.deleteAccountIntro') }}</p>
+          <p class="danger-text">{{ t('profile.deleteAccountWhatDeleted') }}</p>
+          <p class="danger-text">{{ t('profile.deleteAccountWhatKept') }}</p>
+          <p class="danger-text">{{ t('profile.deleteAccountSharedWarning') }}</p>
+          <button type="button" class="btn-danger" @click="openDeleteDialog">
+            {{ t('profile.deleteAccountButton') }}
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Delete confirmation dialog -->
+    <div v-if="showDeleteDialog" class="modal-overlay" @click.self="!deleting && (showDeleteDialog = false)">
+      <div class="modal-box">
+        <h3>{{ t('profile.deleteAccountTitle') }}</h3>
+        <p class="danger-text">{{ t('profile.deleteAccountIntro') }}</p>
+
+        <label class="confirm-label">
+          {{ t('profile.deleteAccountConfirmLabel', { email: user?.email }) }}
+          <input v-model="deleteConfirmEmail" type="email" class="form-input" :disabled="deleting" />
+        </label>
+
+        <v-alert v-if="deleteError" type="error" class="mb-4">
+          {{ deleteError }}
+        </v-alert>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" :disabled="deleting" @click="showDeleteDialog = false">
+            {{ t('profile.deleteAccountCancel') }}
+          </button>
+          <button
+            type="button"
+            class="btn-danger"
+            :disabled="!canConfirmDelete || deleting"
+            @click="confirmDeleteAccount"
+          >
+            {{ deleting ? t('common.loading') : t('profile.deleteAccountConfirmButton') }}
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -500,6 +593,87 @@ const handleSave = async () => {
   border-radius: 8px;
   padding: 1rem;
   border: 1px solid var(--border);
+}
+
+/* Danger zone */
+.danger-zone {
+  margin-top: 1rem;
+}
+
+.danger-card {
+  border-color: #fecaca;
+}
+
+.danger-text {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin: 0 0 0.75rem 0;
+}
+
+.btn-danger {
+  padding: 0.75rem 1.5rem;
+  background: #dc2626;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.btn-danger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  padding: 0.75rem 1.5rem;
+  background: white;
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal-box {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  max-width: 480px;
+  width: 100%;
+}
+
+.modal-box h3 {
+  margin: 0 0 0.75rem 0;
+  color: var(--text-primary);
+}
+
+.confirm-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
 }
 
 /* Responsive */

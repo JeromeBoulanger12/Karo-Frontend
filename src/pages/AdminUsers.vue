@@ -186,6 +186,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { apiUrl } from '../api/client'
 
 const { t } = useI18n()
 
@@ -212,7 +213,7 @@ onMounted(async () => {
     loading.value = true
 
     // Get users list
-    const usersResponse = await fetch('/api/admin/users', {
+    const usersResponse = await fetch(apiUrl('/admin/users'), {
       headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
     })
     if (usersResponse.ok) {
@@ -221,7 +222,7 @@ onMounted(async () => {
     }
 
     // Get user stats
-    const statsResponse = await fetch('/api/admin/users/stats', {
+    const statsResponse = await fetch(apiUrl('/admin/users/stats'), {
       headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
     })
     if (statsResponse.ok) {

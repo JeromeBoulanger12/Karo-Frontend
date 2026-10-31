@@ -232,19 +232,52 @@
         </div>
       </div>
     </div>
+
+    <!-- Edit Subscription Tier Modal -->
+    <div v-if="editingSub" class="modal-overlay" @click.self="editingSub = null">
+      <div class="modal">
+        <div class="modal-header">
+          <h2>{{ editingSub.displayName }}</h2>
+          <button @click="editingSub = null" class="close-btn">
+            <i class="mdi mdi-close"></i>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-group">
+            <label>{{ t('admin.subscription_tier') }}</label>
+            <select v-model="editTierValue" class="form-control">
+              <option value="Free">Free</option>
+              <option value="Pro">Pro</option>
+              <option value="Family">Family</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary" @click="editingSub = null">{{ t('common.cancel') }}</button>
+          <button class="btn btn-primary" @click="saveSubscriptionEdit">{{ t('common.save') }}</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
+import { apiUrl } from '../api/client'
 
 const { t } = useI18n()
+const router = useRouter()
 
 const loading = ref(true)
 const searchQuery = ref('')
 const filterTier = ref('')
 const showCreateModal = ref(false)
+const editingSub = ref<any | null>(null)
+const editTierValue = ref('')
 
 const newSubscription = ref({
   userEmail: '',
@@ -273,7 +306,7 @@ onMounted(async () => {
     loading.value = true
 
     // Get subscription stats
-    const statsResponse = await fetch('/api/admin/subscriptions/stats', {
+    const statsResponse = await fetch(apiUrl('/admin/subscriptions/stats'), {
       headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
     })
     if (statsResponse.ok) {
@@ -323,7 +356,7 @@ onMounted(async () => {
     ]
 
     // Get active subscriptions
-    const subsResponse = await fetch('/api/admin/subscriptions', {
+    const subsResponse = await fetch(apiUrl('/admin/subscriptions'), {
       headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
     })
     if (subsResponse.ok) {
@@ -365,8 +398,9 @@ const getAvatarColor = (userId: string): string => {
   return colors[userId.charCodeAt(userId.length - 1) % colors.length]
 }
 
-const editTier = (tier: any) => {
-  console.log('Edit tier:', tier)
+// Tier prices and features are edited on the tier configurations page
+const editTier = (_tier: any) => {
+  router.push('/admin/tier-configurations')
 }
 
 const viewSubscription = (sub: any) => {
@@ -374,7 +408,34 @@ const viewSubscription = (sub: any) => {
 }
 
 const editSubscription = (sub: any) => {
-  console.log('Edit subscription:', sub)
+  editingSub.value = sub
+  editTierValue.value = sub.tier
+}
+
+const saveSubscriptionEdit = async () => {
+  const sub = editingSub.value
+  if (!sub) return
+
+  try {
+    const response = await fetch(apiUrl(`/admin/subscriptions/${sub.userId}/tier`), {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ tier: editTierValue.value })
+    })
+
+    if (response.ok) {
+      sub.tier = editTierValue.value
+      editingSub.value = null
+    } else {
+      alert(await response.text() || 'Failed to update subscription')
+    }
+  } catch (error) {
+    console.error('Error updating subscription:', error)
+    alert('Error updating subscription')
+  }
 }
 
 const cancelSubscription = (sub: any) => {
@@ -391,7 +452,7 @@ const createSubscription = async () => {
 
   try {
     const token = localStorage.getItem('token')
-    const response = await fetch('/api/admin/subscriptions/create', {
+    const response = await fetch(apiUrl('/admin/subscriptions/create'), {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,

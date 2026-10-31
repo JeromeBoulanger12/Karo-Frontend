@@ -102,6 +102,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { apiUrl } from '../api/client'
 
 const { t } = useI18n()
 
@@ -195,7 +196,7 @@ onMounted(async () => {
 
 const fetchJurisdictions = async () => {
   try {
-    const response = await fetch('/api/tax/jurisdictions')
+    const response = await fetch(apiUrl('/tax/jurisdictions'))
     if (response.ok) {
       jurisdictions.value = await response.json()
     }
@@ -207,7 +208,7 @@ const fetchJurisdictions = async () => {
 const updatePrices = async () => {
   loading.value = true
   try {
-    const response = await fetch(`/api/tax/rate/${selectedJurisdiction.value}`)
+    const response = await fetch(apiUrl(`/tax/rate/${selectedJurisdiction.value}`))
     if (response.ok) {
       taxInfo.value = await response.json()
     }

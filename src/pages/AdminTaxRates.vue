@@ -149,6 +149,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { apiUrl } from '../api/client'
 
 const { t } = useI18n()
 
@@ -212,7 +213,7 @@ onMounted(async () => {
 
 const fetchJurisdictions = async () => {
   try {
-    const response = await fetch('/api/tax/jurisdictions')
+    const response = await fetch(apiUrl('/tax/jurisdictions'))
     if (response.ok) {
       jurisdictions.value = await response.json()
     }
@@ -224,7 +225,7 @@ const fetchJurisdictions = async () => {
 const fetchTaxRates = async () => {
   loading.value = true
   try {
-    const response = await fetch('/api/admin/tax-rates', {
+    const response = await fetch(apiUrl('/admin/tax-rates'), {
       headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
     })
     if (response.ok) {
@@ -268,10 +269,10 @@ const editRate = (rate: TaxRate) => {
 const toggleStatus = async (rate: TaxRate) => {
   try {
     const endpoint = rate.isActive
-      ? `/api/admin/tax-rates/${rate.jurisdiction}/deactivate`
-      : `/api/admin/tax-rates/${rate.jurisdiction}/activate`
+      ? `/admin/tax-rates/${rate.jurisdiction}/deactivate`
+      : `/admin/tax-rates/${rate.jurisdiction}/activate`
 
-    const response = await fetch(endpoint, {
+    const response = await fetch(apiUrl(endpoint), {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
     })
@@ -289,11 +290,11 @@ const saveTaxRate = async () => {
 
   try {
     const endpoint = isEditing.value
-      ? `/api/admin/tax-rates/${formData.value.jurisdiction}/update`
-      : '/api/admin/tax-rates/create'
+      ? `/admin/tax-rates/${formData.value.jurisdiction}/update`
+      : '/admin/tax-rates/create'
 
     const method = isEditing.value ? 'POST' : 'POST'
-    const response = await fetch(endpoint, {
+    const response = await fetch(apiUrl(endpoint), {
       method,
       headers: {
         'Content-Type': 'application/json',
