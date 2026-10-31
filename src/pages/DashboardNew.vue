@@ -10,6 +10,7 @@ import EnvelopeFormModal from '../components/EnvelopeFormModal.vue'
 import AccountFormModal from '../components/AccountFormModal.vue'
 import AccountBalanceModal from '../components/AccountBalanceModal.vue'
 import TransferEnvelopeModal from '../components/TransferEnvelopeModal.vue'
+import EnvelopeActionModal from '../components/EnvelopeActionModal.vue'
 import PayBillModal from '../components/PayBillModal.vue'
 import WithdrawEnvelopeModal from '../components/WithdrawEnvelopeModal.vue'
 import JobFormModal from '../components/JobFormModal.vue'
@@ -45,6 +46,8 @@ const showEnvelopeModal = ref(false)
 const showTransferModal = ref(false)
 const selectedTransferSource = ref<any>(null)
 const showPayBillModal = ref(false)
+const showEnvelopeActionModal = ref(false)
+const selectedActionEnvelope = ref<any>(null)
 const selectedBill = ref<any>(null)
 const showWithdrawModal = ref(false)
 const selectedWithdrawSource = ref<any>(null)
@@ -189,6 +192,19 @@ const handleEnvelopeDelete = async (envelopeId: string) => {
   } catch (err) {
     console.error('Error deleting envelope:', err)
   }
+}
+
+// Clicking an envelope row opens the action chooser, which hands off to the matching modal
+const openEnvelopeActionModal = (envelope: any) => {
+  selectedActionEnvelope.value = envelope
+  showEnvelopeActionModal.value = true
+}
+
+const handleEnvelopeAction = (type: 'pay' | 'transfer' | 'withdraw', envelope: any) => {
+  showEnvelopeActionModal.value = false
+  if (type === 'pay') openPayBillModal(envelope)
+  else if (type === 'transfer') openTransferModal(envelope)
+  else openWithdrawModal(envelope)
 }
 
 // Bill paid: the modal asks for the amount, then the backend withdraws it from the envelope
@@ -480,10 +496,8 @@ onMounted(() => {
             :account="account"
             :envelopes="getAccountEnvelopes(account.id)"
             @add-envelope="openAddEnvelopeModal($event)"
+            @select-envelope="openEnvelopeActionModal($event)"
             @edit-envelope="openEditEnvelopeModal($event)"
-            @pay-envelope="openPayBillModal($event)"
-            @transfer-envelope="openTransferModal($event)"
-            @withdraw-envelope="openWithdrawModal($event)"
             @edit-account="openEditAccountModal($event)"
             @edit-balance="openAccountBalanceModal($event)"
           />
@@ -542,6 +556,15 @@ onMounted(() => {
       :account="selectedAccountForBalance"
       @close="showAccountBalanceModal = false"
       @save="handleAccountBalanceSave"
+    />
+
+    <EnvelopeActionModal
+      :isOpen="showEnvelopeActionModal"
+      :envelope="selectedActionEnvelope"
+      @close="showEnvelopeActionModal = false"
+      @pay="handleEnvelopeAction('pay', $event)"
+      @transfer="handleEnvelopeAction('transfer', $event)"
+      @withdraw="handleEnvelopeAction('withdraw', $event)"
     />
 
     <TransferEnvelopeModal

@@ -21,6 +21,7 @@ const props = withDefaults(defineProps<{
 
 const emit = defineEmits<{
   'add-envelope': [accountId: string]
+  'select-envelope': [envelope: EnvelopeSummary]
   'edit-envelope': [envelope: EnvelopeSummary]
   'pay-envelope': [envelope: EnvelopeSummary]
   'transfer-envelope': [envelope: EnvelopeSummary]
@@ -138,6 +139,7 @@ const toggleExpand = () => {
           v-for="envelope in envelopes"
           :key="envelope.id"
           :envelope="envelope"
+          @select="emit('select-envelope', $event)"
           @edit="emit('edit-envelope', $event)"
           @pay="emit('pay-envelope', $event)"
           @transfer="emit('transfer-envelope', $event)"

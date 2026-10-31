@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { computed } from 'vue'
 import {
   type EnvelopeSummary,
   PURPOSE_LABELS,
@@ -16,13 +16,9 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
+  select: [envelope: EnvelopeSummary]
   edit: [envelope: EnvelopeSummary]
-  pay: [envelope: EnvelopeSummary]
-  transfer: [envelope: EnvelopeSummary]
-  withdraw: [envelope: EnvelopeSummary]
 }>()
-
-const menuOpen = ref(false)
 
 const balance = computed(() => props.envelope.balance?.amount ?? 0)
 const currency = computed(() => props.envelope.balance?.currency ?? 'CAD')
@@ -30,14 +26,7 @@ const target = computed(() => props.envelope.targetAmount?.amount ?? 0)
 const percentage = computed(() => (target.value > 0 ? Math.min((balance.value / target.value) * 100, 100) : 0))
 
 const isBill = computed(() => props.envelope.purpose === 'Bill')
-const isDebt = computed(() => props.envelope.purpose === 'DebtPayment')
 const purposeLabel = computed(() => PURPOSE_LABELS[props.envelope.purpose] ?? props.envelope.purpose)
-
-const canPay = computed(() => (isBill.value || isDebt.value) && balance.value > 0)
-// Debt envelopes can't be withdrawn from: the backend refuses it
-const canWithdraw = computed(() => balance.value > 0 && !isDebt.value)
-const canTransfer = computed(() => balance.value > 0)
-const hasActions = computed(() => canPay.value || canTransfer.value || canWithdraw.value)
 
 // Status line: next due date for bills, last payment, automatic withdrawal or target date
 const statusLines = computed(() => {
@@ -58,29 +47,10 @@ const statusLines = computed(() => {
   if (targetDate && !isBill.value) lines.push(`Cible au ${formatShortDate(targetDate)}`)
   return lines
 })
-
-const closeMenu = () => {
-  menuOpen.value = false
-}
-
-const runPay = () => {
-  closeMenu()
-  emit('pay', props.envelope)
-}
-
-const runTransfer = () => {
-  closeMenu()
-  emit('transfer', props.envelope)
-}
-
-const runWithdraw = () => {
-  closeMenu()
-  emit('withdraw', props.envelope)
-}
 </script>
 
 <template>
-  <div class="envelope-row" @click="emit('edit', envelope)">
+  <div class="envelope-row" @click="emit('select', envelope)">
     <div class="row-name">
       <div class="name">{{ envelope.name }}</div>
       <div class="purpose">
@@ -104,35 +74,9 @@ const runWithdraw = () => {
       <div v-for="line in statusLines" :key="line" class="status-line">{{ line }}</div>
     </div>
 
-    <div class="row-menu" @click.stop>
-      <button
-        v-if="hasActions"
-        class="menu-button"
-        :aria-expanded="menuOpen"
-        aria-label="Actions"
-        @click="menuOpen = !menuOpen"
-      >
-        <i class="mdi mdi-dots-vertical"></i>
-      </button>
-
-      <template v-if="menuOpen">
-        <div class="menu-overlay" @click="closeMenu"></div>
-        <div class="menu">
-          <button v-if="canPay" class="menu-item" @click="runPay">
-            <i class="mdi mdi-check"></i>
-            {{ isDebt ? 'Payer la dette' : 'Payé' }}
-          </button>
-          <button v-if="canTransfer" class="menu-item" @click="runTransfer">
-            <i class="mdi mdi-swap-horizontal"></i>
-            Transférer
-          </button>
-          <button v-if="canWithdraw" class="menu-item danger" @click="runWithdraw">
-            <i class="mdi mdi-cash-minus"></i>
-            Retirer
-          </button>
-        </div>
-      </template>
-    </div>
+    <button class="edit-button" title="Modifier" aria-label="Modifier" @click.stop="emit('edit', envelope)">
+      <i class="mdi mdi-pencil"></i>
+    </button>
   </div>
 </template>
 
@@ -238,11 +182,7 @@ const runWithdraw = () => {
   text-overflow: ellipsis;
 }
 
-.row-menu {
-  position: relative;
-}
-
-.menu-button {
+.edit-button {
   width: 32px;
   height: 32px;
   border: none;
@@ -250,55 +190,12 @@ const runWithdraw = () => {
   border-radius: 6px;
   cursor: pointer;
   color: var(--text-muted);
-  font-size: 1.25rem;
+  font-size: 1.125rem;
 }
 
-.menu-button:hover {
+.edit-button:hover {
   background: var(--surface);
   color: var(--primary);
-}
-
-.menu-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 10;
-}
-
-.menu {
-  position: absolute;
-  right: 0;
-  top: calc(100% + 4px);
-  z-index: 11;
-  min-width: 160px;
-  background: white;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  box-shadow: var(--shadow-lg);
-  padding: 0.25rem;
-  display: flex;
-  flex-direction: column;
-}
-
-.menu-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
-  border: none;
-  background: transparent;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.875rem;
-  color: var(--text-primary);
-  text-align: left;
-}
-
-.menu-item:hover {
-  background: var(--surface);
-}
-
-.menu-item.danger {
-  color: var(--danger);
 }
 
 @media (max-width: 800px) {
