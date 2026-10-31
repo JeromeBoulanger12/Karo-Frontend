@@ -119,7 +119,9 @@
     "comp_support": "Support prioritaire",
     "comp_priority_support": "Support premium 24/7",
     "enter_code_error": "Code promo invalide",
-    "promo_applied": "Code promo appliqué avec succès"
+    "promo_applied": "Code promo appliqué avec succès",
+    "faq_title": "Les bases de Karo",
+    "faq_intro": "Les concepts qui font fonctionner l’application, en quelques mots."
   },
   "checkout": {
     "order_summary": "Résumé de la commande",

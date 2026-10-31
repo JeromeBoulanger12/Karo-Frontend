@@ -129,7 +129,9 @@
     "base_price": "Base Price",
     "tax": "Tax",
     "total": "Total",
-    "back_to_home": "Back to Home"
+    "back_to_home": "Back to Home",
+    "faq_title": "The basics of Karo",
+    "faq_intro": "The concepts behind the app, in a few words."
   },
   "checkout": {
     "order_summary": "Order Summary",

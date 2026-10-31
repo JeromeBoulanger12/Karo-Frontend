@@ -158,6 +158,18 @@
     </section>
 
     <!-- CTA Section -->
+    <!-- Basic concepts, explained before the call to action -->
+    <section id="faq" class="landing-faq">
+      <h2 class="section-title">{{ t('landing.faq_title') }}</h2>
+      <p class="landing-faq-intro">{{ t('landing.faq_intro') }}</p>
+      <div class="landing-faq-list">
+        <details v-for="id in FAQ_ITEMS" :key="id" class="landing-faq-item">
+          <summary>{{ t(`faq.items.${id}.question`) }}</summary>
+          <p>{{ t(`faq.items.${id}.answer`) }}</p>
+        </details>
+      </div>
+    </section>
+
     <section class="cta">
       <h2>{{ t('landing.ready_to_start') }}</h2>
       <p>{{ t('landing.cta_subtitle') }}</p>
@@ -210,6 +222,16 @@ import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
+
+// Questions from the shared FAQ texts (faq.items.*) that explain the basics
+const FAQ_ITEMS = [
+  'envelope',
+  'accountVsEnvelope',
+  'expectedIncome',
+  'allocation',
+  'paid',
+  'transferWithdraw'
+] as const
 
 const promoCode = ref('')
 const promoMessage = ref('')
@@ -795,6 +817,48 @@ table td i {
 }
 
 /* CTA Section */
+.landing-faq {
+  background: white;
+  padding: 5rem 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.landing-faq .section-title {
+  text-align: center;
+}
+
+.landing-faq-intro {
+  text-align: center;
+  color: var(--text-muted);
+  margin: 0 0 2rem;
+}
+
+.landing-faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.landing-faq-item {
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+}
+
+.landing-faq-item summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.landing-faq-item p {
+  margin: 0.75rem 0 0;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
 .cta {
   background: #0f172a;
   color: white;
