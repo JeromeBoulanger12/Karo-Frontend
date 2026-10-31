@@ -16,7 +16,6 @@ import WithdrawEnvelopeModal from '../components/WithdrawEnvelopeModal.vue'
 import JobFormModal from '../components/JobFormModal.vue'
 import DepositPaycheckModal from '../components/DepositPaycheckModal.vue'
 import { accountsApi } from '../api/accounts'
-import { onboardingApi } from '../api/onboarding'
 import { envelopesApi } from '../api/envelopes'
 import { jobsApi } from '../api/jobs'
 import { dashboardAPI } from '../api/dashboard'
@@ -63,6 +62,8 @@ const currentAccountIdForEnvelope = ref<string>('')
 const currentAccountIdForJob = ref<string>('')
 const selectedJobForDeposit = ref<any>(null)
 const selectedAccountForBalance = ref<any>(null)
+// Balance history per account id, from the dashboard overview
+const accountHistory = ref<Record<string, { capturedAt: string; amount: { amount: number; currency: string } }[]>>({})
 
 // Computed properties
 const totalBalance = computed(() => {
@@ -338,41 +339,25 @@ const loadDashboard = async () => {
   loading.value = true
   error.value = ''
   try {
-    // Fetch all data in parallel
-    const [accountsRes, envelopesRes, jobsRes, statsRes, onboardingRes] = await Promise.all([
-      accountsApi.listAccounts().catch(() => null),
-      envelopesApi.listEnvelopes().catch(() => ({ data: [] })),
-      jobsApi.listJobs?.().catch(() => ({ data: [] })) || Promise.resolve({ data: [] }),
-      dashboardAPI.getUserDashboard().catch(() => ({})),
-      onboardingApi.getStatus().catch(() => null)
-    ])
+    // One request for the whole dashboard: accounts, envelopes, plans (with last paycheck), stats, history
+    const overview = await dashboardAPI.getOverview()
 
-    accounts.value = accountsRes?.data || []
+    accounts.value = overview.accounts || []
 
     // No account yet: send the user through the setup wizard (unless they finished or skipped it)
-    if (accountsRes && onboardingRes && accounts.value.length === 0 && !onboardingRes.data.completed) {
+    if (accounts.value.length === 0 && !overview.onboardingCompleted) {
       router.replace('/onboarding')
       return
     }
-    envelopes.value = envelopesRes.data || []
-    jobs.value = jobsRes.data || []
-    dashboardStats.value = statsRes || {}
+
+    envelopes.value = overview.envelopes || []
+    dashboardStats.value = overview.stats || {}
+    accountHistory.value = overview.accountHistory || {}
 
     // Enrich jobs with account names
-    jobs.value = jobs.value.map(job => ({
+    jobs.value = (overview.jobs || []).map((job: any) => ({
       ...job,
       accountName: accounts.value.find(a => a.id === job.homeAccountId)?.name || 'Account'
-    }))
-
-    // The plan has no amount of its own: take the last distributed paycheck from its history
-    // (events are returned oldest first)
-    jobs.value = await Promise.all(jobs.value.map(async job => {
-      const events = await jobsApi.listEvents(job.id).then(res => res.data || []).catch(() => [])
-      const last = events[events.length - 1]
-      return {
-        ...job,
-        lastPaycheck: last ? { amount: last.amount, date: last.occurredAt } : null
-      }
     }))
   } catch (err: any) {
     error.value = err?.message || t('dashboard.error_loading')
@@ -518,6 +503,7 @@ onMounted(() => {
             :key="account.id"
             :account="account"
             :envelopes="getAccountEnvelopes(account.id)"
+            :history="accountHistory[account.id]"
             @add-envelope="openAddEnvelopeModal($event)"
             @select-envelope="openEnvelopeActionModal($event)"
             @edit-envelope="openEditEnvelopeModal($event)"

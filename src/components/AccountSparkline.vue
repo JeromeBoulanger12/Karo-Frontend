@@ -13,8 +13,10 @@ interface BalanceSnapshot {
 const props = withDefaults(defineProps<{
   accountId: string
   days?: number
+  history?: BalanceSnapshot[]
 }>(), {
-  days: 30
+  days: 30,
+  history: undefined
 })
 
 const WIDTH = 120
@@ -23,14 +25,22 @@ const PADDING = 3
 
 const points = ref<number[]>([])
 
+const applySnapshots = (snapshots: BalanceSnapshot[]) => {
+  points.value = snapshots
+    .slice()
+    .sort((a, b) => new Date(a.capturedAt).getTime() - new Date(b.capturedAt).getTime())
+    .map(s => s.amount.amount)
+}
+
 const load = async () => {
+  // The dashboard already sent the history: no extra request
+  if (props.history) {
+    applySnapshots(props.history)
+    return
+  }
   try {
     const { data } = await accountsApi.getAccountBalanceHistory(props.accountId, props.days)
-    const snapshots = (data as BalanceSnapshot[]) ?? []
-    points.value = snapshots
-      .slice()
-      .sort((a, b) => new Date(a.capturedAt).getTime() - new Date(b.capturedAt).getTime())
-      .map(s => s.amount.amount)
+    applySnapshots((data as BalanceSnapshot[]) ?? [])
   } catch (err) {
     console.error('Error loading balance sparkline:', err)
     points.value = []
@@ -38,6 +48,9 @@ const load = async () => {
 }
 
 watch(() => props.accountId, load, { immediate: true })
+watch(() => props.history, (history) => {
+  if (history) applySnapshots(history)
+}, { deep: true })
 
 // Hidden when there is no trend to show
 const hasTrend = computed(() => points.value.length >= 2)

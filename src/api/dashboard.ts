@@ -52,6 +52,12 @@ export interface MonthlyUserGrowthDto {
 }
 
 export const dashboardAPI = {
+  // Everything the personal dashboard shows, in one request
+  async getOverview() {
+    const response = await client.get('/dashboard/overview')
+    return response.data
+  },
+
   // User Dashboard
   async getUserDashboard(): Promise<UserDashboardStatistics> {
     const response = await client.get('/dashboard/user')

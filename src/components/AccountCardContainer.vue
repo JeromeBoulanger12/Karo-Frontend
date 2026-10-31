@@ -20,6 +20,7 @@ const { t } = useI18n()
 const props = withDefaults(defineProps<{
   account: Account
   envelopes: EnvelopeSummary[]
+  history?: { capturedAt: string; amount: { amount: number; currency: string } }[]
 }>(), {})
 
 const emit = defineEmits<{
@@ -103,7 +104,7 @@ const toggleExpand = () => {
           </div>
         </div>
       </div>
-      <AccountSparkline :account-id="account.id" />
+      <AccountSparkline :account-id="account.id" :history="history" />
       <div class="account-balance-section">
         <div class="account-balance">
           <div class="account-balance-label">{{ t('dashboard.account.balance') }}</div>
