@@ -19,6 +19,7 @@ import { accountsApi } from '../api/accounts'
 import { envelopesApi } from '../api/envelopes'
 import { jobsApi } from '../api/jobs'
 import { dashboardAPI } from '../api/dashboard'
+import { paychecksPerMonth } from '../utils/envelopes'
 import '../styles/dashboard.css'
 
 // Helper function for formatting currency
@@ -66,8 +67,12 @@ const totalBalance = computed(() => {
   return accounts.value.reduce((sum, acc) => sum + (acc.latestBalance?.amount ?? acc.latestSnapshot?.amount?.amount ?? 0), 0)
 })
 
+// Monthly forecast: the last distributed paycheck of each plan, times how often that plan is paid
 const expectedIncome = computed(() => {
-  return jobs.value.reduce((sum, job) => sum + (job.amount?.amount ?? 0), 0)
+  return jobs.value.reduce((sum, job) => {
+    const lastAmount = job.lastPaycheck?.amount?.amount ?? 0
+    return sum + lastAmount * paychecksPerMonth(job.recurrencePattern)
+  }, 0)
 })
 
 const spendingThisMonth = computed(() => {

@@ -32,7 +32,7 @@ const formatCurrency = (value: number) => {
       <div class="stat-value">{{ envelopesCount }}</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Revenus prévus</div>
+      <div class="stat-label">Revenus prévus / mois</div>
       <div class="stat-value" style="color: var(--success)">{{ formatCurrency(expectedIncome) }}</div>
     </div>
     <div class="stat-card">

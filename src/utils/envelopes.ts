@@ -34,6 +34,21 @@ export const FREQUENCY_LABELS: Record<string, string> = {
   Irregular: 'irrégulier'
 }
 
+// Paychecks per month for a plan's recurrence (interval 2 = every other period). Irregular and one-time
+// plans have no predictable schedule, so they count as 0 in the monthly forecast
+export function paychecksPerMonth(pattern?: { frequency: string; interval?: number } | null): number {
+  if (!pattern) return 0
+  const perMonth: Record<string, number> = {
+    Weekly: 52 / 12,
+    BiWeekly: 26 / 12,
+    SemiMonthly: 2,
+    Monthly: 1,
+    Annually: 1 / 12
+  }
+  const base = perMonth[pattern.frequency] ?? 0
+  return base / Math.max(pattern.interval ?? 1, 1)
+}
+
 // The API sends dates as "YYYY-MM-DD" (or an ISO timestamp); read the calendar date in local time
 export function parseDateOnly(value?: string | null): Date | null {
   if (!value) return null
