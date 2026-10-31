@@ -777,5 +777,68 @@
     "error_inviting": "Erreur lors de l'envoi de l'invitation",
     "error_removing": "Erreur lors de la suppression du membre",
     "error_canceling": "Erreur lors de l'annulation de l'invitation"
+  },
+  "onboarding": {
+    "title": "Bienvenue sur Karo",
+    "intro": "Configurons ensemble les bases de votre budget. Vous pourrez tout modifier ensuite.",
+    "skipAll": "Passer la configuration",
+    "skipStep": "Passer cette étape",
+    "next": "Suivant",
+    "saving": "Enregistrement...",
+    "goToDashboard": "Aller au tableau de bord",
+    "steps": {
+      "account": "Compte",
+      "job": "Paie",
+      "envelope": "Enveloppe",
+      "summary": "Résumé"
+    },
+    "defaults": {
+      "account": "Compte principal",
+      "job": "Emploi principal",
+      "envelope": "Épicerie"
+    },
+    "account": {
+      "title": "Votre compte bancaire",
+      "description": "Le compte où votre paie est déposée, par exemple votre compte chèques.",
+      "name": "Nom du compte",
+      "type": "Type de compte",
+      "types": {
+        "checking": "Compte chèques",
+        "savings": "Compte épargne"
+      }
+    },
+    "job": {
+      "title": "Votre paie",
+      "description": "Le plan de répartition de votre revenu, à partir de la fréquence de vos paies.",
+      "name": "Nom du revenu",
+      "frequency": "Fréquence de paie",
+      "homeAccount": "Compte de dépôt",
+      "chooseAccount": "Choisir un compte",
+      "setMain": "Marquer comme revenu principal"
+    },
+    "envelope": {
+      "title": "Votre première enveloppe",
+      "description": "Une enveloppe réserve de l'argent pour un usage précis, comme l'épicerie ou un objectif d'épargne.",
+      "name": "Nom de l’enveloppe",
+      "purpose": "Objectif",
+      "target": "Montant cible (optionnel)"
+    },
+    "summary": {
+      "title": "C’est prêt !",
+      "description": "Voici ce qui a été créé. Vous pouvez ajouter le reste depuis le tableau de bord.",
+      "notCreated": "Non créé"
+    },
+    "frequencies": {
+      "weekly": "Chaque semaine",
+      "biweekly": "Aux deux semaines",
+      "semimonthly": "Deux fois par mois",
+      "monthly": "Chaque mois",
+      "annual": "Chaque année"
+    },
+    "errors": {
+      "generic": "Une erreur est survenue. Réessayez.",
+      "nameRequired": "Le nom est requis.",
+      "accountRequired": "Choisissez un compte de dépôt."
+    }
   }
 }

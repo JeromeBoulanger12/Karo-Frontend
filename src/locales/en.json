@@ -693,5 +693,68 @@
     "error_inviting": "Error sending invitation",
     "error_removing": "Error removing member",
     "error_canceling": "Error canceling invitation"
+  },
+  "onboarding": {
+    "title": "Welcome to Karo",
+    "intro": "Let's set up the basics of your budget together. You can change everything later.",
+    "skipAll": "Skip setup",
+    "skipStep": "Skip this step",
+    "next": "Next",
+    "saving": "Saving...",
+    "goToDashboard": "Go to the dashboard",
+    "steps": {
+      "account": "Account",
+      "job": "Pay",
+      "envelope": "Envelope",
+      "summary": "Summary"
+    },
+    "defaults": {
+      "account": "Main account",
+      "job": "Main job",
+      "envelope": "Groceries"
+    },
+    "account": {
+      "title": "Your bank account",
+      "description": "The account where your pay is deposited, for example your checking account.",
+      "name": "Account name",
+      "type": "Account type",
+      "types": {
+        "checking": "Checking",
+        "savings": "Savings"
+      }
+    },
+    "job": {
+      "title": "Your pay",
+      "description": "How your income is split, based on how often you get paid.",
+      "name": "Income name",
+      "frequency": "Pay frequency",
+      "homeAccount": "Deposit account",
+      "chooseAccount": "Choose an account",
+      "setMain": "Mark as main income"
+    },
+    "envelope": {
+      "title": "Your first envelope",
+      "description": "An envelope sets money aside for one purpose, like groceries or a savings goal.",
+      "name": "Envelope name",
+      "purpose": "Purpose",
+      "target": "Target amount (optional)"
+    },
+    "summary": {
+      "title": "All set!",
+      "description": "Here is what was created. You can add the rest from the dashboard.",
+      "notCreated": "Not created"
+    },
+    "frequencies": {
+      "weekly": "Every week",
+      "biweekly": "Every two weeks",
+      "semimonthly": "Twice a month",
+      "monthly": "Every month",
+      "annual": "Every year"
+    },
+    "errors": {
+      "generic": "Something went wrong. Please try again.",
+      "nameRequired": "The name is required.",
+      "accountRequired": "Choose a deposit account."
+    }
   }
 }
