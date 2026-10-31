@@ -457,7 +457,6 @@
     "manage_envelopes": "Manage Envelopes",
     "manage_members": "Manage Members",
     "error_loading": "Error loading dashboard",
-    "subtitle": "Total balance: {balance} • Envelopes: {envelopes} • Pay: {jobs}",
     "stats": {
       "totalBalance": "Total balance",
       "envelopes": "Envelopes",

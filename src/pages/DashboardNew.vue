@@ -461,7 +461,6 @@ onMounted(() => {
       <!-- Page Header -->
       <PageHeader
         :title="t('dashboard.title')"
-        :subtitle="t('dashboard.subtitle', { balance: formatCurrency(totalBalance), envelopes: envelopes.length, jobs: jobs.length })"
         :tierBadge="tierBadge"
       >
         <template #actions>

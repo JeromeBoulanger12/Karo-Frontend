@@ -450,7 +450,6 @@
     "manage_envelopes": "Gérer les enveloppes",
     "manage_members": "Gérer les membres",
     "error_loading": "Erreur lors du chargement du tableau de bord",
-    "subtitle": "Solde total : {balance} • Enveloppes : {envelopes} • Paie : {jobs}",
     "stats": {
       "totalBalance": "Solde total",
       "envelopes": "Enveloppes",

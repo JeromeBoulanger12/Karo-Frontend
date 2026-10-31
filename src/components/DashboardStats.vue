@@ -88,9 +88,7 @@ const formatCurrency = (value: number) => {
 .stat-label {
   font-size: 0.875rem;
   font-weight: 600;
-  text-transform: uppercase;
   color: var(--text-muted);
-  letter-spacing: 0.5px;
 }
 
 .stat-value {

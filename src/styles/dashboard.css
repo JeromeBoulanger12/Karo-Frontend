@@ -73,9 +73,7 @@
 .stat-label {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
-  text-transform: uppercase;
   color: var(--text-muted);
-  letter-spacing: 0.5px;
 }
 
 .stat-value {
