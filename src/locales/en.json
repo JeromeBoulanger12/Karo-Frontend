@@ -757,5 +757,49 @@
       "nameRequired": "The name is required.",
       "accountRequired": "Choose a deposit account."
     }
+  },
+  "faq": {
+    "link": "Help (FAQ)",
+    "back": "Back to the dashboard",
+    "title": "Frequently asked questions",
+    "intro": "How Karo works, in a few answers.",
+    "items": {
+      "envelope": {
+        "question": "What is an envelope?",
+        "answer": "An envelope sets money aside for one purpose, like rent, groceries or a savings goal. Its balance is part of the account it is attached to."
+      },
+      "accountVsEnvelope": {
+        "question": "What is the difference between an account and an envelope?",
+        "answer": "The account holds the actual money. Envelopes split that balance between your planned uses. Surplus: the account balance is higher than the total of its envelopes. Deficit: the envelopes add up to more than the account balance."
+      },
+      "expectedIncome": {
+        "question": "What does \"Expected income / month\" mean?",
+        "answer": "For each pay plan, we take the amount of the last paycheck received and multiply it by how many paychecks come in a month (weekly, every two weeks, twice a month, monthly, yearly). Irregular or one-time income counts as 0."
+      },
+      "addIncome": {
+        "question": "How do I add an income?",
+        "answer": "Add an income from the dashboard. Enter its name, pay frequency and the account it is deposited into. You can make it your main income."
+      },
+      "allocation": {
+        "question": "How do I split my pay across envelopes?",
+        "answer": "When you create an envelope, choose a pay plan and an allocation type: bill (a share of the bill each paycheck), automatic withdrawal, fixed amount per paycheck, or percentage of the paycheck."
+      },
+      "paid": {
+        "question": "What happens when I click \"Paid\"?",
+        "answer": "For a bill, the amount paid is withdrawn from the envelope and from the account balance, and the payment date is recorded. For a debt, the amount is withdrawn from the envelope and reduces what you owe on the debt account."
+      },
+      "transferWithdraw": {
+        "question": "What is the difference between Transfer and Withdraw?",
+        "answer": "Transfer moves money from one envelope to another in the same currency. Withdraw takes money out of the envelope without changing the account balance; tick \"unexpected expense\" for an expense you did not plan."
+      },
+      "debt": {
+        "question": "Why can I not withdraw from a debt envelope?",
+        "answer": "A debt envelope is only used to repay the debt. Use \"Pay the debt\" to repay it."
+      },
+      "sharing": {
+        "question": "How do I share an envelope with my household?",
+        "answer": "Turn on the \"shareable\" option on the envelope. Other household members can then see it and link it to their own envelope."
+      }
+    }
   }
 }

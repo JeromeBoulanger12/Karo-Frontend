@@ -77,6 +77,10 @@ const handleSave = async () => {
         <h1 class="page-title">{{ t('profile.title') }}</h1>
         <p class="page-subtitle">{{ user?.email }}</p>
       </div>
+      <router-link to="/faq" class="faq-link">
+        <i class="mdi mdi-help-circle-outline"></i>
+        {{ t('faq.link') }}
+      </router-link>
     </div>
 
     <!-- Profile Form & Subscription Section -->

@@ -22,6 +22,7 @@ import InviteUser from './pages/InviteUser.vue'
 import PendingInvitations from './pages/PendingInvitations.vue'
 import DashboardNew from './pages/DashboardNew.vue'
 import Onboarding from './pages/Onboarding.vue'
+import Faq from './pages/Faq.vue'
 import AdminDashboard from './pages/AdminDashboard.vue'
 import AdminPanel from './pages/AdminPanel.vue'
 import AdminSettings from './pages/AdminSettings.vue'
@@ -44,6 +45,7 @@ const routes = [
   // Main app routes
   { path: '/dashboard', component: DashboardNew },
   { path: '/onboarding', component: Onboarding },
+  { path: '/faq', component: Faq },
   { path: '/profile', component: Profile },
   { path: '/household', component: Household },
   { path: '/household/invite', component: InviteUser },

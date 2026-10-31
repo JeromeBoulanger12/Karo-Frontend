@@ -458,6 +458,10 @@ onMounted(() => {
         :tierBadge="tierBadge"
       >
         <template #actions>
+          <router-link to="/faq" class="btn-faq">
+            <i class="mdi mdi-help-circle-outline"></i>
+            {{ t('faq.link') }}
+          </router-link>
           <button class="btn-deposit-paycheck" @click="openDepositPaycheckModal">
             <i class="mdi mdi-plus-circle"></i>
             Déposer une paie
@@ -780,6 +784,23 @@ onMounted(() => {
   background: #2563eb;
   transform: translateY(-2px);
   box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+}
+.btn-faq {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: white;
+  color: var(--text-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.btn-faq:hover {
+  border-color: var(--primary);
+  color: var(--primary);
 }
 
 .btn-deposit-paycheck {

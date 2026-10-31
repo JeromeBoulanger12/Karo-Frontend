@@ -292,6 +292,7 @@ const finish = async () => {
 
       <footer v-if="step < 3" class="onboarding-footer">
         <button class="link-button" :disabled="saving" @click="finish">{{ t('onboarding.skipAll') }}</button>
+        <router-link to="/faq" class="link-button">{{ t('faq.link') }}</router-link>
       </footer>
     </div>
   </div>
@@ -492,6 +493,7 @@ const finish = async () => {
 .onboarding-footer {
   display: flex;
   justify-content: center;
+  gap: 1.5rem;
 }
 
 .link-button {

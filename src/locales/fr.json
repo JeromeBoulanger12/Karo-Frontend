@@ -841,5 +841,49 @@
       "nameRequired": "Le nom est requis.",
       "accountRequired": "Choisissez un compte de dépôt."
     }
+  },
+  "faq": {
+    "link": "Aide (FAQ)",
+    "back": "Retour au tableau de bord",
+    "title": "Questions fréquentes",
+    "intro": "Comment fonctionne Karo, en quelques réponses.",
+    "items": {
+      "envelope": {
+        "question": "Qu'est-ce qu'une enveloppe ?",
+        "answer": "Une enveloppe met de l'argent de côté pour un usage précis, comme le loyer, l'épicerie ou un objectif d'épargne. Son solde fait partie du compte auquel elle est rattachée."
+      },
+      "accountVsEnvelope": {
+        "question": "Quelle est la différence entre un compte et une enveloppe ?",
+        "answer": "Le compte contient l'argent réel. Les enveloppes répartissent ce solde entre vos usages prévus. Surplus : le solde du compte est plus élevé que le total de ses enveloppes. Déficit : les enveloppes dépassent le solde du compte."
+      },
+      "expectedIncome": {
+        "question": "Que veut dire « Revenus prévus / mois » ?",
+        "answer": "Pour chaque plan de paie, on prend le montant de la dernière paie reçue et on le multiplie par le nombre de paies par mois (hebdomadaire, aux deux semaines, deux fois par mois, mensuel, annuel). Les revenus irréguliers ou ponctuels comptent pour 0."
+      },
+      "addIncome": {
+        "question": "Comment ajouter un revenu ?",
+        "answer": "Ajoutez un revenu depuis le tableau de bord. Indiquez son nom, la fréquence de paie et le compte où elle est déposée. Vous pouvez en faire votre revenu principal."
+      },
+      "allocation": {
+        "question": "Comment répartir ma paie dans les enveloppes ?",
+        "answer": "Lors de la création d'une enveloppe, choisissez un plan de paie et un type de répartition : facture (une part de la facture à chaque paie), prélèvement automatique, montant fixe par paie ou pourcentage de la paie."
+      },
+      "paid": {
+        "question": "Que se passe-t-il quand je clique sur « Payé » ?",
+        "answer": "Pour une facture, le montant payé est retiré de l'enveloppe et du solde du compte, et la date de paiement est enregistrée. Pour une dette, le montant est retiré de l'enveloppe et réduit ce que vous devez sur le compte de dette."
+      },
+      "transferWithdraw": {
+        "question": "Quelle différence entre Transférer et Retirer ?",
+        "answer": "Transférer déplace de l'argent d'une enveloppe vers une autre, dans la même devise. Retirer sort l'argent de l'enveloppe sans changer le solde du compte ; cochez « dépense imprévue » pour une dépense non planifiée."
+      },
+      "debt": {
+        "question": "Pourquoi je ne peux pas retirer d'une enveloppe de dette ?",
+        "answer": "Une enveloppe de dette sert uniquement à rembourser la dette. Utilisez « Payer la dette » pour la rembourser."
+      },
+      "sharing": {
+        "question": "Comment partager une enveloppe avec mon ménage ?",
+        "answer": "Activez l'option « partageable » sur l'enveloppe. Les autres membres du ménage peuvent alors la voir et la lier à leur propre enveloppe."
+      }
+    }
   }
 }
