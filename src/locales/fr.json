@@ -821,7 +821,8 @@
       "description": "Une enveloppe réserve de l'argent pour un usage précis, comme l'épicerie ou un objectif d'épargne.",
       "name": "Nom de l’enveloppe",
       "purpose": "Objectif",
-      "target": "Montant cible (optionnel)"
+      "target": "Montant cible (optionnel)",
+      "account": "Compte"
     },
     "summary": {
       "title": "C’est prêt !",

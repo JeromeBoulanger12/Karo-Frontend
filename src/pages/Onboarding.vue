@@ -2,15 +2,13 @@
 import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import { useAuth } from '../composables/useAuth'
 import { accountsApi } from '../api/accounts'
 import { jobsApi } from '../api/jobs'
 import { envelopesApi } from '../api/envelopes'
-import { markOnboardingDone } from '../utils/onboarding'
+import { onboardingApi } from '../api/onboarding'
 
 const { t } = useI18n()
 const router = useRouter()
-const { user } = useAuth()
 
 const STEPS = ['account', 'job', 'envelope', 'summary'] as const
 const FREQUENCIES = ['weekly', 'biweekly', 'semimonthly', 'monthly', 'annual'] as const
@@ -41,6 +39,7 @@ const jobIsMain = ref(true)
 
 // Step 3: envelope
 const envelopeName = ref(t('onboarding.defaults.envelope'))
+const envelopeAccountId = ref('')
 const envelopePurpose = ref<string>('SavingsGoal')
 const envelopeTarget = ref<number | null>(null)
 
@@ -48,7 +47,10 @@ onMounted(async () => {
   try {
     const { data } = await accountsApi.listAccounts()
     accounts.value = data || []
-    if (accounts.value.length > 0) jobHomeAccountId.value = accounts.value[0].id
+    if (accounts.value.length > 0) {
+      jobHomeAccountId.value = accounts.value[0].id
+      envelopeAccountId.value = accounts.value[0].id
+    }
   } catch {
     accounts.value = []
   }
@@ -76,6 +78,7 @@ const submitAccount = () => run(async () => {
   createdAccount.value = data
   accounts.value = [...accounts.value, data]
   jobHomeAccountId.value = data.id
+  envelopeAccountId.value = data.id
   step.value = 1
 })
 
@@ -103,8 +106,13 @@ const submitEnvelope = () => run(async () => {
     error.value = t('onboarding.errors.nameRequired')
     return
   }
+  if (!envelopeAccountId.value) {
+    error.value = t('onboarding.errors.accountRequired')
+    return
+  }
   const { data } = await envelopesApi.createEnvelope({
     name: envelopeName.value.trim(),
+    homeAccountId: envelopeAccountId.value,
     purpose: envelopePurpose.value,
     ...(envelopeTarget.value ? { targetAmount: envelopeTarget.value } : {})
   })
@@ -119,8 +127,9 @@ const skipStep = () => {
 }
 
 // Leaves the wizard for the dashboard; also used when the user skips the whole setup
-const finish = () => {
-  markOnboardingDone(user.value?.id)
+const finish = async () => {
+  // Record it on the server so the wizard is not shown again on any device; go on even if that fails
+  await onboardingApi.complete().catch(err => console.error('Could not save onboarding status:', err))
   router.push('/dashboard')
 }
 </script>
@@ -222,6 +231,16 @@ const finish = () => {
         <div class="form-group">
           <label>{{ t('onboarding.envelope.name') }}</label>
           <input v-model="envelopeName" type="text" maxlength="100" />
+        </div>
+
+        <div class="form-group">
+          <label>{{ t('onboarding.envelope.account') }}</label>
+          <select v-model="envelopeAccountId">
+            <option value="" disabled>{{ t('onboarding.job.chooseAccount') }}</option>
+            <option v-for="account in accounts" :key="account.id" :value="account.id">
+              {{ account.name }}
+            </option>
+          </select>
         </div>
 
         <div class="form-group">

@@ -16,8 +16,7 @@ import WithdrawEnvelopeModal from '../components/WithdrawEnvelopeModal.vue'
 import JobFormModal from '../components/JobFormModal.vue'
 import DepositPaycheckModal from '../components/DepositPaycheckModal.vue'
 import { accountsApi } from '../api/accounts'
-import { useAuth } from '../composables/useAuth'
-import { isOnboardingDone } from '../utils/onboarding'
+import { onboardingApi } from '../api/onboarding'
 import { envelopesApi } from '../api/envelopes'
 import { jobsApi } from '../api/jobs'
 import { dashboardAPI } from '../api/dashboard'
@@ -34,7 +33,6 @@ const formatCurrency = (value: number) => {
 
 const { t } = useI18n()
 const router = useRouter()
-const { user } = useAuth()
 
 // Data refs
 const accounts = ref<any[]>([])
@@ -341,17 +339,18 @@ const loadDashboard = async () => {
   error.value = ''
   try {
     // Fetch all data in parallel
-    const [accountsRes, envelopesRes, jobsRes, statsRes] = await Promise.all([
+    const [accountsRes, envelopesRes, jobsRes, statsRes, onboardingRes] = await Promise.all([
       accountsApi.listAccounts().catch(() => null),
       envelopesApi.listEnvelopes().catch(() => ({ data: [] })),
       jobsApi.listJobs?.().catch(() => ({ data: [] })) || Promise.resolve({ data: [] }),
-      dashboardAPI.getUserDashboard().catch(() => ({}))
+      dashboardAPI.getUserDashboard().catch(() => ({})),
+      onboardingApi.getStatus().catch(() => null)
     ])
 
     accounts.value = accountsRes?.data || []
 
     // No account yet: send the user through the setup wizard (unless they finished or skipped it)
-    if (accountsRes && accounts.value.length === 0 && !isOnboardingDone(user.value?.id)) {
+    if (accountsRes && onboardingRes && accounts.value.length === 0 && !onboardingRes.data.completed) {
       router.replace('/onboarding')
       return
     }

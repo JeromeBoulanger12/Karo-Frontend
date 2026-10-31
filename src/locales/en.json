@@ -737,7 +737,8 @@
       "description": "An envelope sets money aside for one purpose, like groceries or a savings goal.",
       "name": "Envelope name",
       "purpose": "Purpose",
-      "target": "Target amount (optional)"
+      "target": "Target amount (optional)",
+      "account": "Account"
     },
     "summary": {
       "title": "All set!",
