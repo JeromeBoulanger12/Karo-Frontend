@@ -68,6 +68,15 @@ const totalBalance = computed(() => {
 })
 
 // Monthly forecast: the last distributed paycheck of each plan, times how often that plan is paid
+// Per account: its balance minus the total of its envelopes (negative means a deficit)
+const accountSurpluses = computed(() => {
+  return accounts.value.map(acc => {
+    const balance = acc.latestBalance?.amount ?? acc.latestSnapshot?.amount?.amount ?? 0
+    const envelopesTotal = getAccountEnvelopes(acc.id).reduce((sum, env) => sum + (env.balance?.amount ?? 0), 0)
+    return { id: acc.id, name: acc.name, amount: balance - envelopesTotal }
+  })
+})
+
 const expectedIncome = computed(() => {
   return jobs.value.reduce((sum, job) => {
     const lastAmount = job.lastPaycheck?.amount?.amount ?? 0
@@ -318,7 +327,7 @@ const handleJobSave = async (jobData: any) => {
   } catch (err: any) {
     console.error('Error saving job:', err)
     console.error('Error response:', err.response?.data)
-    error.value = err.response?.data?.message || err.message || 'Error saving job'
+    error.value = err.response?.data?.message || err.message || t('dashboard.errors.saveJob')
   }
 }
 
@@ -357,7 +366,7 @@ const loadDashboard = async () => {
       }
     }))
   } catch (err: any) {
-    error.value = err?.message || t('common.errorLoading') || 'Erreur lors du chargement'
+    error.value = err?.message || t('dashboard.error_loading')
     console.error('Error loading dashboard:', err)
   } finally {
     loading.value = false
@@ -444,15 +453,15 @@ onMounted(() => {
         <i class="mdi mdi-alert-circle"></i>
         {{ error }}
       </div>
-      <button class="btn-retry" @click="loadDashboard">{{ t('common.retry') || 'Réessayer' }}</button>
+      <button class="btn-retry" @click="loadDashboard">{{ t('common.retry') }}</button>
     </div>
 
     <!-- Main content -->
     <div v-else class="dashboard-content">
       <!-- Page Header -->
       <PageHeader
-        :title="t('dashboard.title') || 'Tableau de bord'"
-        :subtitle="`Solde total: ${formatCurrency(totalBalance)} • Enveloppes: ${envelopes.length} • Paie: ${jobs.length}`"
+        :title="t('dashboard.title')"
+        :subtitle="t('dashboard.subtitle', { balance: formatCurrency(totalBalance), envelopes: envelopes.length, jobs: jobs.length })"
         :tierBadge="tierBadge"
       >
         <template #actions>
@@ -470,6 +479,7 @@ onMounted(() => {
         :jobsCount="jobs.length"
         :spendingThisMonth="spendingThisMonth"
         :expectedIncome="expectedIncome"
+        :accountSurpluses="accountSurpluses"
       />
 
       <!-- Accounts Section -->
@@ -487,7 +497,7 @@ onMounted(() => {
 
         <div v-if="accounts.length === 0" class="empty-state">
           <i class="mdi mdi-inbox-outline"></i>
-          <p>{{ t('dashboard.noAccounts') || 'Aucun compte' }}</p>
+          <p>{{ t('dashboard.noAccounts') }}</p>
           <button class="btn-create" @click="openAddAccountModal">
             <i class="mdi mdi-plus"></i>
             Créer un compte
@@ -583,7 +593,7 @@ onMounted(() => {
     <PayBillModal
       :isOpen="showPayBillModal"
       :bill="selectedBill"
-      :title="isDebtPayment ? 'Payer la dette' : 'Payer la facture'"
+      :title="isDebtPayment ? t('envelopes.payModal.titleDebt') : t('envelopes.payModal.title')"
       @close="showPayBillModal = false"
       @pay="handleBillPay"
     />

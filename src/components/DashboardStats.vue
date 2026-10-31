@@ -1,17 +1,29 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
+
+interface AccountSurplus {
+  id: string
+  name: string
+  amount: number
+}
+
 const props = withDefaults(defineProps<{
   totalBalance?: number
   envelopesCount?: number
   jobsCount?: number
   spendingThisMonth?: number
   expectedIncome?: number
+  accountSurpluses?: AccountSurplus[]
 }>(), {
   totalBalance: 0,
   envelopesCount: 0,
   jobsCount: 0,
   spendingThisMonth: 0,
-  expectedIncome: 0
+  expectedIncome: 0,
+  accountSurpluses: () => []
 })
+
+const { t } = useI18n()
 
 const formatCurrency = (value: number) => {
   return new Intl.NumberFormat('fr-CA', {
@@ -24,20 +36,25 @@ const formatCurrency = (value: number) => {
 <template>
   <div class="stats-row">
     <div class="stat-card">
-      <div class="stat-label">Solde total</div>
+      <div class="stat-label">{{ t('dashboard.stats.totalBalance') }}</div>
       <div class="stat-value">{{ formatCurrency(totalBalance) }}</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Enveloppes</div>
+      <div class="stat-label">{{ t('dashboard.stats.envelopes') }}</div>
       <div class="stat-value">{{ envelopesCount }}</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Revenus prévus / mois</div>
+      <div class="stat-label">{{ t('dashboard.stats.expectedIncome') }}</div>
       <div class="stat-value" style="color: var(--success)">{{ formatCurrency(expectedIncome) }}</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Dépenses ce mois</div>
+      <div class="stat-label">{{ t('dashboard.stats.spendingThisMonth') }}</div>
       <div class="stat-value" style="color: var(--warning)">{{ formatCurrency(spendingThisMonth) }}</div>
+    </div>
+    <!-- One card per account: balance minus the total of its envelopes -->
+    <div v-for="item in accountSurpluses" :key="item.id" class="stat-card">
+      <div class="stat-label">{{ item.amount < 0 ? t('dashboard.stats.deficit') : t('dashboard.stats.surplus') }} · {{ item.name }}</div>
+      <div class="stat-value" :style="{ color: item.amount < 0 ? 'var(--danger)' : 'var(--success)' }">{{ formatCurrency(Math.abs(item.amount)) }}</div>
     </div>
   </div>
 </template>

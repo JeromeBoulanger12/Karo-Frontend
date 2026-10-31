@@ -15,25 +15,6 @@ export interface EnvelopeSummary {
   isShareable?: boolean
 }
 
-export const PURPOSE_LABELS: Record<string, string> = {
-  GeneralReserve: 'Réserve',
-  Bill: 'Facture',
-  SavingsGoal: 'Objectif',
-  DebtPayment: 'Dette',
-  WeeklyExpenses: 'Dépenses',
-  Mortgage: 'Hypothèque'
-}
-
-export const FREQUENCY_LABELS: Record<string, string> = {
-  Weekly: 'chaque semaine',
-  BiWeekly: 'aux 2 semaines',
-  SemiMonthly: '2 fois par mois',
-  Monthly: 'chaque mois',
-  Annually: 'chaque année',
-  OneTime: 'une fois',
-  Irregular: 'irrégulier'
-}
-
 // Paychecks per month for a plan's recurrence (interval 2 = every other period). Irregular and one-time
 // plans have no predictable schedule, so they count as 0 in the monthly forecast
 export function paychecksPerMonth(pattern?: { frequency: string; interval?: number } | null): number {

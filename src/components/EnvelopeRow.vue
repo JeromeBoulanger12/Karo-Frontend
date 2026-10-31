@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import {
   type EnvelopeSummary,
-  PURPOSE_LABELS,
-  FREQUENCY_LABELS,
   parseDateOnly,
   nextPaymentDate,
   daysUntil,
@@ -14,6 +13,8 @@ import {
 const props = defineProps<{
   envelope: EnvelopeSummary
 }>()
+
+const { t } = useI18n()
 
 const emit = defineEmits<{
   select: [envelope: EnvelopeSummary]
@@ -26,7 +27,7 @@ const target = computed(() => props.envelope.targetAmount?.amount ?? 0)
 const percentage = computed(() => (target.value > 0 ? Math.min((balance.value / target.value) * 100, 100) : 0))
 
 const isBill = computed(() => props.envelope.purpose === 'Bill')
-const purposeLabel = computed(() => PURPOSE_LABELS[props.envelope.purpose] ?? props.envelope.purpose)
+const purposeLabel = computed(() => t(`enums.envelopePurposes.${props.envelope.purpose}`))
 
 // Status line: next due date for bills, last payment, automatic withdrawal or target date
 const statusLines = computed(() => {
@@ -34,17 +35,17 @@ const statusLines = computed(() => {
   const next = isBill.value ? nextPaymentDate(props.envelope.billPaymentScheduleJson) : null
   if (next) {
     const days = daysUntil(next)
-    const when = days === 0 ? "aujourd'hui" : days === 1 ? 'demain' : `dans ${days} j`
-    lines.push(`Échéance ${formatShortDate(next)} (${when})`)
+    const when = days === 0 ? t('envelopes.row.today') : days === 1 ? t('envelopes.row.tomorrow') : t('envelopes.row.inDays', { days })
+    lines.push(t('envelopes.row.dueDate', { date: formatShortDate(next), when }))
   }
   const lastPaid = parseDateOnly(props.envelope.billLastPaidDate)
-  if (lastPaid) lines.push(`Payé le ${formatShortDate(lastPaid)}`)
+  if (lastPaid) lines.push(t('envelopes.row.paidOn', { date: formatShortDate(lastPaid) }))
   if (props.envelope.isAutomaticWithdrawal && props.envelope.withdrawalFrequency) {
-    const frequency = FREQUENCY_LABELS[props.envelope.withdrawalFrequency] ?? props.envelope.withdrawalFrequency
-    lines.push(`Prélèvement ${frequency}`)
+    const frequency = t(`enums.recurrenceFrequencies.${props.envelope.withdrawalFrequency}`)
+    lines.push(t('envelopes.row.withdrawal', { frequency }))
   }
   const targetDate = parseDateOnly(props.envelope.targetDate)
-  if (targetDate && !isBill.value) lines.push(`Cible au ${formatShortDate(targetDate)}`)
+  if (targetDate && !isBill.value) lines.push(t('envelopes.row.targetDate', { date: formatShortDate(targetDate) }))
   return lines
 })
 </script>
@@ -55,8 +56,8 @@ const statusLines = computed(() => {
       <div class="name">{{ envelope.name }}</div>
       <div class="purpose">
         {{ purposeLabel }}
-        <span v-if="envelope.isShareable" class="tag tag-shared">Partagé</span>
-        <span v-if="envelope.linkedEnvelopeId" class="tag tag-linked">Liée</span>
+        <span v-if="envelope.isShareable" class="tag tag-shared">{{ t('envelopes.row.shared') }}</span>
+        <span v-if="envelope.linkedEnvelopeId" class="tag tag-linked">{{ t('envelopes.row.linked') }}</span>
       </div>
     </div>
 
@@ -74,7 +75,7 @@ const statusLines = computed(() => {
       <div v-for="line in statusLines" :key="line" class="status-line">{{ line }}</div>
     </div>
 
-    <button class="edit-button" title="Modifier" aria-label="Modifier" @click.stop="emit('edit', envelope)">
+    <button class="edit-button" :title="t('envelopes.row.edit')" :aria-label="t('envelopes.row.edit')" @click.stop="emit('edit', envelope)">
       <i class="mdi mdi-pencil"></i>
     </button>
   </div>

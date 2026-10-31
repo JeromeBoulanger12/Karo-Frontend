@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { accountsApi } from '../api/accounts'
+
+const { t } = useI18n()
 
 interface BalanceSnapshot {
   capturedAt: string
@@ -62,8 +65,8 @@ const trendClass = computed(() => {
 </script>
 
 <template>
-  <div v-if="hasTrend" class="sparkline" :class="trendClass" :title="`Solde sur ${days} jours`">
-    <svg :viewBox="`0 0 ${WIDTH} ${HEIGHT}`" preserveAspectRatio="none" role="img" aria-label="Tendance du solde">
+  <div v-if="hasTrend" class="sparkline" :class="trendClass" :title="t('dashboard.sparklineTitle', { days })">
+    <svg :viewBox="`0 0 ${WIDTH} ${HEIGHT}`" preserveAspectRatio="none" role="img" :aria-label="t('dashboard.sparklineLabel')">
       <path :d="path" fill="none" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" />
     </svg>
   </div>

@@ -150,19 +150,19 @@ const handleSubmit = () => {
   if (formData.value.selectedPlanId) {
     const type = formData.value.planAllocationType
     if (type === 'BillProrated' && !isBillPurpose.value) {
-      validationError.value = 'La répartition « Facture » ne s\'applique qu\'à une enveloppe de type Facture'
+      validationError.value = t('envelopes.form.errorBillOnly')
       return
     }
     if (type === 'Automatic' && !formData.value.isAutomaticWithdrawal) {
-      validationError.value = 'La répartition « Prélèvement automatique » exige que l\'option soit activée'
+      validationError.value = t('envelopes.form.errorAutomaticNeedsOption')
       return
     }
     if (type === 'FixedAmount' && !(formData.value.planFixedAmount && formData.value.planFixedAmount > 0)) {
-      validationError.value = 'Le montant par paie doit être supérieur à 0'
+      validationError.value = t('envelopes.form.errorFixedPositive')
       return
     }
     if (type === 'Percentage' && !(formData.value.planPercentage && formData.value.planPercentage > 0 && formData.value.planPercentage <= 100)) {
-      validationError.value = 'Le pourcentage doit être entre 0 et 100'
+      validationError.value = t('envelopes.form.errorPercentageRange')
       return
     }
   }
@@ -359,22 +359,22 @@ const withdrawalFrequencies = [
 
           <template v-if="formData.selectedPlanId">
             <div class="form-group">
-              <label>Type de répartition</label>
+              <label>{{ t('envelopes.form.allocationType') }}</label>
               <select v-model="formData.planAllocationType">
-                <option value="BillProrated">Facture : part de la facture à chaque paie</option>
-                <option value="Automatic">Prélèvement automatique : montant de l'enveloppe à chaque paie</option>
-                <option value="FixedAmount">Montant fixe à chaque paie</option>
-                <option value="Percentage">Pourcentage de la paie</option>
+                <option value="BillProrated">{{ t('envelopes.form.billProrated') }}</option>
+                <option value="Automatic">{{ t('envelopes.form.automatic') }}</option>
+                <option value="FixedAmount">{{ t('envelopes.form.fixedAmount') }}</option>
+                <option value="Percentage">{{ t('envelopes.form.percentage') }}</option>
               </select>
             </div>
 
             <div v-if="formData.planAllocationType === 'FixedAmount'" class="form-group">
-              <label>Montant par paie</label>
+              <label>{{ t('envelopes.form.fixedAmountLabel') }}</label>
               <input v-model.number="formData.planFixedAmount" type="number" step="0.01" min="0" placeholder="0.00" />
             </div>
 
             <div v-if="formData.planAllocationType === 'Percentage'" class="form-group">
-              <label>Pourcentage de la paie</label>
+              <label>{{ t('envelopes.form.percentageLabel') }}</label>
               <input v-model.number="formData.planPercentage" type="number" step="0.01" min="0" max="100" placeholder="0" />
             </div>
           </template>

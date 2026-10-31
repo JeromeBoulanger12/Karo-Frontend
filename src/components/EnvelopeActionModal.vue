@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { EnvelopeSummary } from '../utils/envelopes'
+import { useI18n } from 'vue-i18n'
 import { formatMoney } from '../utils/envelopes'
+
+const { t } = useI18n()
 
 const props = withDefaults(defineProps<{
   isOpen: boolean
@@ -43,33 +46,33 @@ const choose = (type: 'pay' | 'transfer' | 'withdraw') => {
     <div class="modal" @click.stop>
       <div class="modal-header">
         <h2>{{ envelope.name }}</h2>
-        <button class="modal-close" aria-label="Fermer" @click="handleClose">
+        <button class="modal-close" :aria-label="t('envelopes.actionModal.close')" @click="handleClose">
           <i class="mdi mdi-close"></i>
         </button>
       </div>
 
       <div class="modal-body">
         <p class="balance">
-          Solde disponible : <strong>{{ formatMoney(balance, currency) }}</strong>
+          {{ t('envelopes.actionModal.balance', { amount: formatMoney(balance, currency) }) }}
         </p>
 
         <div class="action-choices">
           <button v-if="canPay" class="action-choice" @click="choose('pay')">
             <i class="mdi mdi-check-circle-outline"></i>
-            <span>{{ isDebt ? 'Payer la dette' : 'Payé' }}</span>
+            <span>{{ isDebt ? t('envelopes.actionModal.payDebt') : t('envelopes.actionModal.paid') }}</span>
           </button>
           <button v-if="canTransfer" class="action-choice" @click="choose('transfer')">
             <i class="mdi mdi-swap-horizontal"></i>
-            <span>Transférer</span>
+            <span>{{ t('envelopes.actionModal.transfer') }}</span>
           </button>
           <button v-if="canWithdraw" class="action-choice" @click="choose('withdraw')">
             <i class="mdi mdi-cash-minus"></i>
-            <span>Retirer</span>
+            <span>{{ t('envelopes.actionModal.withdraw') }}</span>
           </button>
         </div>
 
         <p v-if="!canPay && !canTransfer && !canWithdraw" class="empty">
-          Aucune action disponible : le solde de cette enveloppe est à zéro.
+          {{ t('envelopes.actionModal.none') }}
         </p>
       </div>
     </div>

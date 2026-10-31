@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 interface Money {
   amount: number
@@ -57,15 +60,15 @@ const formatCurrency = (value: number) =>
 const handleSubmit = () => {
   error.value = ''
   if (!toEnvelopeId.value) {
-    error.value = 'Choisissez une enveloppe de destination.'
+    error.value = t('envelopes.transferModal.errorDestination')
     return
   }
   if (amount.value === null || amount.value <= 0) {
-    error.value = 'Le montant doit être supérieur à 0.'
+    error.value = t('envelopes.transferModal.errorPositive')
     return
   }
   if (amount.value > sourceBalance.value) {
-    error.value = `Solde insuffisant : ${formatCurrency(sourceBalance.value)} disponibles.`
+    error.value = t('envelopes.transferModal.errorInsufficient', { amount: formatCurrency(sourceBalance.value) })
     return
   }
   emit('transfer', {
@@ -80,7 +83,7 @@ const handleSubmit = () => {
   <div v-if="isOpen" class="modal-overlay" @click="emit('close')">
     <div class="modal" @click.stop>
       <div class="modal-header">
-        <h2>Transférer</h2>
+        <h2>{{ t('envelopes.transferModal.title') }}</h2>
         <button class="modal-close" @click="emit('close')">
           <i class="mdi mdi-close"></i>
         </button>
@@ -88,18 +91,18 @@ const handleSubmit = () => {
 
       <div class="modal-body">
         <p class="source-info">
-          De <strong>{{ source?.name }}</strong> — disponible : <strong>{{ formatCurrency(sourceBalance) }}</strong>
+          {{ t('envelopes.transferModal.from', { name: source?.name, amount: formatCurrency(sourceBalance) }) }}
         </p>
 
         <div v-if="destinations.length === 0" class="empty-hint">
-          Aucune autre enveloppe en {{ currency }} pour recevoir ce transfert.
+          {{ t('envelopes.transferModal.noDestination', { currency }) }}
         </div>
 
         <template v-else>
           <div class="form-group">
-            <label>Vers l'enveloppe</label>
+            <label>{{ t('envelopes.transferModal.destination') }}</label>
             <select v-model="toEnvelopeId">
-              <option value="" disabled>Choisir…</option>
+              <option value="" disabled>{{ t('envelopes.transferModal.chooseDestination') }}</option>
               <option v-for="env in destinations" :key="env.id" :value="env.id">
                 {{ env.name }} ({{ formatCurrency(env.balance?.amount ?? 0) }})
               </option>
@@ -107,12 +110,12 @@ const handleSubmit = () => {
           </div>
 
           <div class="form-group">
-            <label>Montant</label>
+            <label>{{ t('envelopes.transferModal.amount') }}</label>
             <input v-model.number="amount" type="number" step="0.01" min="0" placeholder="0.00" />
           </div>
 
           <div class="form-group">
-            <label>Note (optionnel)</label>
+            <label>{{ t('envelopes.transferModal.memo') }}</label>
             <input v-model="memo" type="text" maxlength="200" />
           </div>
 
@@ -121,8 +124,8 @@ const handleSubmit = () => {
       </div>
 
       <div class="modal-footer">
-        <button class="btn-secondary" @click="emit('close')">Annuler</button>
-        <button class="btn-primary" :disabled="destinations.length === 0" @click="handleSubmit">Transférer</button>
+        <button class="btn-secondary" @click="emit('close')">{{ t('common.cancel') }}</button>
+        <button class="btn-primary" :disabled="destinations.length === 0" @click="handleSubmit">{{ t('envelopes.transferModal.submit') }}</button>
       </div>
     </div>
   </div>

@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 interface Money {
   amount: number
@@ -53,11 +56,11 @@ const formatCurrency = (value: number) =>
 const handleSubmit = () => {
   error.value = ''
   if (amount.value === null || amount.value <= 0) {
-    error.value = 'Le montant doit être supérieur à 0.'
+    error.value = t('envelopes.withdrawModal.errorPositive')
     return
   }
   if (amount.value > balance.value) {
-    error.value = `Solde insuffisant : ${formatCurrency(balance.value)} disponibles.`
+    error.value = t('envelopes.withdrawModal.errorInsufficient', { amount: formatCurrency(balance.value) })
     return
   }
   emit('withdraw', {
@@ -72,7 +75,7 @@ const handleSubmit = () => {
   <div v-if="isOpen" class="modal-overlay" @click="emit('close')">
     <div class="modal" @click.stop>
       <div class="modal-header">
-        <h2>Retirer de l'enveloppe</h2>
+        <h2>{{ t('envelopes.withdrawModal.title') }}</h2>
         <button class="modal-close" @click="emit('close')">
           <i class="mdi mdi-close"></i>
         </button>
@@ -80,35 +83,35 @@ const handleSubmit = () => {
 
       <div class="modal-body">
         <p class="source-info">
-          <strong>{{ source?.name }}</strong> — disponible : <strong>{{ formatCurrency(balance) }}</strong>
+          {{ t('envelopes.withdrawModal.from', { name: source?.name, amount: formatCurrency(balance) }) }}
         </p>
-        <p class="hint">Le solde du compte bancaire n'est pas modifié.</p>
+        <p class="hint">{{ t('envelopes.withdrawModal.hint') }}</p>
 
         <div class="form-group">
-          <label>Montant</label>
+          <label>{{ t('envelopes.withdrawModal.amount') }}</label>
           <input v-model.number="amount" type="number" step="0.01" min="0" :max="balance" />
         </div>
 
         <div class="form-group">
-          <label>Bénéficiaire (optionnel)</label>
+          <label>{{ t('envelopes.withdrawModal.payee') }}</label>
           <input v-model="payee" type="text" maxlength="200" />
         </div>
 
         <div class="form-group">
-          <label>Note (optionnel)</label>
+          <label>{{ t('envelopes.withdrawModal.memo') }}</label>
           <input v-model="memo" type="text" maxlength="200" />
         </div>
 
         <p class="remaining">
-          Reste dans l'enveloppe : <strong>{{ formatCurrency(remainingAfterWithdrawal) }}</strong>
+          {{ t('envelopes.withdrawModal.remaining', { amount: formatCurrency(remainingAfterWithdrawal) }) }}
         </p>
 
         <p v-if="error" class="error-text">{{ error }}</p>
       </div>
 
       <div class="modal-footer">
-        <button class="btn-secondary" @click="emit('close')">Annuler</button>
-        <button class="btn-primary" @click="handleSubmit">Retirer</button>
+        <button class="btn-secondary" @click="emit('close')">{{ t('common.cancel') }}</button>
+        <button class="btn-primary" @click="handleSubmit">{{ t('envelopes.withdrawModal.submit') }}</button>
       </div>
     </div>
   </div>

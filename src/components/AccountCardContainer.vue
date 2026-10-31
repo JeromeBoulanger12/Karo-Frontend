@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import EnvelopeRow from './EnvelopeRow.vue'
 import AccountBalanceChart from './AccountBalanceChart.vue'
 import AccountSparkline from './AccountSparkline.vue'
+import { useI18n } from 'vue-i18n'
 import type { EnvelopeSummary } from '../utils/envelopes'
 
 interface Account {
@@ -13,6 +14,8 @@ interface Account {
   latestBalance?: { amount?: number }
   latestSnapshot?: { amount?: { amount?: number } }
 }
+
+const { t } = useI18n()
 
 const props = withDefaults(defineProps<{
   account: Account
@@ -103,11 +106,11 @@ const toggleExpand = () => {
       <AccountSparkline :account-id="account.id" />
       <div class="account-balance-section">
         <div class="account-balance">
-          <div class="account-balance-label">Solde</div>
+          <div class="account-balance-label">{{ t('dashboard.account.balance') }}</div>
           <div class="account-balance-amount">{{ formatCurrency(accountBalance) }}</div>
         </div>
         <button class="btn-adjust-balance" @click.stop="emit('edit-balance', account)">
-          Ajuster le solde
+          {{ t('dashboard.account.adjustBalance') }}
         </button>
       </div>
       <button class="expand-toggle" :class="{ rotated: isExpanded }" @click.stop="toggleExpand">
@@ -118,10 +121,10 @@ const toggleExpand = () => {
     <!-- Account Body (Envelopes) -->
     <div v-show="isExpanded" class="account-body" :class="{ expanded: isExpanded }">
       <div class="section-header">
-        <h4 class="section-subtitle">Enveloppes ({{ envelopesCount }}/20)</h4>
+        <h4 class="section-subtitle">{{ t('dashboard.account.envelopesCount', { count: envelopesCount }) }}</h4>
         <button class="btn-link" @click="showHistory = !showHistory">
           <i class="mdi" :class="showHistory ? 'mdi-chart-line-variant' : 'mdi-chart-line'"></i>
-          {{ showHistory ? "Masquer l'historique" : "Historique du solde" }}
+          {{ showHistory ? t('dashboard.account.hideHistory') : t('dashboard.account.showHistory') }}
         </button>
       </div>
 
@@ -131,7 +134,7 @@ const toggleExpand = () => {
 
       <div v-if="envelopes.length === 0" class="empty-envelopes">
         <i class="mdi mdi-inbox-outline"></i>
-        <p>Aucune enveloppe pour ce compte</p>
+        <p>{{ t('dashboard.account.noEnvelopes') }}</p>
       </div>
 
       <div v-else class="envelope-list">
@@ -150,11 +153,11 @@ const toggleExpand = () => {
       <div class="account-actions">
         <button class="btn btn-primary-sm" @click="emit('add-envelope', account.id)">
           <i class="mdi mdi-plus"></i>
-          Ajouter une enveloppe
+          {{ t('dashboard.account.addEnvelope') }}
         </button>
         <button class="btn btn-secondary-sm" @click="emit('edit-account', account)">
           <i class="mdi mdi-pencil"></i>
-          Éditer le compte
+          {{ t('dashboard.account.editAccount') }}
         </button>
       </div>
     </div>
