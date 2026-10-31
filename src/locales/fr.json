@@ -21,7 +21,7 @@
     "required": "Requis",
     "noData": "Aucune donnée disponible",
     "home": "Accueil",
-    "dashboard": "Tableau de Bord",
+    "dashboard": "Tableau de bord",
     "accounts": "Comptes",
     "envelopes": "Enveloppes",
     "budgeting": "Emplois",
@@ -435,8 +435,8 @@
     }
   },
   "dashboard": {
-    "title": "Mon Tableau de Bord",
-    "profile": "Mon Profil",
+    "title": "Mon tableau de bord",
+    "profile": "Mon profil",
     "name": "Nom",
     "email": "Courriel",
     "subscription": "Abonnement",
@@ -445,7 +445,7 @@
     "accounts": "Comptes",
     "envelopes": "Enveloppes",
     "spending_this_month": "Dépenses ce mois",
-    "quick_actions": "Actions Rapides",
+    "quick_actions": "Actions rapides",
     "manage_accounts": "Gérer les comptes",
     "manage_envelopes": "Gérer les enveloppes",
     "manage_members": "Gérer les membres",
