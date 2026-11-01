@@ -85,6 +85,13 @@
                 <span class="tier-badge" :class="user.subscriptionTier.toLowerCase()">
                   {{ user.subscriptionTier }}
                 </span>
+                <span
+                  v-if="user.isManualAccess"
+                  class="grant-badge"
+                  :title="user.manualAccessUntil ? t('admin.grantedUntil', { date: formatGrantEnd(user.manualAccessUntil) }) : t('admin.grantedNoEnd')"
+                >
+                  {{ user.manualAccessUntil ? t('admin.grantedUntil', { date: formatGrantEnd(user.manualAccessUntil) }) : t('admin.grantedNoEnd') }}
+                </span>
               </td>
               <td>{{ formatDate(user.joinDate) }}</td>
               <td>{{ formatRelativeDate(user.lastActivity) }}</td>
@@ -203,12 +210,19 @@
             <dd>{{ formatRelativeDate(selectedUser.lastActivity) }}</dd>
           </dl>
 
-          <div v-if="modalMode === 'edit'" class="form-group">
-            <label>{{ t('admin.subscription_tier') }}</label>
-            <select v-model="editTier">
-              <option v-for="tier in TIERS" :key="tier" :value="tier">{{ tier }}</option>
-            </select>
-          </div>
+          <template v-if="modalMode === 'edit'">
+            <div class="form-group">
+              <label>{{ t('admin.subscription_tier') }}</label>
+              <select v-model="editTier">
+                <option v-for="tier in TIERS" :key="tier" :value="tier">{{ tier }}</option>
+              </select>
+            </div>
+            <div v-if="editTier !== 'Free'" class="form-group">
+              <label>{{ t('admin.accessEnd') }}</label>
+              <input v-model="editEndDate" type="date" :min="todayIso" />
+              <small class="hint">{{ t('admin.accessEndHint') }}</small>
+            </div>
+          </template>
 
           <p v-if="modalError" class="error-text">{{ modalError }}</p>
         </div>
@@ -338,15 +352,22 @@ const TIERS = ['Free', 'Pro', 'Family']
 const selectedUser = ref<any>(null)
 const modalMode = ref<'view' | 'edit'>('view')
 const editTier = ref('')
+// Optional end of a manually granted access (YYYY-MM-DD); empty means no end date
+const editEndDate = ref('')
 const saving = ref(false)
 const modalError = ref('')
+const todayIso = new Date().toISOString().slice(0, 10)
 
 const openUserModal = (user: any, mode: 'view' | 'edit') => {
   selectedUser.value = user
   modalMode.value = mode
   editTier.value = user.subscriptionTier
+  editEndDate.value = user.manualAccessUntil ? String(user.manualAccessUntil).slice(0, 10) : ''
   modalError.value = ''
 }
+
+const formatGrantEnd = (value: string) =>
+  new Date(value).toLocaleDateString('fr-CA', { dateStyle: 'medium' })
 
 const closeUserModal = () => {
   if (saving.value) return
@@ -358,26 +379,32 @@ const editUser = (user: any) => openUserModal(user, 'edit')
 // No separate menu yet: the more button opens the details
 const openUserMenu = (user: any) => openUserModal(user, 'view')
 
-// Uses the existing admin endpoint; the tier is also returned by the users list, so update it locally
+// Grants access chosen by the admin. The end of the day is used so the chosen date is included
 const saveUserTier = async () => {
   const user = selectedUser.value
   if (!user) return
   saving.value = true
   modalError.value = ''
+  const manualAccessUntil = editTier.value !== 'Free' && editEndDate.value
+    ? `${editEndDate.value}T23:59:59Z`
+    : null
   try {
-    const response = await fetch(apiUrl(`/admin/subscriptions/${user.id}/tier`), {
+    const response = await fetch(apiUrl(`/admin/users/${user.id}/access`), {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ tier: editTier.value })
+      body: JSON.stringify({ tier: editTier.value, manualAccessUntil })
     })
     if (!response.ok) {
-      modalError.value = t('admin.saveError')
+      const body = await response.json().catch(() => null)
+      modalError.value = body?.message || t('admin.saveError')
       return
     }
     user.subscriptionTier = editTier.value
+    user.isManualAccess = editTier.value !== 'Free'
+    user.manualAccessUntil = manualAccessUntil
     selectedUser.value = null
   } catch (error) {
     console.error('Error updating tier:', error)
@@ -748,6 +775,30 @@ const saveUserTier = async () => {
   .users-table td {
     padding: 0.75rem 0.5rem;
   }
+}
+
+/* Admin-granted access */
+.grant-badge {
+  display: inline-block;
+  margin-left: 0.375rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(245, 158, 11, 0.15);
+  color: #b45309;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.modal .hint {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.modal input[type='date'] {
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
 }
 
 /* User modal */
