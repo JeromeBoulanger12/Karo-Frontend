@@ -47,5 +47,11 @@ export const accountsApi = {
     return client.get(`/accounts/${id}/balance-history`, {
       params: { days }
     })
+  },
+
+  getAccountSurplusHistory(id: string, days: number = 90) {
+    return client.get(`/accounts/${id}/surplus-history`, {
+      params: { days }
+    })
   }
 }

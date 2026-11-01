@@ -508,7 +508,13 @@
       "note": "Note",
       "peak": "Big move",
       "error": "Could not load the history.",
-      "close": "Close"
+      "close": "Close",
+      "surplusTitle": "Surplus over {days} days (balance − envelopes)",
+      "surplusLabel": "Surplus",
+      "surplusEmpty": "Surplus will appear after the first recorded balance.",
+      "percentInSurplus": "In surplus {percent}% of the time",
+      "lowest": "Lowest: {amount} on {date}",
+      "current": "Current: {amount}"
     },
     "account": {
       "balance": "Balance",
