@@ -180,6 +180,52 @@
         </div>
       </div>
     </div>
+
+    <!-- User details (view) and subscription tier (edit) -->
+    <div v-if="selectedUser" class="modal-overlay" @click="closeUserModal">
+      <div class="modal" @click.stop>
+        <div class="modal-header">
+          <h2>{{ modalMode === 'edit' ? t('admin.editUser') : t('admin.userDetails') }}</h2>
+          <button class="modal-close" @click="closeUserModal"><i class="mdi mdi-close"></i></button>
+        </div>
+
+        <div class="modal-body">
+          <dl class="user-details">
+            <dt>{{ t('admin.user') }}</dt>
+            <dd>{{ selectedUser.displayName || '—' }}</dd>
+            <dt>{{ t('admin.email') }}</dt>
+            <dd>{{ selectedUser.email }}</dd>
+            <dt>{{ t('admin.role') }}</dt>
+            <dd>{{ selectedUser.role || '—' }}</dd>
+            <dt>{{ t('admin.join_date') }}</dt>
+            <dd>{{ formatDate(selectedUser.joinDate) }}</dd>
+            <dt>{{ t('admin.last_activity') }}</dt>
+            <dd>{{ formatRelativeDate(selectedUser.lastActivity) }}</dd>
+          </dl>
+
+          <div v-if="modalMode === 'edit'" class="form-group">
+            <label>{{ t('admin.subscription_tier') }}</label>
+            <select v-model="editTier">
+              <option v-for="tier in TIERS" :key="tier" :value="tier">{{ tier }}</option>
+            </select>
+          </div>
+
+          <p v-if="modalError" class="error-text">{{ modalError }}</p>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn-secondary" @click="closeUserModal">{{ t('common.cancel') }}</button>
+          <button
+            v-if="modalMode === 'edit'"
+            class="btn-primary"
+            :disabled="saving || editTier === selectedUser.subscriptionTier"
+            @click="saveUserTier"
+          >
+            {{ t('common.save') }}
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -287,16 +333,58 @@ const openAddUserModal = () => {
   console.log('Open add user modal')
 }
 
-const viewUser = (user: any) => {
-  console.log('View user:', user)
+// User modal: details (view) or subscription tier change (edit)
+const TIERS = ['Free', 'Pro', 'Family']
+const selectedUser = ref<any>(null)
+const modalMode = ref<'view' | 'edit'>('view')
+const editTier = ref('')
+const saving = ref(false)
+const modalError = ref('')
+
+const openUserModal = (user: any, mode: 'view' | 'edit') => {
+  selectedUser.value = user
+  modalMode.value = mode
+  editTier.value = user.subscriptionTier
+  modalError.value = ''
 }
 
-const editUser = (user: any) => {
-  console.log('Edit user:', user)
+const closeUserModal = () => {
+  if (saving.value) return
+  selectedUser.value = null
 }
 
-const openUserMenu = (user: any) => {
-  console.log('Open user menu:', user)
+const viewUser = (user: any) => openUserModal(user, 'view')
+const editUser = (user: any) => openUserModal(user, 'edit')
+// No separate menu yet: the more button opens the details
+const openUserMenu = (user: any) => openUserModal(user, 'view')
+
+// Uses the existing admin endpoint; the tier is also returned by the users list, so update it locally
+const saveUserTier = async () => {
+  const user = selectedUser.value
+  if (!user) return
+  saving.value = true
+  modalError.value = ''
+  try {
+    const response = await fetch(apiUrl(`/admin/subscriptions/${user.id}/tier`), {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ tier: editTier.value })
+    })
+    if (!response.ok) {
+      modalError.value = t('admin.saveError')
+      return
+    }
+    user.subscriptionTier = editTier.value
+    selectedUser.value = null
+  } catch (error) {
+    console.error('Error updating tier:', error)
+    modalError.value = t('admin.saveError')
+  } finally {
+    saving.value = false
+  }
 }
 </script>
 
@@ -660,5 +748,122 @@ const openUserMenu = (user: any) => {
   .users-table td {
     padding: 0.75rem 0.5rem;
   }
+}
+
+/* User modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: var(--bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  width: 90%;
+  max-width: 480px;
+}
+
+.modal-header,
+.modal-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-lg);
+}
+
+.modal-header {
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.125rem;
+}
+
+.modal-footer {
+  justify-content: flex-end;
+  gap: var(--space-sm);
+  border-top: 1px solid var(--border);
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--text-muted);
+}
+
+.modal-body {
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.user-details {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  font-size: 0.9375rem;
+}
+
+.user-details dt {
+  color: var(--text-muted);
+}
+
+.user-details dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.modal .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.modal select {
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.modal .error-text {
+  margin: 0;
+  color: var(--danger);
+  font-size: 0.875rem;
+}
+
+.modal .btn-primary,
+.modal .btn-secondary {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.modal .btn-primary {
+  background: var(--primary);
+  color: white;
+  border: none;
+}
+
+.modal .btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.modal .btn-secondary {
+  background: white;
+  color: var(--primary);
+  border: 1px solid var(--border);
 }
 </style>
