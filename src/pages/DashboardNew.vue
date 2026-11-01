@@ -456,7 +456,7 @@ const openAdjustModal = async (job: any) => {
       .filter(e => e.isAutomatic)
       .sort((a, b) => new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime())[0]
     if (!latest) {
-      console.warn('No automatic paycheck to adjust yet for this job')
+      window.alert("Aucune paie automatique n'a encore été déposée pour cette source. Elle pourra être ajustée après son premier dépôt.")
       return
     }
     selectedAdjustJob.value = job
@@ -464,6 +464,7 @@ const openAdjustModal = async (job: any) => {
     showAdjustModal.value = true
   } catch (err) {
     console.error('Error loading paychecks:', err)
+    window.alert('Impossible de charger les paies de cette source. Réessayez.')
   }
 }
 
