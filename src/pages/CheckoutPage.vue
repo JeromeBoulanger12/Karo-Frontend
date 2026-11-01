@@ -126,6 +126,32 @@
             />
           </div>
 
+          <!-- Mailing address (kept for the payment) -->
+          <div class="form-group">
+            <label for="street">{{ t('profile.street') }}</label>
+            <input id="street" v-model="form.street" type="text" :disabled="loading" class="form-control" autocomplete="street-address" />
+          </div>
+
+          <div class="form-group">
+            <label for="city">{{ t('profile.city') }}</label>
+            <input id="city" v-model="form.city" type="text" :disabled="loading" class="form-control" autocomplete="address-level2" />
+          </div>
+
+          <div class="form-group">
+            <label for="province">{{ t('profile.province') }}</label>
+            <input id="province" v-model="form.province" type="text" :disabled="loading" class="form-control" autocomplete="address-level1" />
+          </div>
+
+          <div class="form-group">
+            <label for="postalCode">{{ t('profile.postalCode') }}</label>
+            <input id="postalCode" v-model="form.postalCode" type="text" :disabled="loading" class="form-control" autocomplete="postal-code" />
+          </div>
+
+          <div class="form-group">
+            <label for="country">{{ t('profile.country') }}</label>
+            <input id="country" v-model="form.country" type="text" :disabled="loading" class="form-control" autocomplete="country-name" />
+          </div>
+
           <!-- Terms -->
           <div class="form-group checkbox">
             <input
@@ -173,6 +199,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { createClient } from '@supabase/supabase-js'
 import client from '../api/client'
+import { userSettingsApi } from '../api/userSettings'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -191,6 +218,11 @@ const form = ref({
   confirmPassword: '',
   firstName: '',
   lastName: '',
+  street: '',
+  city: '',
+  province: '',
+  postalCode: '',
+  country: '',
   agreeToTerms: false
 })
 
@@ -310,6 +342,20 @@ const handleCheckout = async () => {
         firstName: form.value.firstName,
         lastName: form.value.lastName
       })
+    }
+
+    // The address is kept for the payment; the time zone starts as the browser's. Neither blocks the checkout
+    try {
+      await userSettingsApi.updateAddress({
+        street: form.value.street,
+        city: form.value.city,
+        province: form.value.province,
+        postalCode: form.value.postalCode,
+        country: form.value.country
+      })
+      await userSettingsApi.updatePreferences(Intl.DateTimeFormat().resolvedOptions().timeZone, true)
+    } catch (profileErr) {
+      console.warn('[CHECKOUT] Address or time zone not saved:', profileErr)
     }
 
     // 4. Handle payment and redirection based on tier

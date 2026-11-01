@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { useAuth } from './composables/useAuth'
 import { householdsAPI } from './api/households'
 import { notificationsApi } from './api/notifications'
+import { userSettingsApi } from './api/userSettings'
 import client from './api/client'
 
 const router = useRouter()
@@ -19,6 +20,19 @@ const features = ref({ allowMembers: false, allowHousehold: false, allowBalanceH
 
 // Tier features, shared with the dashboard components that gate a feature by plan
 provide('subscriptionFeatures', features)
+
+// The user's notification setting, shared with the profile page that changes it
+const userPreferences = ref({ notificationsEnabled: true })
+provide('userPreferences', userPreferences)
+
+const loadUserPreferences = async () => {
+  try {
+    const response = await userSettingsApi.getProfile()
+    userPreferences.value = { notificationsEnabled: !!response.data?.notificationsEnabled }
+  } catch (err) {
+    console.error('[App.vue] Could not load preferences', err)
+  }
+}
 
 const isAdmin = computed(() => userRole.value === 'Owner' || userRole.value === 'Admin')
 
@@ -97,10 +111,12 @@ watch(() => user.value?.id, (userId) => {
   if (userId) {
     loadUserRole()
     loadFeatures()
+    loadUserPreferences()
     loadNotifications()
   } else {
     userRole.value = null
     features.value = { allowMembers: false, allowHousehold: false, allowBalanceHistory: false, allowPlanning: false }
+    userPreferences.value = { notificationsEnabled: true }
     notifications.value = []
     isLoadingRole.value = false
   }
@@ -258,8 +274,8 @@ const notificationIcon = (item) => ({
 
       <v-spacer></v-spacer>
 
-      <!-- Notifications (shown when signed in); refreshed each time the list opens -->
-      <v-menu v-if="user" location="bottom end" @update:model-value="(open) => open && loadNotifications()">
+      <!-- Notifications: paid plans that kept them on; refreshed each time the list opens -->
+      <v-menu v-if="user && features.allowPlanning && userPreferences.notificationsEnabled" location="bottom end" @update:model-value="(open) => open && loadNotifications()">
         <template #activator="{ props }">
           <v-btn icon variant="text" :aria-label="t('notifications.title')" v-bind="props">
             <v-badge v-if="notifications.length" :content="notifications.length" color="error" floating>

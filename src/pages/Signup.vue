@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuth } from '../composables/useAuth'
 import { resetRedirectFlag } from '../api/client'
+import { savePendingProfile } from '../composables/pendingProfile'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -14,6 +15,11 @@ const password = ref('')
 const confirmPassword = ref('')
 const firstName = ref('')
 const lastName = ref('')
+const street = ref('')
+const city = ref('')
+const province = ref('')
+const postalCode = ref('')
+const country = ref('')
 
 const passwordsMatch = () => password.value === confirmPassword.value
 
@@ -25,6 +31,17 @@ const handleSignup = async () => {
   // Store profile info for later (after email confirmation)
   localStorage.setItem('pendingFirstName', firstName.value)
   localStorage.setItem('pendingLastName', lastName.value)
+  savePendingProfile({
+    // The browser's zone is a good first guess; the profile page can change it
+    timeZoneId: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    address: {
+      street: street.value,
+      city: city.value,
+      province: province.value,
+      postalCode: postalCode.value,
+      country: country.value
+    }
+  })
 
   await signup(email.value, password.value)
 }
@@ -73,6 +90,29 @@ onMounted(() => {
           outlined
           class="mb-3"
         ></v-text-field>
+
+        <v-text-field
+          v-model="street"
+          :label="t('profile.street')"
+          outlined
+          class="mb-3"
+          autocomplete="street-address"
+        ></v-text-field>
+
+        <v-row dense>
+          <v-col cols="6">
+            <v-text-field v-model="city" :label="t('profile.city')" outlined class="mb-3" autocomplete="address-level2"></v-text-field>
+          </v-col>
+          <v-col cols="6">
+            <v-text-field v-model="postalCode" :label="t('profile.postalCode')" outlined class="mb-3" autocomplete="postal-code"></v-text-field>
+          </v-col>
+          <v-col cols="6">
+            <v-text-field v-model="province" :label="t('profile.province')" outlined class="mb-3" autocomplete="address-level1"></v-text-field>
+          </v-col>
+          <v-col cols="6">
+            <v-text-field v-model="country" :label="t('profile.country')" outlined class="mb-3" autocomplete="country-name"></v-text-field>
+          </v-col>
+        </v-row>
 
         <v-text-field
           v-model="password"

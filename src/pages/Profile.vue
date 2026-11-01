@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, inject } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAuth } from '../composables/useAuth'
 import client from '../api/client'
+import { userSettingsApi, listTimeZones } from '../api/userSettings'
 import '../styles/dashboard.css'
 
 const { t } = useI18n()
@@ -25,6 +26,19 @@ const loading = ref(false)
 const error = ref<string | null>(null)
 const success = ref<string | null>(null)
 
+// Time zone, notifications and address
+const subscriptionFeatures = inject('subscriptionFeatures', ref({ allowPlanning: false }))
+const userPreferences = inject<{ value: { notificationsEnabled: boolean } }>('userPreferences', ref({ notificationsEnabled: true }))
+const canUseNotifications = computed(() => !!subscriptionFeatures.value.allowPlanning)
+const timeZones = listTimeZones()
+const timeZoneId = ref('America/Toronto')
+const notificationsEnabled = ref(true)
+const street = ref('')
+const city = ref('')
+const province = ref('')
+const postalCode = ref('')
+const country = ref('')
+
 // Subscriptions and orders
 const subscriptions = ref<any[]>([])
 const orders = ref<any[]>([])
@@ -46,11 +60,29 @@ const loadSubscriptionsAndOrders = async () => {
   }
 }
 
+const loadProfile = async () => {
+  try {
+    const response = await userSettingsApi.getProfile()
+    const profile = response.data
+    email.value = profile.email
+    firstName.value = profile.firstName
+    lastName.value = profile.lastName
+    timeZoneId.value = profile.timeZoneId
+    notificationsEnabled.value = profile.notificationsEnabled
+    street.value = profile.address?.street ?? ''
+    city.value = profile.address?.city ?? ''
+    province.value = profile.address?.province ?? ''
+    postalCode.value = profile.address?.postalCode ?? ''
+    country.value = profile.address?.country ?? ''
+  } catch (err) {
+    console.error('Error loading profile:', err)
+  }
+}
+
 onMounted(async () => {
   if (user.value) {
     email.value = user.value.email
-    firstName.value = user.value.email.split('@')[0]
-    lastName.value = ''
+    await loadProfile()
     await loadSubscriptionsAndOrders()
   }
 })
@@ -61,10 +93,17 @@ const handleSave = async () => {
   success.value = null
 
   try {
-    const response = await client.put('/auth/profile', {
-      firstName: firstName.value,
-      lastName: lastName.value
+    await userSettingsApi.updateName(firstName.value, lastName.value)
+    // On a free plan the switch is disabled, so this sends back the value the user already has
+    await userSettingsApi.updatePreferences(timeZoneId.value, notificationsEnabled.value)
+    await userSettingsApi.updateAddress({
+      street: street.value,
+      city: city.value,
+      province: province.value,
+      postalCode: postalCode.value,
+      country: country.value
     })
+    userPreferences.value.notificationsEnabled = notificationsEnabled.value
 
     success.value = t('profile.updateSuccess')
     setTimeout(() => {
@@ -157,6 +196,54 @@ const confirmDeleteAccount = async () => {
               <div class="form-group">
                 <label>{{ t('common.lastName') }}</label>
                 <input v-model="lastName" type="text" class="form-input" />
+              </div>
+            </div>
+
+            <h3 class="form-section-title">{{ t('profile.preferencesTitle') }}</h3>
+
+            <div class="form-group">
+              <label>{{ t('profile.timeZone') }}</label>
+              <select v-model="timeZoneId" class="form-input">
+                <option v-for="zone in timeZones" :key="zone" :value="zone">{{ zone }}</option>
+              </select>
+              <small class="form-hint">{{ t('profile.timeZoneHint') }}</small>
+            </div>
+
+            <div class="form-group">
+              <label class="checkbox-row">
+                <input v-model="notificationsEnabled" type="checkbox" :disabled="!canUseNotifications" />
+                {{ t('profile.notifications') }}
+              </label>
+              <small v-if="!canUseNotifications" class="form-hint">{{ t('profile.notificationsPaidOnly') }}</small>
+            </div>
+
+            <h3 class="form-section-title">{{ t('profile.addressTitle') }}</h3>
+            <small class="form-hint">{{ t('profile.addressHint') }}</small>
+
+            <div class="form-group">
+              <label>{{ t('profile.street') }}</label>
+              <input v-model="street" type="text" class="form-input" autocomplete="street-address" />
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>{{ t('profile.city') }}</label>
+                <input v-model="city" type="text" class="form-input" autocomplete="address-level2" />
+              </div>
+              <div class="form-group">
+                <label>{{ t('profile.province') }}</label>
+                <input v-model="province" type="text" class="form-input" autocomplete="address-level1" />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>{{ t('profile.postalCode') }}</label>
+                <input v-model="postalCode" type="text" class="form-input" autocomplete="postal-code" />
+              </div>
+              <div class="form-group">
+                <label>{{ t('profile.country') }}</label>
+                <input v-model="country" type="text" class="form-input" autocomplete="country-name" />
               </div>
             </div>
 
@@ -396,6 +483,18 @@ const confirmDeleteAccount = async () => {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+}
+
+.form-section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 1.5rem 0 0.25rem;
+}
+
+.form-hint {
+  display: block;
+  color: #666666;
+  margin-top: 0.25rem;
 }
 
 .form-row {
