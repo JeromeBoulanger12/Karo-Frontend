@@ -498,9 +498,22 @@
     "sparklineLabel": "Balance trend",
     "sparklineTitle": "Balance over {days} days",
     "noAccounts": "No account",
+    "balanceHistory": {
+      "title": "Balance history — {name}",
+      "loading": "Loading history…",
+      "empty": "No balance recorded for this account.",
+      "date": "Date",
+      "balance": "Balance",
+      "change": "Change",
+      "note": "Note",
+      "peak": "Big move",
+      "error": "Could not load the history.",
+      "close": "Close"
+    },
     "account": {
       "balance": "Balance",
       "adjustBalance": "Adjust balance",
+      "history": "History",
       "envelopesCount": "Envelopes ({count}/20)",
       "hideHistory": "Hide history",
       "showHistory": "Balance history",

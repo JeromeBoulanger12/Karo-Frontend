@@ -32,6 +32,7 @@ const emit = defineEmits<{
   'withdraw-envelope': [envelope: EnvelopeSummary]
   'edit-account': [account: Account]
   'edit-balance': [account: Account]
+  'view-history': [account: Account]
 }>()
 
 const isExpanded = ref(true)
@@ -112,6 +113,9 @@ const toggleExpand = () => {
         </div>
         <button class="btn-adjust-balance" @click.stop="emit('edit-balance', account)">
           {{ t('dashboard.account.adjustBalance') }}
+        </button>
+        <button class="btn-adjust-balance" @click.stop="emit('view-history', account)">
+          {{ t('dashboard.account.history') }}
         </button>
       </div>
       <button class="expand-toggle" :class="{ rotated: isExpanded }" @click.stop="toggleExpand">

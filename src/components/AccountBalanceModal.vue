@@ -20,7 +20,7 @@ const props = withDefaults(defineProps<{
 
 const emit = defineEmits<{
   close: []
-  save: [balance: number]
+  save: [payload: { balance: number; note?: string }]
 }>()
 
 const { t } = useI18n()
@@ -28,6 +28,7 @@ const { t } = useI18n()
 const formData = ref<{ balance: number }>({
   balance: props.account?.balance || 0
 })
+const note = ref('')
 
 watch(() => props.account, (newAccount) => {
   if (newAccount) {
@@ -35,8 +36,13 @@ watch(() => props.account, (newAccount) => {
   }
 }, { deep: true, immediate: true })
 
+// Start each fresh entry with an empty note; keep what was typed when reopened after an error
+watch(() => props.isOpen, (open) => {
+  if (open && !props.submitError) note.value = ''
+})
+
 const handleSubmit = () => {
-  emit('save', formData.value.balance)
+  emit('save', { balance: formData.value.balance, note: note.value.trim() || undefined })
 }
 
 const handleClose = () => {
@@ -77,6 +83,11 @@ const formatCurrency = (value: number) => {
         <div class="balance-preview">
           <span class="preview-label">Nouveau solde:</span>
           <span class="preview-value">{{ formatCurrency(formData.balance) }}</span>
+        </div>
+
+        <div class="form-group">
+          <label>Note (optionnel)</label>
+          <input v-model="note" type="text" maxlength="500" placeholder="ex. Achat imprévu : pneus" />
         </div>
       </div>
 

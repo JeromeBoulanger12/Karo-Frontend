@@ -491,9 +491,22 @@
     "sparklineLabel": "Tendance du solde",
     "sparklineTitle": "Solde sur {days} jours",
     "noAccounts": "Aucun compte",
+    "balanceHistory": {
+      "title": "Historique du solde — {name}",
+      "loading": "Chargement de l'historique…",
+      "empty": "Aucun solde enregistré pour ce compte.",
+      "date": "Date",
+      "balance": "Solde",
+      "change": "Variation",
+      "note": "Note",
+      "peak": "Gros mouvement",
+      "error": "Impossible de charger l'historique.",
+      "close": "Fermer"
+    },
     "account": {
       "balance": "Solde",
       "adjustBalance": "Ajuster le solde",
+      "history": "Historique",
       "envelopesCount": "Enveloppes ({count}/20)",
       "hideHistory": "Masquer l'historique",
       "showHistory": "Historique du solde",

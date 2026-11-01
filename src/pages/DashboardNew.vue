@@ -9,6 +9,7 @@ import JobCard from '../components/JobCard.vue'
 import EnvelopeFormModal from '../components/EnvelopeFormModal.vue'
 import AccountFormModal from '../components/AccountFormModal.vue'
 import AccountBalanceModal from '../components/AccountBalanceModal.vue'
+import AccountHistoryModal from '../components/AccountHistoryModal.vue'
 import TransferEnvelopeModal from '../components/TransferEnvelopeModal.vue'
 import EnvelopeActionModal from '../components/EnvelopeActionModal.vue'
 import PayBillModal from '../components/PayBillModal.vue'
@@ -53,6 +54,8 @@ const reopenWithError = (err: any, fallback: string, reopen: () => void) => {
 // Modal refs
 const showAccountModal = ref(false)
 const showAccountBalanceModal = ref(false)
+const showAccountHistoryModal = ref(false)
+const selectedHistoryAccount = ref<any>(null)
 const showEnvelopeModal = ref(false)
 const showTransferModal = ref(false)
 const selectedTransferSource = ref<any>(null)
@@ -457,19 +460,26 @@ const handleSetMainJob = async (job: any) => {
 }
 
 // Account balance modal handlers
+// Read-only history of the account's balance snapshots, with the biggest movements flagged
+const openAccountHistoryModal = (account: any) => {
+  selectedHistoryAccount.value = account
+  showAccountHistoryModal.value = true
+}
+
 const openAccountBalanceModal = (account: any) => {
   submitError.value = ''
   selectedAccountForBalance.value = account
   showAccountBalanceModal.value = true
 }
 
-const handleAccountBalanceSave = async (newBalance: number) => {
+const handleAccountBalanceSave = async (payload: { balance: number; note?: string }) => {
   showAccountBalanceModal.value = false
   try {
     if (selectedAccountForBalance.value?.id) {
       await accountsApi.updateAccount(selectedAccountForBalance.value.id, {
         name: selectedAccountForBalance.value.name,
-        newBalance: newBalance
+        newBalance: payload.balance,
+        note: payload.note
       })
     }
     await loadDashboard()
@@ -564,6 +574,7 @@ onMounted(() => {
             @edit-envelope="openEditEnvelopeModal($event)"
             @edit-account="openEditAccountModal($event)"
             @edit-balance="openAccountBalanceModal($event)"
+            @view-history="openAccountHistoryModal($event)"
           />
         </div>
       </section>
@@ -622,6 +633,12 @@ onMounted(() => {
       :account="selectedAccountForBalance"
       @close="showAccountBalanceModal = false"
       @save="handleAccountBalanceSave"
+    />
+
+    <AccountHistoryModal
+      :isOpen="showAccountHistoryModal"
+      :account="selectedHistoryAccount"
+      @close="showAccountHistoryModal = false"
     />
 
     <EnvelopeActionModal
