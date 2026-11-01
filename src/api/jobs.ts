@@ -77,6 +77,16 @@ export const jobsApi = {
     return client.post(`/jobs/plans/${id}/distribute`, data)
   },
 
+  // Fixed pay: the amount deposited automatically on each payday; null turns it off
+  setFixedPay(id: string, amount: number | null) {
+    return client.put(`/jobs/plans/${id}/fixed-pay`, { amount })
+  },
+
+  // Corrects an automatic paycheck to the amount actually received
+  adjustAutomaticPaycheck(planId: string, eventId: string, actualAmount: number) {
+    return client.post(`/jobs/plans/${planId}/events/${eventId}/adjust`, { actualAmount })
+  },
+
   listEvents(id: string) {
     return client.get(`/jobs/plans/${id}/events`)
   },

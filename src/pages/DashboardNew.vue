@@ -6,6 +6,7 @@ import PageHeader from '../components/PageHeader.vue'
 import DashboardStats from '../components/DashboardStats.vue'
 import AccountCardContainer from '../components/AccountCardContainer.vue'
 import JobCard from '../components/JobCard.vue'
+import AdjustPaycheckModal from '../components/AdjustPaycheckModal.vue'
 import EnvelopeFormModal from '../components/EnvelopeFormModal.vue'
 import AccountFormModal from '../components/AccountFormModal.vue'
 import AccountBalanceModal from '../components/AccountBalanceModal.vue'
@@ -420,19 +421,63 @@ const handleJobSave = async (jobData: any) => {
   const jobId = selectedJob.value?.id
   showJobModal.value = false
   try {
+    let planId = jobId
     if (jobId) {
       // Edit: frequency and the payday the schedule is counted from
       await jobsApi.updateRecurrence(jobId, { frequency: jobData.frequency, anchorDate: jobData.anchorDate })
     } else {
       // Create new
       console.log('handleJobSave - Job data from form:', jobData)
-      await jobsApi.createPlan(jobData)
+      const created = await jobsApi.createPlan(jobData)
+      planId = created.data?.id
+    }
+    // Fixed pay (or null to turn it off), applied after the schedule is saved
+    if (planId) {
+      await jobsApi.setFixedPay(planId, jobData.fixedAmount ?? null)
     }
     await loadDashboard()
   } catch (err: any) {
     console.error('Error saving job:', err)
     console.error('Error response:', err.response?.data)
     reopenWithError(err, t('dashboard.errors.saveJob'), () => (showJobModal.value = true))
+  }
+}
+
+// Adjust the latest automatic paycheck to the amount actually received
+const showAdjustModal = ref(false)
+const selectedAdjustJob = ref<any>(null)
+const selectedAdjustEvent = ref<any>(null)
+
+const openAdjustModal = async (job: any) => {
+  submitError.value = ''
+  try {
+    const { data } = await jobsApi.listEvents(job.id)
+    const latest = (data as any[])
+      .filter(e => e.isAutomatic)
+      .sort((a, b) => new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime())[0]
+    if (!latest) {
+      console.warn('No automatic paycheck to adjust yet for this job')
+      return
+    }
+    selectedAdjustJob.value = job
+    selectedAdjustEvent.value = latest
+    showAdjustModal.value = true
+  } catch (err) {
+    console.error('Error loading paychecks:', err)
+  }
+}
+
+const handleAdjustSave = async (actualAmount: number) => {
+  const jobId = selectedAdjustJob.value?.id
+  const eventId = selectedAdjustEvent.value?.id
+  if (!jobId || !eventId) return
+  showAdjustModal.value = false
+  try {
+    await jobsApi.adjustAutomaticPaycheck(jobId, eventId, actualAmount)
+    await loadDashboard()
+  } catch (err) {
+    console.error('Error adjusting paycheck:', err)
+    reopenWithError(err, t('dashboard.errors.save'), () => (showAdjustModal.value = true))
   }
 }
 
@@ -666,6 +711,7 @@ onMounted(() => {
             :job="job"
             @edit="openEditJobModal($event)"
             @deposit="openDepositPaycheckModal($event)"
+            @adjust="openAdjustModal($event)"
             @set-main-job="handleSetMainJob($event)"
           />
           <div class="add-job-card" @click="openAddJobModal('')">
@@ -755,6 +801,14 @@ onMounted(() => {
       @close="showEnvelopeModal = false"
       @save="handleEnvelopeSave"
       @delete="handleEnvelopeDelete"
+    />
+
+    <AdjustPaycheckModal
+      :isOpen="showAdjustModal"
+      :paycheck="selectedAdjustEvent"
+      :submitError="submitError"
+      @close="showAdjustModal = false"
+      @save="handleAdjustSave"
     />
 
     <JobFormModal

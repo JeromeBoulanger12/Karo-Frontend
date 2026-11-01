@@ -11,10 +11,21 @@ interface Job {
   lastPayment?: string
   // A real payday; the following ones are counted from it with the frequency (YYYY-MM-DD)
   anchorDate?: string
+  // Fixed paycheck from the dashboard (amount and currency); the form works with a plain number
+  fixedAmount?: { amount: number; currency: string } | null
   rules?: DistributionRule[]
 }
 
+// What the form emits: the fixed amount is a plain number, or null when fixed pay is off
+interface JobSavePayload extends Omit<Job, 'fixedAmount'> {
+  fixedAmount: number | null
+}
+
 const validationError = ref<string>('')
+
+// Fixed pay: deposited automatically on each payday, instead of entered by hand
+const fixedPayEnabled = ref(false)
+const fixedPayAmount = ref<number | null>(null)
 
 const props = withDefaults(defineProps<{
   isOpen: boolean
@@ -29,7 +40,7 @@ const props = withDefaults(defineProps<{
 
 const emit = defineEmits<{
   close: []
-  save: [job: Job]
+  save: [job: JobSavePayload]
 }>()
 
 const { t } = useI18n()
@@ -77,6 +88,12 @@ watch(() => props.accountId, (newAccountId) => {
   }
 })
 
+// Fixed pay state follows the job being edited; a new job starts with fixed pay off
+watch(() => props.job, (newJob) => {
+  fixedPayEnabled.value = !!newJob?.id && !!newJob.fixedAmount
+  fixedPayAmount.value = newJob?.id ? newJob.fixedAmount?.amount ?? null : null
+}, { immediate: true })
+
 const isEditing = computed(() => !!props.job?.id)
 
 const handleSubmit = () => {
@@ -93,8 +110,15 @@ const handleSubmit = () => {
     return
   }
 
-  console.log('Submitting job form:', formData.value)
-  emit('save', formData.value)
+  if (fixedPayEnabled.value && !(fixedPayAmount.value && fixedPayAmount.value > 0)) {
+    validationError.value = 'Le montant de la paie fixe doit être supérieur à 0.'
+    return
+  }
+
+  emit('save', {
+    ...formData.value,
+    fixedAmount: fixedPayEnabled.value ? fixedPayAmount.value : null
+  })
 }
 
 const handleClose = () => {
@@ -184,6 +208,24 @@ const formatDate = (dateString: string | undefined) => {
           <input v-model="formData.anchorDate" type="date" required />
           <small class="hint">
             Choisissez une date de paie réelle. Les suivantes sont calculées à partir de celle-ci selon la fréquence.
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label class="checkbox-row">
+            <input v-model="fixedPayEnabled" type="checkbox" />
+            Paie fixe (déposée automatiquement à chaque paie)
+          </label>
+          <input
+            v-if="fixedPayEnabled"
+            v-model.number="fixedPayAmount"
+            type="number"
+            step="0.01"
+            min="0"
+            placeholder="Montant par paie"
+          />
+          <small class="hint">
+            Avec une paie fixe, « Déposer une paie » disparaît. Si le montant reçu est différent, utilisez « Ajuster la dernière paie ».
           </small>
         </div>
 
@@ -482,5 +524,11 @@ const formatDate = (dateString: string | undefined) => {
   margin-top: 0.25rem;
   color: var(--text-muted);
   font-size: 0.75rem;
+}
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
 }
 </style>

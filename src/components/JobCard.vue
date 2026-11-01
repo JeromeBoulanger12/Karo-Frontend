@@ -26,6 +26,8 @@ interface Job {
   lastPaycheck?: { amount: Money; date: string } | null
   // Computed by the backend from the anchor date and frequency (YYYY-MM-DD)
   nextPaydayDate?: string | null
+  // Fixed paycheck deposited automatically on each payday; null when paychecks are entered by hand
+  fixedAmount?: Money | null
 }
 
 const props = withDefaults(defineProps<{
@@ -35,6 +37,7 @@ const props = withDefaults(defineProps<{
 const emit = defineEmits<{
   edit: [job: Job]
   deposit: [job: Job]
+  adjust: [job: Job]
   'set-main-job': [job: Job]
 }>()
 
@@ -118,6 +121,10 @@ const formatDate = (dateString: string | undefined) => {
     </div>
 
     <div class="job-details">
+      <div v-if="job.fixedAmount" class="job-detail-item fixed-pay">
+        <span>Paie fixe:</span>
+        <strong>{{ formatCurrency(job.fixedAmount) }} · automatique</strong>
+      </div>
       <div v-if="job.nextPaydayDate" class="job-detail-item">
         <span>Prochaine paie:</span>
         <strong>{{ formatPayday(job.nextPaydayDate) }}</strong>
@@ -152,9 +159,14 @@ const formatDate = (dateString: string | undefined) => {
     </div>
 
     <div class="job-actions">
-      <button class="btn btn-primary" @click="emit('deposit', job)">
+      <!-- With a fixed pay the paycheck arrives on its own: no manual deposit -->
+      <button v-if="!job.fixedAmount" class="btn btn-primary" @click="emit('deposit', job)">
         <i class="mdi mdi-plus"></i>
         Déposer une paie
+      </button>
+      <button v-else class="btn btn-primary" @click="emit('adjust', job)">
+        <i class="mdi mdi-tune-variant"></i>
+        Ajuster la dernière paie
       </button>
       <button class="btn btn-primary-sm" @click="emit('edit', job)">
         <i class="mdi mdi-pencil"></i>
@@ -401,5 +413,8 @@ const formatDate = (dateString: string | undefined) => {
   .job-actions {
     flex-direction: column;
   }
+}
+.job-detail-item.fixed-pay strong {
+  color: var(--success);
 }
 </style>
