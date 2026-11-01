@@ -7,9 +7,11 @@ const { t } = useI18n()
 
 const props = withDefaults(defineProps<{
   isOpen: boolean
+  submitError?: string
   envelope?: EnvelopeSummary | null
 }>(), {
   isOpen: false,
+  submitError: '',
   envelope: null
 })
 
@@ -46,7 +48,7 @@ const selectPercent = (percent: number) => {
 }
 
 watch(() => props.isOpen, (open) => {
-  if (open) {
+  if (open && !props.submitError) {
     amount.value = null
     memo.value = ''
     error.value = ''
@@ -115,6 +117,8 @@ const handleSubmit = () => {
 
         <p v-if="error" class="error-text">{{ error }}</p>
       </div>
+
+        <p v-if="submitError" class="error-text">{{ submitError }}</p>
 
       <div class="modal-footer">
         <button class="btn-secondary" @click="emit('close')">{{ t('common.cancel') }}</button>

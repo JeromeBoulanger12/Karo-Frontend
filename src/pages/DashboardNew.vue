@@ -42,6 +42,14 @@ const dashboardStats = ref<any>(null)
 const loading = ref(true)
 const error = ref('')
 
+// Error from the last submit that failed. The modal that was just closed is reopened with it, and
+// keeps the user's input (its form only resets when opened with no error)
+const submitError = ref('')
+const reopenWithError = (err: any, fallback: string, reopen: () => void) => {
+  submitError.value = err?.response?.data?.message || err?.message || fallback
+  reopen()
+}
+
 // Modal refs
 const showAccountModal = ref(false)
 const showAccountBalanceModal = ref(false)
@@ -119,11 +127,13 @@ const getAccountEnvelopes = (accountId: string) => {
 
 // Modal handlers - Account
 const openAddAccountModal = () => {
+  submitError.value = ''
   selectedAccount.value = null
   showAccountModal.value = true
 }
 
 const openEditAccountModal = (account: any) => {
+  submitError.value = ''
   selectedAccount.value = account
   showAccountModal.value = true
 }
@@ -145,17 +155,20 @@ const handleAccountSave = async (accountData: any) => {
     await loadDashboard()
   } catch (err) {
     console.error('Error saving account:', err)
+    reopenWithError(err, t('dashboard.errors.save'), () => (showAccountModal.value = true))
   }
 }
 
 // Modal handlers - Envelope
 const openAddEnvelopeModal = (accountId: string) => {
+  submitError.value = ''
   selectedEnvelope.value = null
   currentAccountIdForEnvelope.value = accountId
   showEnvelopeModal.value = true
 }
 
 const openEditEnvelopeModal = (envelope: any) => {
+  submitError.value = ''
   selectedEnvelope.value = envelope
   currentAccountIdForEnvelope.value = envelope.homeAccountId
   showEnvelopeModal.value = true
@@ -200,6 +213,7 @@ const handleEnvelopeSave = async (envelopeData: any) => {
     await loadDashboard()
   } catch (err) {
     console.error('Error saving envelope:', err)
+    reopenWithError(err, t('dashboard.errors.save'), () => (showEnvelopeModal.value = true))
   }
 }
 
@@ -211,6 +225,7 @@ const handleEnvelopeDelete = async (envelopeId: string) => {
     await loadDashboard()
   } catch (err) {
     console.error('Error deleting envelope:', err)
+    reopenWithError(err, t('dashboard.errors.save'), () => (showEnvelopeModal.value = true))
   }
 }
 
@@ -231,6 +246,7 @@ const handleEnvelopeAction = (type: 'add' | 'pay' | 'transfer' | 'withdraw', env
 // Add money to an envelope (e.g. reach 50% of a bill before its next payment). Only the envelope
 // ledger changes: no account balance is touched
 const openAddFundsModal = (envelope: any) => {
+  submitError.value = ''
   selectedAddFundsEnvelope.value = envelope
   showAddFundsModal.value = true
 }
@@ -243,12 +259,14 @@ const handleEnvelopeAddFunds = async (payload: { amount: number; memo?: string }
     await loadDashboard()
   } catch (err) {
     console.error('Error adding funds to envelope:', err)
+    reopenWithError(err, t('dashboard.errors.save'), () => (showAddFundsModal.value = true))
   }
 }
 
 // Bill paid: the modal asks for the amount, then the backend withdraws it from the envelope
 // and debits the home account in one transaction
 const openPayBillModal = (envelope: any) => {
+  submitError.value = ''
   if (!(envelope.balance?.amount > 0)) return
   selectedBill.value = envelope
   showPayBillModal.value = true
@@ -269,11 +287,13 @@ const handleBillPay = async (amount: number) => {
     await loadDashboard()
   } catch (err) {
     console.error('Error recording payment:', err)
+    reopenWithError(err, t('dashboard.errors.save'), () => (showPayBillModal.value = true))
   }
 }
 
 // Transfer money from one envelope to another (no account balance change)
 const openTransferModal = (envelope: any) => {
+  submitError.value = ''
   selectedTransferSource.value = envelope
   showTransferModal.value = true
 }
@@ -290,11 +310,13 @@ const handleEnvelopeTransfer = async (payload: { toEnvelopeId: string; amount: n
     await loadDashboard()
   } catch (err) {
     console.error('Error transferring between envelopes:', err)
+    reopenWithError(err, t('dashboard.errors.save'), () => (showTransferModal.value = true))
   }
 }
 
 // Withdraw money from an envelope: only the envelope balance changes, not the account balance
 const openWithdrawModal = (envelope: any) => {
+  submitError.value = ''
   selectedWithdrawSource.value = envelope
   showWithdrawModal.value = true
 }
@@ -307,11 +329,13 @@ const handleEnvelopeWithdraw = async (payload: { amount: number; payee?: string;
     await loadDashboard()
   } catch (err) {
     console.error('Error withdrawing from envelope:', err)
+    reopenWithError(err, t('dashboard.errors.save'), () => (showWithdrawModal.value = true))
   }
 }
 
 // Modal handlers - Job
 const openAddJobModal = (accountId: string = '') => {
+  submitError.value = ''
   selectedJob.value = null
   console.log('openAddJobModal - accountId:', accountId, 'accounts.value.length:', accounts.value.length)
   // If no account provided, use the first available account
@@ -330,6 +354,7 @@ const openAddJobModal = (accountId: string = '') => {
 }
 
 const openEditJobModal = (job: any) => {
+  submitError.value = ''
   selectedJob.value = job
   currentAccountIdForJob.value = job.homeAccountId
   showJobModal.value = true
@@ -351,7 +376,7 @@ const handleJobSave = async (jobData: any) => {
   } catch (err: any) {
     console.error('Error saving job:', err)
     console.error('Error response:', err.response?.data)
-    error.value = err.response?.data?.message || err.message || t('dashboard.errors.saveJob')
+    reopenWithError(err, t('dashboard.errors.saveJob'), () => (showJobModal.value = true))
   }
 }
 
@@ -396,6 +421,7 @@ const handleJobEdit = (job: any) => {
 
 // Modal handlers - Deposit Paycheck
 const openDepositPaycheckModal = (job?: any) => {
+  submitError.value = ''
   selectedJobForDeposit.value = job || null
   showDepositModal.value = true
 }
@@ -414,6 +440,7 @@ const handleDepositPaycheck = async (depositData: any) => {
     await loadDashboard()
   } catch (err) {
     console.error('Error depositing paycheck:', err)
+    reopenWithError(err, t('dashboard.errors.save'), () => (showDepositModal.value = true))
   }
 }
 
@@ -431,6 +458,7 @@ const handleSetMainJob = async (job: any) => {
 
 // Account balance modal handlers
 const openAccountBalanceModal = (account: any) => {
+  submitError.value = ''
   selectedAccountForBalance.value = account
   showAccountBalanceModal.value = true
 }
@@ -447,6 +475,7 @@ const handleAccountBalanceSave = async (newBalance: number) => {
     await loadDashboard()
   } catch (err) {
     console.error('Error updating account balance:', err)
+    reopenWithError(err, t('dashboard.errors.save'), () => (showAccountBalanceModal.value = true))
   }
 }
 
@@ -581,6 +610,7 @@ onMounted(() => {
     <!-- Modals -->
     <AccountFormModal
       :isOpen="showAccountModal"
+      :submitError="submitError"
       :account="selectedAccount"
       @close="showAccountModal = false"
       @save="handleAccountSave"
@@ -588,6 +618,7 @@ onMounted(() => {
 
     <AccountBalanceModal
       :isOpen="showAccountBalanceModal"
+      :submitError="submitError"
       :account="selectedAccountForBalance"
       @close="showAccountBalanceModal = false"
       @save="handleAccountBalanceSave"
@@ -605,6 +636,7 @@ onMounted(() => {
 
     <TransferEnvelopeModal
       :isOpen="showTransferModal"
+      :submitError="submitError"
       :source="selectedTransferSource"
       :envelopes="envelopes"
       @close="showTransferModal = false"
@@ -613,6 +645,7 @@ onMounted(() => {
 
     <PayBillModal
       :isOpen="showPayBillModal"
+      :submitError="submitError"
       :bill="selectedBill"
       :title="isDebtPayment ? t('envelopes.payModal.titleDebt') : t('envelopes.payModal.title')"
       @close="showPayBillModal = false"
@@ -621,6 +654,7 @@ onMounted(() => {
 
     <WithdrawEnvelopeModal
       :isOpen="showWithdrawModal"
+      :submitError="submitError"
       :source="selectedWithdrawSource"
       @close="showWithdrawModal = false"
       @withdraw="handleEnvelopeWithdraw"
@@ -628,6 +662,7 @@ onMounted(() => {
 
     <AddFundsModal
       :isOpen="showAddFundsModal"
+      :submitError="submitError"
       :envelope="selectedAddFundsEnvelope"
       @close="showAddFundsModal = false"
       @add="handleEnvelopeAddFunds"
@@ -635,6 +670,7 @@ onMounted(() => {
 
     <EnvelopeFormModal
       :isOpen="showEnvelopeModal"
+      :submitError="submitError"
       :envelope="selectedEnvelope"
       :accountId="currentAccountIdForEnvelope"
       :availableAccounts="accounts"
@@ -647,6 +683,7 @@ onMounted(() => {
 
     <JobFormModal
       :isOpen="showJobModal"
+      :submitError="submitError"
       :job="selectedJob"
       :accountId="currentAccountIdForJob"
       @close="showJobModal = false"
@@ -655,6 +692,7 @@ onMounted(() => {
 
     <DepositPaycheckModal
       :isOpen="showDepositModal"
+      :submitError="submitError"
       :job="selectedJobForDeposit"
       :jobs="jobs"
       @close="showDepositModal = false"

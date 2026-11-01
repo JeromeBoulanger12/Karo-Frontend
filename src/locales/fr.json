@@ -485,7 +485,8 @@
       "deficit": "Déficit"
     },
     "errors": {
-      "saveJob": "Erreur lors de l'enregistrement du plan"
+      "saveJob": "Erreur lors de l'enregistrement du plan",
+      "save": "Erreur lors de l'enregistrement. Vérifiez les champs et réessayez."
     },
     "sparklineLabel": "Tendance du solde",
     "sparklineTitle": "Solde sur {days} jours",

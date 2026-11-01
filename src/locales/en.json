@@ -492,7 +492,8 @@
       "deficit": "Deficit"
     },
     "errors": {
-      "saveJob": "Error saving the plan"
+      "saveJob": "Error saving the plan",
+      "save": "Error while saving. Check the fields and try again."
     },
     "sparklineLabel": "Balance trend",
     "sparklineTitle": "Balance over {days} days",

@@ -17,10 +17,12 @@ interface Envelope {
 
 const props = withDefaults(defineProps<{
   isOpen: boolean
+  submitError?: string
   bill?: Envelope | null
   title?: string
 }>(), {
   isOpen: false,
+  submitError: '',
   bill: null,
   title: ''
 })
@@ -43,7 +45,7 @@ const remainingAfterPayment = computed(() => {
 
 // Start with the full balance so a plain "Payé" still pays the whole bill
 watch(() => props.isOpen, (open) => {
-  if (open) {
+  if (open && !props.submitError) {
     amount.value = balance.value
     error.value = ''
   }
@@ -92,6 +94,8 @@ const handleSubmit = () => {
 
         <p v-if="error" class="error-text">{{ error }}</p>
       </div>
+
+        <p v-if="submitError" class="error-text">{{ submitError }}</p>
 
       <div class="modal-footer">
         <button class="btn-secondary" @click="emit('close')">{{ t('common.cancel') }}</button>

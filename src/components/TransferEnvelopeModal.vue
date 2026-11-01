@@ -17,10 +17,12 @@ interface Envelope {
 
 const props = withDefaults(defineProps<{
   isOpen: boolean
+  submitError?: string
   source?: Envelope | null
   envelopes?: Envelope[]
 }>(), {
   isOpen: false,
+  submitError: '',
   source: null,
   envelopes: () => []
 })
@@ -46,7 +48,7 @@ const destinations = computed(() =>
 )
 
 watch(() => props.isOpen, (open) => {
-  if (open) {
+  if (open && !props.submitError) {
     toEnvelopeId.value = ''
     amount.value = null
     memo.value = ''
@@ -122,6 +124,8 @@ const handleSubmit = () => {
           <p v-if="error" class="error-text">{{ error }}</p>
         </template>
       </div>
+
+        <p v-if="submitError" class="error-text">{{ submitError }}</p>
 
       <div class="modal-footer">
         <button class="btn-secondary" @click="emit('close')">{{ t('common.cancel') }}</button>

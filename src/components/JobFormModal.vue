@@ -16,10 +16,12 @@ const validationError = ref<string>('')
 
 const props = withDefaults(defineProps<{
   isOpen: boolean
+  submitError?: string
   job?: Job | null
   accountId: string
 }>(), {
   isOpen: false,
+  submitError: '',
   job: null
 })
 
@@ -181,6 +183,8 @@ const formatDate = (dateString: string | undefined) => {
           </p>
         </div>
       </div>
+
+        <p v-if="submitError" class="error-text">{{ submitError }}</p>
 
       <div class="modal-footer">
         <button class="btn-secondary" @click="handleClose">{{ t('common.cancel') || 'Annuler' }}</button>
@@ -447,5 +451,11 @@ const formatDate = (dateString: string | undefined) => {
     flex-direction: column;
     padding: var(--space-md);
   }
+}
+
+.error-text {
+  margin: 0;
+  color: var(--danger);
+  font-size: 0.875rem;
 }
 </style>

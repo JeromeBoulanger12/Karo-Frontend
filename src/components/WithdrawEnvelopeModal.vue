@@ -17,9 +17,11 @@ interface Envelope {
 
 const props = withDefaults(defineProps<{
   isOpen: boolean
+  submitError?: string
   source?: Envelope | null
 }>(), {
   isOpen: false,
+  submitError: '',
   source: null
 })
 
@@ -42,7 +44,7 @@ const remainingAfterWithdrawal = computed(() => {
 })
 
 watch(() => props.isOpen, (open) => {
-  if (open) {
+  if (open && !props.submitError) {
     amount.value = null
     payee.value = ''
     memo.value = ''
@@ -108,6 +110,8 @@ const handleSubmit = () => {
 
         <p v-if="error" class="error-text">{{ error }}</p>
       </div>
+
+        <p v-if="submitError" class="error-text">{{ submitError }}</p>
 
       <div class="modal-footer">
         <button class="btn-secondary" @click="emit('close')">{{ t('common.cancel') }}</button>

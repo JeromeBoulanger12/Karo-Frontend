@@ -20,10 +20,12 @@ interface DepositData {
 
 const props = withDefaults(defineProps<{
   isOpen: boolean
+  submitError?: string
   job?: Job | null
   jobs?: Job[]
 }>(), {
   isOpen: false,
+  submitError: '',
   job: null,
   jobs: () => []
 })
@@ -153,6 +155,8 @@ const handleClose = () => {
           />
         </div>
       </div>
+
+        <p v-if="submitError" class="error-text">{{ submitError }}</p>
 
       <div class="modal-footer">
         <button class="btn-secondary" @click="handleClose">{{ t('common.cancel') || 'Annuler' }}</button>
@@ -412,5 +416,11 @@ const handleClose = () => {
     flex-direction: column;
     padding: var(--space-md);
   }
+}
+
+.error-text {
+  margin: 0;
+  color: var(--danger);
+  font-size: 0.875rem;
 }
 </style>

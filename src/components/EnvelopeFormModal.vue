@@ -24,6 +24,7 @@ interface FormData {
 
 const props = withDefaults(defineProps<{
   isOpen: boolean
+  submitError?: string
   envelope?: any | null
   accountId: string
   availableAccounts?: any[]
@@ -31,6 +32,7 @@ const props = withDefaults(defineProps<{
   plans?: any[]
 }>(), {
   isOpen: false,
+  submitError: '',
   envelope: null,
   availableAccounts: () => [],
   availableEnvelopes: () => [],
@@ -109,7 +111,7 @@ const loadFormFromEnvelope = () => {
 }
 
 watch(() => props.isOpen, (open) => {
-  if (open) loadFormFromEnvelope()
+  if (open && !props.submitError) loadFormFromEnvelope()
 })
 
 // Suggest the allocation type that fits the envelope once a plan is picked; the user can change it
@@ -395,6 +397,8 @@ const withdrawalFrequencies = [
           </div>
         </div>
       </div>
+
+        <p v-if="submitError" class="error-text">{{ submitError }}</p>
 
       <div class="modal-footer">
         <button v-if="isEditing" class="btn-danger" @click="handleDelete">
@@ -715,5 +719,11 @@ const withdrawalFrequencies = [
   .date-input-group {
     flex-direction: column;
   }
+}
+
+.error-text {
+  margin: 0;
+  color: var(--danger);
+  font-size: 0.875rem;
 }
 </style>
