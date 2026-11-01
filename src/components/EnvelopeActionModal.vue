@@ -16,6 +16,7 @@ const props = withDefaults(defineProps<{
 
 const emit = defineEmits<{
   close: []
+  add: [envelope: EnvelopeSummary]
   pay: [envelope: EnvelopeSummary]
   transfer: [envelope: EnvelopeSummary]
   withdraw: [envelope: EnvelopeSummary]
@@ -35,7 +36,7 @@ const handleClose = () => {
   emit('close')
 }
 
-const choose = (type: 'pay' | 'transfer' | 'withdraw') => {
+const choose = (type: 'add' | 'pay' | 'transfer' | 'withdraw') => {
   if (!props.envelope) return
   emit(type, props.envelope)
 }
@@ -57,6 +58,10 @@ const choose = (type: 'pay' | 'transfer' | 'withdraw') => {
         </p>
 
         <div class="action-choices">
+          <button class="action-choice" @click="choose('add')">
+            <i class="mdi mdi-cash-plus"></i>
+            <span>{{ t('envelopes.actionModal.add') }}</span>
+          </button>
           <button v-if="canPay" class="action-choice" @click="choose('pay')">
             <i class="mdi mdi-check-circle-outline"></i>
             <span>{{ isDebt ? t('envelopes.actionModal.payDebt') : t('envelopes.actionModal.paid') }}</span>
@@ -70,10 +75,6 @@ const choose = (type: 'pay' | 'transfer' | 'withdraw') => {
             <span>{{ t('envelopes.actionModal.withdraw') }}</span>
           </button>
         </div>
-
-        <p v-if="!canPay && !canTransfer && !canWithdraw" class="empty">
-          {{ t('envelopes.actionModal.none') }}
-        </p>
       </div>
     </div>
   </div>
@@ -177,9 +178,4 @@ const choose = (type: 'pay' | 'transfer' | 'withdraw') => {
   box-shadow: var(--shadow-md);
 }
 
-.empty {
-  margin: 0;
-  font-size: 0.875rem;
-  color: var(--text-muted);
-}
 </style>

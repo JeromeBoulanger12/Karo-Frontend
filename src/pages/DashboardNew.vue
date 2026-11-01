@@ -13,6 +13,7 @@ import TransferEnvelopeModal from '../components/TransferEnvelopeModal.vue'
 import EnvelopeActionModal from '../components/EnvelopeActionModal.vue'
 import PayBillModal from '../components/PayBillModal.vue'
 import WithdrawEnvelopeModal from '../components/WithdrawEnvelopeModal.vue'
+import AddFundsModal from '../components/AddFundsModal.vue'
 import JobFormModal from '../components/JobFormModal.vue'
 import DepositPaycheckModal from '../components/DepositPaycheckModal.vue'
 import { accountsApi } from '../api/accounts'
@@ -53,6 +54,8 @@ const selectedActionEnvelope = ref<any>(null)
 const selectedBill = ref<any>(null)
 const showWithdrawModal = ref(false)
 const selectedWithdrawSource = ref<any>(null)
+const showAddFundsModal = ref(false)
+const selectedAddFundsEnvelope = ref<any>(null)
 const showJobModal = ref(false)
 const showDepositModal = ref(false)
 const selectedAccount = ref<any>(null)
@@ -217,11 +220,30 @@ const openEnvelopeActionModal = (envelope: any) => {
   showEnvelopeActionModal.value = true
 }
 
-const handleEnvelopeAction = (type: 'pay' | 'transfer' | 'withdraw', envelope: any) => {
+const handleEnvelopeAction = (type: 'add' | 'pay' | 'transfer' | 'withdraw', envelope: any) => {
   showEnvelopeActionModal.value = false
-  if (type === 'pay') openPayBillModal(envelope)
+  if (type === 'add') openAddFundsModal(envelope)
+  else if (type === 'pay') openPayBillModal(envelope)
   else if (type === 'transfer') openTransferModal(envelope)
   else openWithdrawModal(envelope)
+}
+
+// Add money to an envelope (e.g. reach 50% of a bill before its next payment). Only the envelope
+// ledger changes: no account balance is touched
+const openAddFundsModal = (envelope: any) => {
+  selectedAddFundsEnvelope.value = envelope
+  showAddFundsModal.value = true
+}
+
+const handleEnvelopeAddFunds = async (payload: { amount: number; memo?: string }) => {
+  if (!selectedAddFundsEnvelope.value?.id) return
+  try {
+    await envelopesApi.allocate(selectedAddFundsEnvelope.value.id, payload)
+    showAddFundsModal.value = false
+    await loadDashboard()
+  } catch (err) {
+    console.error('Error adding funds to envelope:', err)
+  }
 }
 
 // Bill paid: the modal asks for the amount, then the backend withdraws it from the envelope
@@ -575,6 +597,7 @@ onMounted(() => {
       :isOpen="showEnvelopeActionModal"
       :envelope="selectedActionEnvelope"
       @close="showEnvelopeActionModal = false"
+      @add="handleEnvelopeAction('add', $event)"
       @pay="handleEnvelopeAction('pay', $event)"
       @transfer="handleEnvelopeAction('transfer', $event)"
       @withdraw="handleEnvelopeAction('withdraw', $event)"
@@ -601,6 +624,13 @@ onMounted(() => {
       :source="selectedWithdrawSource"
       @close="showWithdrawModal = false"
       @withdraw="handleEnvelopeWithdraw"
+    />
+
+    <AddFundsModal
+      :isOpen="showAddFundsModal"
+      :envelope="selectedAddFundsEnvelope"
+      @close="showAddFundsModal = false"
+      @add="handleEnvelopeAddFunds"
     />
 
     <EnvelopeFormModal

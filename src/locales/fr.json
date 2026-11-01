@@ -253,9 +253,20 @@
       "paid": "Payé",
       "payDebt": "Payer la dette",
       "transfer": "Transférer",
+      "add": "Ajouter des fonds",
       "withdraw": "Retirer",
-      "none": "Aucune action disponible : le solde de cette enveloppe est à zéro.",
       "close": "Fermer"
+    },
+    "addModal": {
+      "title": "Ajouter des fonds",
+      "to": "{name} — solde actuel : {amount}",
+      "target": "Montant cible : {amount}",
+      "percentOfTarget": "{percent} %",
+      "amount": "Montant à ajouter",
+      "memo": "Note (optionnel)",
+      "after": "Solde après ajout : {amount}",
+      "errorPositive": "Le montant doit être supérieur à 0.",
+      "submit": "Ajouter"
     },
     "payModal": {
       "title": "Payer la facture",

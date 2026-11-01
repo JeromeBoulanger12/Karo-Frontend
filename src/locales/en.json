@@ -263,9 +263,20 @@
       "paid": "Paid",
       "payDebt": "Pay the debt",
       "transfer": "Transfer",
+      "add": "Add funds",
       "withdraw": "Withdraw",
-      "none": "No action available: this envelope's balance is zero.",
       "close": "Close"
+    },
+    "addModal": {
+      "title": "Add funds",
+      "to": "{name} — current balance: {amount}",
+      "target": "Target amount: {amount}",
+      "percentOfTarget": "{percent}%",
+      "amount": "Amount to add",
+      "memo": "Note (optional)",
+      "after": "Balance after adding: {amount}",
+      "errorPositive": "The amount must be greater than 0.",
+      "submit": "Add"
     },
     "payModal": {
       "title": "Pay the bill",

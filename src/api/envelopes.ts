@@ -17,7 +17,7 @@ export const envelopesApi = {
     return client.put(`/envelopes/${id}`, data)
   },
 
-  allocate(id: string, data: Record<string, unknown>) {
+  allocate(id: string, data: { amount: number; memo?: string }) {
     return client.post(`/envelopes/${id}/allocate`, data)
   },
 
