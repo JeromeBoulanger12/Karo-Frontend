@@ -498,6 +498,17 @@
     "sparklineLabel": "Balance trend",
     "sparklineTitle": "Balance over {days} days",
     "noAccounts": "No account",
+    "monthEnd": {
+      "title": "Month end",
+      "daysLeft": "{days} days left",
+      "ok": "You should make it to the end of the month.",
+      "risk": "Warning: the margin will be negative at month end.",
+      "surplus": "Current surplus",
+      "income": "Estimated pay until month end ({days} d)",
+      "unfunded": "Bills not covered by month end",
+      "unfundedItem": "{name}: {amount} (due {date})",
+      "estimate": "Estimate: upcoming pay is spread over the remaining days of the month."
+    },
     "balanceHistory": {
       "title": "Balance history — {name}",
       "loading": "Loading history…",
@@ -530,6 +541,9 @@
     "account": {
       "balance": "Balance",
       "adjustBalance": "Adjust balance",
+      "balanceToday": "Balance updated today",
+      "balanceDaysAgo": "Balance updated {days} d ago",
+      "balanceNone": "No balance recorded",
       "history": "History",
       "envelopesCount": "Envelopes ({count}/20)",
       "hideHistory": "Hide history",

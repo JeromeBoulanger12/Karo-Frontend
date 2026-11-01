@@ -23,7 +23,21 @@ const props = withDefaults(defineProps<{
   history?: { capturedAt: string; amount: { amount: number; currency: string } }[]
   // Balance minus the total of this account's envelopes; negative means a deficit
   surplus?: number | null
-}>(), { surplus: null })
+  // When the balance was last recorded; old or missing values are flagged as stale
+  balanceDate?: string | null
+}>(), { surplus: null, balanceDate: null })
+
+const STALE_AFTER_DAYS = 7
+const balanceAgeDays = computed(() => {
+  if (!props.balanceDate) return null
+  return Math.floor((Date.now() - new Date(props.balanceDate).getTime()) / (24 * 60 * 60 * 1000))
+})
+const isBalanceStale = computed(() => balanceAgeDays.value === null || balanceAgeDays.value > STALE_AFTER_DAYS)
+const balanceFreshnessLabel = computed(() => {
+  if (balanceAgeDays.value === null) return t('dashboard.account.balanceNone')
+  if (balanceAgeDays.value === 0) return t('dashboard.account.balanceToday')
+  return t('dashboard.account.balanceDaysAgo', { days: balanceAgeDays.value })
+})
 
 const emit = defineEmits<{
   'add-envelope': [accountId: string]
@@ -116,6 +130,7 @@ const toggleExpand = () => {
         <div class="account-balance">
           <div class="account-balance-label">{{ t('dashboard.account.balance') }}</div>
           <div class="account-balance-amount">{{ formatCurrency(accountBalance) }}</div>
+          <div class="balance-freshness" :class="{ 'is-stale': isBalanceStale }">{{ balanceFreshnessLabel }}</div>
           <div v-if="surplus !== null" class="account-surplus" :class="surplus < 0 ? 'is-deficit' : 'is-surplus'">
             {{ surplus < 0 ? t('dashboard.stats.deficit') : t('dashboard.stats.surplus') }} : {{ formatCurrency(Math.abs(surplus)) }}
           </div>
@@ -269,6 +284,17 @@ const toggleExpand = () => {
 .account-balance-label {
   font-size: 0.875rem;
   color: var(--text-muted);
+}
+
+.balance-freshness {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.balance-freshness.is-stale {
+  color: var(--warning);
+  font-weight: 600;
 }
 
 .account-surplus {

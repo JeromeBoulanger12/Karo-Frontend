@@ -491,6 +491,17 @@
     "sparklineLabel": "Tendance du solde",
     "sparklineTitle": "Solde sur {days} jours",
     "noAccounts": "Aucun compte",
+    "monthEnd": {
+      "title": "Fin de mois",
+      "daysLeft": "{days} jours restants",
+      "ok": "Vous devriez arriver à la fin du mois.",
+      "risk": "Attention : la marge sera négative à la fin du mois.",
+      "surplus": "Surplus actuel",
+      "income": "Paies estimées d'ici la fin du mois ({days} j)",
+      "unfunded": "Factures non couvertes d'ici la fin du mois",
+      "unfundedItem": "{name} : {amount} (échéance {date})",
+      "estimate": "Estimation : les paies à venir sont réparties sur les jours restants du mois."
+    },
     "balanceHistory": {
       "title": "Historique du solde — {name}",
       "loading": "Chargement de l'historique…",
@@ -523,6 +534,9 @@
     "account": {
       "balance": "Solde",
       "adjustBalance": "Ajuster le solde",
+      "balanceToday": "Solde mis à jour aujourd'hui",
+      "balanceDaysAgo": "Solde mis à jour il y a {days} j",
+      "balanceNone": "Aucun solde enregistré",
       "history": "Historique",
       "envelopesCount": "Enveloppes ({count}/20)",
       "hideHistory": "Masquer l'historique",

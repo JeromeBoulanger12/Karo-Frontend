@@ -21,7 +21,9 @@ import { accountsApi } from '../api/accounts'
 import { envelopesApi } from '../api/envelopes'
 import { jobsApi } from '../api/jobs'
 import { dashboardAPI } from '../api/dashboard'
-import { paychecksPerMonth } from '../utils/envelopes'
+import { paychecksPerMonth, nextPaymentDate } from '../utils/envelopes'
+import { monthEndProjection, type BillCoverage } from '../utils/monthEnd'
+import MonthEndProjection from '../components/MonthEndProjection.vue'
 import '../styles/dashboard.css'
 
 // Helper function for formatting currency
@@ -91,6 +93,31 @@ const accountSurpluses = computed(() => {
     const balance = acc.latestBalance?.amount ?? acc.latestSnapshot?.amount?.amount ?? 0
     const envelopesTotal = getAccountEnvelopes(acc.id).reduce((sum, env) => sum + (env.balance?.amount ?? 0), 0)
     return { id: acc.id, name: acc.name, amount: balance - envelopesTotal }
+  })
+})
+
+// Where the money stands at month end: surplus today, expected income still to come, and bills due
+// before month end that their envelopes don't fully cover
+const monthEnd = computed(() => {
+  const bills = envelopes.value
+    .filter(env => env.purpose === 'Bill' && env.billPaymentScheduleJson)
+    .map(env => {
+      const dueDate = nextPaymentDate(env.billPaymentScheduleJson)
+      if (!dueDate) return null
+      return {
+        name: env.name,
+        target: env.targetAmount?.amount ?? 0,
+        balance: env.balance?.amount ?? 0,
+        dueDate
+      } as BillCoverage
+    })
+    .filter((bill): bill is BillCoverage => bill !== null)
+
+  return monthEndProjection({
+    surplus: accountSurpluses.value.reduce((sum, acc) => sum + acc.amount, 0),
+    monthlyIncome: expectedIncome.value,
+    today: new Date(),
+    bills
   })
 })
 
@@ -530,6 +557,8 @@ onMounted(() => {
         </template>
       </PageHeader>
 
+      <MonthEndProjection :result="monthEnd" />
+
       <!-- Stats Row -->
       <DashboardStats
         :totalBalance="totalBalance"
@@ -569,6 +598,7 @@ onMounted(() => {
             :envelopes="getAccountEnvelopes(account.id)"
             :history="accountHistory[account.id]"
             :surplus="accountSurpluses.find(s => s.id === account.id)?.amount ?? null"
+            :balance-date="account.latestSnapshotDate"
             @add-envelope="openAddEnvelopeModal($event)"
             @select-envelope="openEnvelopeActionModal($event)"
             @edit-envelope="openEditEnvelopeModal($event)"
