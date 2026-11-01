@@ -1,4 +1,15 @@
 {
+  "notifications": {
+    "title": "Notifications",
+    "empty": "Nothing to report for now.",
+    "kinds": {
+      "BillOverdue": "Overdue bill: {name}",
+      "BillDueSoon": "Bill due soon: {name}",
+      "AutomaticPaydaySuspended": "Automatic paycheck suspended: {name}"
+    },
+    "dueOn": "Due {date}",
+    "suspendedHint": "Available on paid plans"
+  },
   "auth": {
     "login": "Login",
     "signup": "Sign up",

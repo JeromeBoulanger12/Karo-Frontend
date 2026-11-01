@@ -1,4 +1,15 @@
 {
+  "notifications": {
+    "title": "Notifications",
+    "empty": "Rien à signaler pour le moment.",
+    "kinds": {
+      "BillOverdue": "Facture en retard : {name}",
+      "BillDueSoon": "Facture à payer bientôt : {name}",
+      "AutomaticPaydaySuspended": "Paie automatique suspendue : {name}"
+    },
+    "dueOn": "Échéance le {date}",
+    "suspendedHint": "Réservé aux abonnements payants"
+  },
   "auth": {
     "login": "Connexion",
     "signup": "Inscription",

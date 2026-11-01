@@ -4,6 +4,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuth } from './composables/useAuth'
 import { householdsAPI } from './api/households'
+import { notificationsApi } from './api/notifications'
 import client from './api/client'
 
 const router = useRouter()
@@ -96,9 +97,11 @@ watch(() => user.value?.id, (userId) => {
   if (userId) {
     loadUserRole()
     loadFeatures()
+    loadNotifications()
   } else {
     userRole.value = null
     features.value = { allowMembers: false, allowHousehold: false, allowBalanceHistory: false, allowPlanning: false }
+    notifications.value = []
     isLoadingRole.value = false
   }
 })
@@ -135,6 +138,39 @@ const goHome = () => {
     router.push('/')
   }
 }
+
+// Notification bell: overdue and upcoming bills, and suspended automatic paychecks
+const notifications = ref([])
+
+const loadNotifications = async () => {
+  try {
+    const response = await notificationsApi.list()
+    notifications.value = response.data ?? []
+  } catch (err) {
+    console.error('[App.vue] Could not load notifications', err)
+  }
+}
+
+const notificationLocale = computed(() => (locale.value === 'fr' ? 'fr-CA' : 'en-CA'))
+
+const notificationTitle = (item) => t(`notifications.kinds.${item.kind}`, { name: item.name })
+
+const notificationSubtitle = (item) => {
+  if (item.kind === 'AutomaticPaydaySuspended') return t('notifications.suspendedHint')
+
+  // Dates are yyyy-mm-dd; reading them as local midnight keeps the day from shifting
+  const date = new Date(`${item.dueDate}T00:00:00`).toLocaleDateString(notificationLocale.value, { day: 'numeric', month: 'long' })
+  const amount = item.amount == null
+    ? ''
+    : ` · ${new Intl.NumberFormat(notificationLocale.value, { style: 'currency', currency: item.currency || 'CAD' }).format(item.amount)}`
+  return `${t('notifications.dueOn', { date })}${amount}`
+}
+
+const notificationIcon = (item) => ({
+  BillOverdue: 'mdi-alert-circle',
+  BillDueSoon: 'mdi-calendar-clock',
+  AutomaticPaydaySuspended: 'mdi-pause-circle'
+})[item.kind]
 </script>
 
 <template>
@@ -221,6 +257,31 @@ const goHome = () => {
       </div>
 
       <v-spacer></v-spacer>
+
+      <!-- Notifications (shown when signed in); refreshed each time the list opens -->
+      <v-menu v-if="user" location="bottom end" @update:model-value="(open) => open && loadNotifications()">
+        <template #activator="{ props }">
+          <v-btn icon variant="text" :aria-label="t('notifications.title')" v-bind="props">
+            <v-badge v-if="notifications.length" :content="notifications.length" color="error" floating>
+              <v-icon icon="mdi-bell-outline"></v-icon>
+            </v-badge>
+            <v-icon v-else icon="mdi-bell-outline"></v-icon>
+          </v-btn>
+        </template>
+        <v-card min-width="300" max-width="380">
+          <v-card-title class="text-subtitle-1 font-weight-bold">{{ t('notifications.title') }}</v-card-title>
+          <v-list v-if="notifications.length" density="compact">
+            <v-list-item
+              v-for="(item, index) in notifications"
+              :key="index"
+              :title="notificationTitle(item)"
+              :subtitle="notificationSubtitle(item)"
+              :prepend-icon="notificationIcon(item)"
+            ></v-list-item>
+          </v-list>
+          <v-card-text v-else class="text-medium-emphasis">{{ t('notifications.empty') }}</v-card-text>
+        </v-card>
+      </v-menu>
 
       <!-- Language Toggle -->
       <v-btn-group variant="text" class="lang-toggle">
