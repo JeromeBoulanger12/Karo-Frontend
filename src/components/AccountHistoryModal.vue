@@ -8,12 +8,13 @@ import {
   LinearScale,
   PointElement,
   LineElement,
+  Legend,
   Tooltip
 } from 'chart.js'
 import { accountsApi } from '../api/accounts'
 import { surplusStats, type SurplusPoint } from '../utils/surplus'
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip)
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Legend, Tooltip)
 
 const { t } = useI18n()
 
@@ -50,13 +51,14 @@ const emit = defineEmits<{
 const PEAK_COUNT = 3
 // Whole history: the endpoint returns the last N days
 const HISTORY_DAYS = 365
-// Surplus window: how far back the surplus chart and its summary look
-const SURPLUS_DAYS = 90
+// Trend window choices for the chart and its summary
+const TREND_PERIODS = [30, 90, 365]
 
 const loading = ref(false)
 const error = ref('')
 const snapshots = ref<Snapshot[]>([])
 const surplusPoints = ref<SurplusPoint[]>([])
+const trendDays = ref(90)
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat('fr-CA', { style: 'currency', currency: 'CAD' }).format(value)
@@ -69,34 +71,55 @@ const formatShortDate = (value: string) =>
 
 const stats = computed(() => surplusStats(surplusPoints.value))
 
-// Step line: each surplus holds until the next observation or envelope movement. Red where in deficit
-const surplusChart = computed(() => {
+// Step lines: each value holds until the next observation or envelope movement.
+// The surplus line turns red wherever it is in deficit
+const trendChart = computed(() => {
   const isDeficit = (value: number) => value < 0
+  const points = surplusPoints.value
   return {
     data: {
-      labels: surplusPoints.value.map(p => formatShortDate(p.capturedAt)),
-      datasets: [{
-        label: t('dashboard.balanceHistory.surplusLabel'),
-        data: surplusPoints.value.map(p => p.surplus),
-        borderColor: 'rgb(16, 185, 129)',
-        borderWidth: 2,
-        stepped: 'after' as const,
-        pointRadius: 2,
-        segment: {
-          borderColor: (ctx: { p0: { parsed: { y: number } }; p1: { parsed: { y: number } } }) =>
-            isDeficit(ctx.p0.parsed.y) || isDeficit(ctx.p1.parsed.y) ? 'rgb(239, 68, 68)' : 'rgb(16, 185, 129)'
+      labels: points.map(p => formatShortDate(p.capturedAt)),
+      datasets: [
+        {
+          label: t('dashboard.balanceHistory.balanceLabel'),
+          data: points.map(p => p.balance),
+          borderColor: 'rgb(59, 130, 246)',
+          borderWidth: 2,
+          stepped: 'after' as const,
+          pointRadius: 0
+        },
+        {
+          label: t('dashboard.balanceHistory.envelopesLabel'),
+          data: points.map(p => p.envelopesTotal),
+          borderColor: 'rgb(245, 158, 11)',
+          borderWidth: 2,
+          stepped: 'after' as const,
+          pointRadius: 0
+        },
+        {
+          label: t('dashboard.balanceHistory.surplusLabel'),
+          data: points.map(p => p.surplus),
+          borderColor: 'rgb(16, 185, 129)',
+          borderWidth: 2.5,
+          stepped: 'after' as const,
+          pointRadius: 0,
+          segment: {
+            borderColor: (ctx: { p0: { parsed: { y: number } }; p1: { parsed: { y: number } } }) =>
+              isDeficit(ctx.p0.parsed.y) || isDeficit(ctx.p1.parsed.y) ? 'rgb(239, 68, 68)' : 'rgb(16, 185, 129)'
+          }
         }
-      }]
+      ]
     },
     options: {
       responsive: true,
       maintainAspectRatio: true,
+      interaction: { mode: 'index' as const, intersect: false },
       plugins: {
-        legend: { display: false },
+        legend: { display: true, position: 'bottom' as const, labels: { boxWidth: 12, font: { size: 11 } } },
         tooltip: {
-          displayColors: false,
           callbacks: {
-            label: (context: { parsed: { y: number } }) => formatCurrency(context.parsed.y)
+            label: (context: { dataset: { label?: string }; parsed: { y: number } }) =>
+              `${context.dataset.label}: ${formatCurrency(context.parsed.y)}`
           }
         }
       },
@@ -132,17 +155,27 @@ const rows = computed<Row[]>(() => {
   return withDelta.reverse()
 })
 
+const loadTrend = async () => {
+  if (!props.account?.id) return
+  try {
+    const response = await accountsApi.getAccountSurplusHistory(props.account.id, trendDays.value)
+    surplusPoints.value = response.data as SurplusPoint[]
+  } catch (err) {
+    console.error('Error loading surplus history:', err)
+    error.value = t('dashboard.balanceHistory.error')
+  }
+}
+
 const loadHistory = async () => {
   if (!props.account?.id) return
   loading.value = true
   error.value = ''
   try {
-    const [balanceRes, surplusRes] = await Promise.all([
+    const [balanceRes] = await Promise.all([
       accountsApi.getAccountBalanceHistory(props.account.id, HISTORY_DAYS),
-      accountsApi.getAccountSurplusHistory(props.account.id, SURPLUS_DAYS)
+      loadTrend()
     ])
     snapshots.value = balanceRes.data as Snapshot[]
-    surplusPoints.value = surplusRes.data as SurplusPoint[]
   } catch (err) {
     console.error('Error loading balance history:', err)
     error.value = t('dashboard.balanceHistory.error')
@@ -153,6 +186,11 @@ const loadHistory = async () => {
 
 watch(() => props.isOpen, (open) => {
   if (open) loadHistory()
+})
+
+// Changing the period only reloads the trend, not the balance list
+watch(trendDays, () => {
+  loadTrend()
 })
 
 const deltaClass = (delta: number | null) => {
@@ -184,7 +222,14 @@ const formatDelta = (delta: number | null) => {
 
         <template v-else>
           <section class="surplus-section">
-            <h3>{{ t('dashboard.balanceHistory.surplusTitle', { days: SURPLUS_DAYS }) }}</h3>
+            <div class="trend-header">
+              <h3>{{ t('dashboard.balanceHistory.trendTitle') }}</h3>
+              <select v-model.number="trendDays" class="trend-period" :aria-label="t('dashboard.balanceHistory.period')">
+                <option v-for="days in TREND_PERIODS" :key="days" :value="days">
+                  {{ t('dashboard.balanceHistory.periodDays', { days }) }}
+                </option>
+              </select>
+            </div>
             <template v-if="stats">
               <p class="surplus-summary">
                 <span class="summary-item">
@@ -197,7 +242,7 @@ const formatDelta = (delta: number | null) => {
                   {{ t('dashboard.balanceHistory.current', { amount: formatCurrency(stats.current.surplus) }) }}
                 </span>
               </p>
-              <Line :data="surplusChart.data" :options="surplusChart.options" />
+              <Line :data="trendChart.data" :options="trendChart.options" />
             </template>
             <p v-else class="hint">{{ t('dashboard.balanceHistory.surplusEmpty') }}</p>
           </section>
@@ -290,8 +335,23 @@ const formatDelta = (delta: number | null) => {
 }
 
 .surplus-section h3 {
-  margin: 0 0 0.5rem;
+  margin: 0;
   font-size: 1rem;
+}
+
+.trend-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.trend-period {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.875rem;
 }
 
 .surplus-summary {
