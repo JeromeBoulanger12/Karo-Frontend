@@ -1,26 +1,18 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 
-interface AccountSurplus {
-  id: string
-  name: string
-  amount: number
-}
-
-const props = withDefaults(defineProps<{
+withDefaults(defineProps<{
   totalBalance?: number
   envelopesCount?: number
   jobsCount?: number
   spendingThisMonth?: number
   expectedIncome?: number
-  accountSurpluses?: AccountSurplus[]
 }>(), {
   totalBalance: 0,
   envelopesCount: 0,
   jobsCount: 0,
   spendingThisMonth: 0,
-  expectedIncome: 0,
-  accountSurpluses: () => []
+  expectedIncome: 0
 })
 
 const { t } = useI18n()
@@ -50,11 +42,6 @@ const formatCurrency = (value: number) => {
     <div class="stat-card">
       <div class="stat-label">{{ t('dashboard.stats.spendingThisMonth') }}</div>
       <div class="stat-value" style="color: var(--warning)">{{ formatCurrency(spendingThisMonth) }}</div>
-    </div>
-    <!-- One card per account: balance minus the total of its envelopes -->
-    <div v-for="item in accountSurpluses" :key="item.id" class="stat-card">
-      <div class="stat-label">{{ item.amount < 0 ? t('dashboard.stats.deficit') : t('dashboard.stats.surplus') }} · {{ item.name }}</div>
-      <div class="stat-value" :style="{ color: item.amount < 0 ? 'var(--danger)' : 'var(--success)' }">{{ formatCurrency(Math.abs(item.amount)) }}</div>
     </div>
   </div>
 </template>

@@ -21,7 +21,9 @@ const props = withDefaults(defineProps<{
   account: Account
   envelopes: EnvelopeSummary[]
   history?: { capturedAt: string; amount: { amount: number; currency: string } }[]
-}>(), {})
+  // Balance minus the total of this account's envelopes; negative means a deficit
+  surplus?: number | null
+}>(), { surplus: null })
 
 const emit = defineEmits<{
   'add-envelope': [accountId: string]
@@ -114,6 +116,9 @@ const toggleExpand = () => {
         <div class="account-balance">
           <div class="account-balance-label">{{ t('dashboard.account.balance') }}</div>
           <div class="account-balance-amount">{{ formatCurrency(accountBalance) }}</div>
+          <div v-if="surplus !== null" class="account-surplus" :class="surplus < 0 ? 'is-deficit' : 'is-surplus'">
+            {{ surplus < 0 ? t('dashboard.stats.deficit') : t('dashboard.stats.surplus') }} : {{ formatCurrency(Math.abs(surplus)) }}
+          </div>
         </div>
         <button class="btn-adjust-balance" @click.stop="emit('edit-balance', account)">
           {{ t('dashboard.account.adjustBalance') }}
@@ -264,6 +269,20 @@ const toggleExpand = () => {
 .account-balance-label {
   font-size: 0.875rem;
   color: var(--text-muted);
+}
+
+.account-surplus {
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.is-surplus {
+  color: var(--success);
+}
+
+.is-deficit {
+  color: var(--danger);
 }
 
 .account-balance-amount {

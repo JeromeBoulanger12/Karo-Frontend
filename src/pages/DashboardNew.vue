@@ -537,7 +537,6 @@ onMounted(() => {
         :jobsCount="jobs.length"
         :spendingThisMonth="spendingThisMonth"
         :expectedIncome="expectedIncome"
-        :accountSurpluses="accountSurpluses"
       />
 
       <!-- Accounts Section -->
@@ -569,6 +568,7 @@ onMounted(() => {
             :account="account"
             :envelopes="getAccountEnvelopes(account.id)"
             :history="accountHistory[account.id]"
+            :surplus="accountSurpluses.find(s => s.id === account.id)?.amount ?? null"
             @add-envelope="openAddEnvelopeModal($event)"
             @select-envelope="openEnvelopeActionModal($event)"
             @edit-envelope="openEditEnvelopeModal($event)"
