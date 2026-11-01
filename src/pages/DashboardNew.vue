@@ -129,6 +129,7 @@ const openEditAccountModal = (account: any) => {
 }
 
 const handleAccountSave = async (accountData: any) => {
+  showAccountModal.value = false
   try {
     if (selectedAccount.value?.id) {
       // Edit existing - transform balance to NewBalance for API
@@ -141,7 +142,6 @@ const handleAccountSave = async (accountData: any) => {
       // Create new
       await accountsApi.createAccount(accountData)
     }
-    showAccountModal.value = false
     await loadDashboard()
   } catch (err) {
     console.error('Error saving account:', err)
@@ -163,6 +163,7 @@ const openEditEnvelopeModal = (envelope: any) => {
 
 const handleEnvelopeSave = async (envelopeData: any) => {
   const { selectedPlanId, planAllocationType, planFixedAmount, planPercentage, ...payload } = envelopeData
+  showEnvelopeModal.value = false
   try {
     let envelopeId: string
     if (selectedEnvelope.value?.id) {
@@ -196,7 +197,6 @@ const handleEnvelopeSave = async (envelopeData: any) => {
       }
     }
 
-    showEnvelopeModal.value = false
     await loadDashboard()
   } catch (err) {
     console.error('Error saving envelope:', err)
@@ -204,9 +204,9 @@ const handleEnvelopeSave = async (envelopeData: any) => {
 }
 
 const handleEnvelopeDelete = async (envelopeId: string) => {
+  showEnvelopeModal.value = false
   try {
     await envelopesApi.deleteEnvelope(envelopeId)
-    showEnvelopeModal.value = false
     // Reload so the removed rule also disappears from the plans
     await loadDashboard()
   } catch (err) {
@@ -237,9 +237,9 @@ const openAddFundsModal = (envelope: any) => {
 
 const handleEnvelopeAddFunds = async (payload: { amount: number; memo?: string }) => {
   if (!selectedAddFundsEnvelope.value?.id) return
+  showAddFundsModal.value = false
   try {
     await envelopesApi.allocate(selectedAddFundsEnvelope.value.id, payload)
-    showAddFundsModal.value = false
     await loadDashboard()
   } catch (err) {
     console.error('Error adding funds to envelope:', err)
@@ -259,13 +259,13 @@ const isDebtPayment = computed(() => selectedBill.value?.purpose === 'DebtPaymen
 // Debt envelopes pay the debt account; bill envelopes pay the bill
 const handleBillPay = async (amount: number) => {
   if (!selectedBill.value?.id) return
+  showPayBillModal.value = false
   try {
     if (isDebtPayment.value) {
       await envelopesApi.payDebt(selectedBill.value.id, amount)
     } else {
       await envelopesApi.pay(selectedBill.value.id, amount)
     }
-    showPayBillModal.value = false
     await loadDashboard()
   } catch (err) {
     console.error('Error recording payment:', err)
@@ -280,13 +280,13 @@ const openTransferModal = (envelope: any) => {
 
 const handleEnvelopeTransfer = async (payload: { toEnvelopeId: string; amount: number; memo?: string }) => {
   if (!selectedTransferSource.value?.id) return
+  showTransferModal.value = false
   try {
     await envelopesApi.transfer(selectedTransferSource.value.id, {
       targetEnvelopeId: payload.toEnvelopeId,
       amount: payload.amount,
       memo: payload.memo
     })
-    showTransferModal.value = false
     await loadDashboard()
   } catch (err) {
     console.error('Error transferring between envelopes:', err)
@@ -301,9 +301,9 @@ const openWithdrawModal = (envelope: any) => {
 
 const handleEnvelopeWithdraw = async (payload: { amount: number; payee?: string; memo?: string }) => {
   if (!selectedWithdrawSource.value?.id) return
+  showWithdrawModal.value = false
   try {
     await envelopesApi.withdraw(selectedWithdrawSource.value.id, payload)
-    showWithdrawModal.value = false
     await loadDashboard()
   } catch (err) {
     console.error('Error withdrawing from envelope:', err)
@@ -336,18 +336,17 @@ const openEditJobModal = (job: any) => {
 }
 
 const handleJobSave = async (jobData: any) => {
+  if (selectedJob.value?.id) {
+    // Edit existing - Backend doesn't support yet
+    console.warn('Job update not yet supported by backend. Only creation is available.')
+    // TODO: Implement updatePlan when backend supports it
+    return
+  }
+  showJobModal.value = false
   try {
-    if (selectedJob.value?.id) {
-      // Edit existing - Backend doesn't support yet
-      console.warn('Job update not yet supported by backend. Only creation is available.')
-      // TODO: Implement updatePlan when backend supports it
-      return
-    } else {
-      // Create new
-      console.log('handleJobSave - Job data from form:', jobData)
-      await jobsApi.createPlan(jobData)
-    }
-    showJobModal.value = false
+    // Create new
+    console.log('handleJobSave - Job data from form:', jobData)
+    await jobsApi.createPlan(jobData)
     await loadDashboard()
   } catch (err: any) {
     console.error('Error saving job:', err)
@@ -357,8 +356,9 @@ const handleJobSave = async (jobData: any) => {
 }
 
 // Load data
+// `loading` starts true, so only the first load shows the full-page spinner; refreshes after a
+// save happen in the background while the modal is already closed
 const loadDashboard = async () => {
-  loading.value = true
   error.value = ''
   try {
     // One request for the whole dashboard: accounts, envelopes, plans (with last paycheck), stats, history
@@ -401,6 +401,7 @@ const openDepositPaycheckModal = (job?: any) => {
 }
 
 const handleDepositPaycheck = async (depositData: any) => {
+  showDepositModal.value = false
   try {
     if (selectedJobForDeposit.value?.id) {
       // Distribute paycheck to the selected job
@@ -410,7 +411,6 @@ const handleDepositPaycheck = async (depositData: any) => {
         accountBalance: depositData.accountBalance
       })
     }
-    showDepositModal.value = false
     await loadDashboard()
   } catch (err) {
     console.error('Error depositing paycheck:', err)
@@ -436,6 +436,7 @@ const openAccountBalanceModal = (account: any) => {
 }
 
 const handleAccountBalanceSave = async (newBalance: number) => {
+  showAccountBalanceModal.value = false
   try {
     if (selectedAccountForBalance.value?.id) {
       await accountsApi.updateAccount(selectedAccountForBalance.value.id, {
@@ -443,7 +444,6 @@ const handleAccountBalanceSave = async (newBalance: number) => {
         newBalance: newBalance
       })
     }
-    showAccountBalanceModal.value = false
     await loadDashboard()
   } catch (err) {
     console.error('Error updating account balance:', err)
