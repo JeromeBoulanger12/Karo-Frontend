@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, inject } from 'vue'
 import EnvelopeRow from './EnvelopeRow.vue'
 import AccountBalanceChart from './AccountBalanceChart.vue'
 import AccountSparkline from './AccountSparkline.vue'
@@ -38,6 +38,10 @@ const emit = defineEmits<{
 const isExpanded = ref(true)
 // The full history chart is heavy; the header sparkline shows the trend, this opens the detail
 const showHistory = ref(false)
+
+// Balance history visuals are part of the paid tiers; provided by App.vue from the subscription
+const subscriptionFeatures = inject('subscriptionFeatures', ref({ allowBalanceHistory: false }))
+const canShowHistory = computed(() => !!subscriptionFeatures.value.allowBalanceHistory)
 
 const accountBalance = computed(() => {
   return props.account.latestBalance?.amount ?? props.account.latestSnapshot?.amount?.amount ?? 0
@@ -105,7 +109,7 @@ const toggleExpand = () => {
           </div>
         </div>
       </div>
-      <AccountSparkline :account-id="account.id" :history="history" />
+      <AccountSparkline v-if="canShowHistory" :account-id="account.id" :history="history" />
       <div class="account-balance-section">
         <div class="account-balance">
           <div class="account-balance-label">{{ t('dashboard.account.balance') }}</div>
@@ -114,7 +118,7 @@ const toggleExpand = () => {
         <button class="btn-adjust-balance" @click.stop="emit('edit-balance', account)">
           {{ t('dashboard.account.adjustBalance') }}
         </button>
-        <button class="btn-adjust-balance" @click.stop="emit('view-history', account)">
+        <button v-if="canShowHistory" class="btn-adjust-balance" @click.stop="emit('view-history', account)">
           {{ t('dashboard.account.history') }}
         </button>
       </div>
@@ -127,13 +131,13 @@ const toggleExpand = () => {
     <div v-show="isExpanded" class="account-body" :class="{ expanded: isExpanded }">
       <div class="section-header">
         <h4 class="section-subtitle">{{ t('dashboard.account.envelopesCount', { count: envelopesCount }) }}</h4>
-        <button class="btn-link" @click="showHistory = !showHistory">
+        <button v-if="canShowHistory" class="btn-link" @click="showHistory = !showHistory">
           <i class="mdi" :class="showHistory ? 'mdi-chart-line-variant' : 'mdi-chart-line'"></i>
           {{ showHistory ? t('dashboard.account.hideHistory') : t('dashboard.account.showHistory') }}
         </button>
       </div>
 
-      <div v-if="showHistory" class="chart-section">
+      <div v-if="canShowHistory && showHistory" class="chart-section">
         <AccountBalanceChart :account-id="account.id" :days="30" />
       </div>
 
