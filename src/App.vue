@@ -14,7 +14,7 @@ const drawer = ref(true)
 const userMenuOpen = ref(false)
 const userRole = ref(null)
 const isLoadingRole = ref(true)
-const features = ref({ allowMembers: false, allowHousehold: false, allowBalanceHistory: false })
+const features = ref({ allowMembers: false, allowHousehold: false, allowBalanceHistory: false, allowPlanning: false })
 
 // Tier features, shared with the dashboard components that gate a feature by plan
 provide('subscriptionFeatures', features)
@@ -27,11 +27,12 @@ const loadFeatures = async () => {
     features.value = {
       allowMembers: !!response.data?.allowMembers,
       allowHousehold: !!response.data?.allowHousehold,
-      allowBalanceHistory: !!response.data?.allowBalanceHistory
+      allowBalanceHistory: !!response.data?.allowBalanceHistory,
+      allowPlanning: !!response.data?.allowPlanning
     }
   } catch (err) {
     console.error('[App.vue] Failed to load subscription features:', err)
-    features.value = { allowMembers: false, allowHousehold: false, allowBalanceHistory: false }
+    features.value = { allowMembers: false, allowHousehold: false, allowBalanceHistory: false, allowPlanning: false }
   }
 }
 
@@ -97,7 +98,7 @@ watch(() => user.value?.id, (userId) => {
     loadFeatures()
   } else {
     userRole.value = null
-    features.value = { allowMembers: false, allowHousehold: false, allowBalanceHistory: false }
+    features.value = { allowMembers: false, allowHousehold: false, allowBalanceHistory: false, allowPlanning: false }
     isLoadingRole.value = false
   }
 })

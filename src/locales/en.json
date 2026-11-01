@@ -498,6 +498,15 @@
     "sparklineLabel": "Balance trend",
     "sparklineTitle": "Balance over {days} days",
     "noAccounts": "No account",
+    "calendar": {
+      "title": "Quarterly calendar",
+      "previous": "Previous month",
+      "next": "Next month",
+      "bills": "Bills",
+      "pays": "Pay (estimated)",
+      "empty": "No due dates or pay in this period.",
+      "estimate": "Pay is projected from the last recorded paycheck; bills follow their schedule."
+    },
     "monthEnd": {
       "title": "Month end",
       "daysLeft": "{days} days left",

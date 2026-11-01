@@ -491,6 +491,15 @@
     "sparklineLabel": "Tendance du solde",
     "sparklineTitle": "Solde sur {days} jours",
     "noAccounts": "Aucun compte",
+    "calendar": {
+      "title": "Calendrier trimestriel",
+      "previous": "Mois précédent",
+      "next": "Mois suivant",
+      "bills": "Factures",
+      "pays": "Paies (estimées)",
+      "empty": "Aucune échéance ni paie sur cette période.",
+      "estimate": "Les paies sont projetées à partir de la dernière paie enregistrée ; les factures suivent leur échéancier."
+    },
     "monthEnd": {
       "title": "Fin de mois",
       "daysLeft": "{days} jours restants",

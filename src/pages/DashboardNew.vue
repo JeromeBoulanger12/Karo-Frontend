@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, inject } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import PageHeader from '../components/PageHeader.vue'
@@ -24,6 +24,7 @@ import { dashboardAPI } from '../api/dashboard'
 import { paychecksPerMonth, nextPaymentDate } from '../utils/envelopes'
 import { monthEndProjection, type BillCoverage } from '../utils/monthEnd'
 import MonthEndProjection from '../components/MonthEndProjection.vue'
+import PlanningCalendar from '../components/PlanningCalendar.vue'
 import '../styles/dashboard.css'
 
 // Helper function for formatting currency
@@ -95,6 +96,31 @@ const accountSurpluses = computed(() => {
     return { id: acc.id, name: acc.name, amount: balance - envelopesTotal }
   })
 })
+
+// Planning tools (month-end card and calendar) are a paid-tier feature, provided by App.vue
+const subscriptionFeatures = inject('subscriptionFeatures', ref({ allowPlanning: false }))
+const canPlan = computed(() => !!subscriptionFeatures.value.allowPlanning)
+
+// Inputs for the calendar: bills with their schedule, and jobs with their last paycheck
+const calendarBills = computed(() =>
+  envelopes.value
+    .filter(env => env.purpose === 'Bill' && env.billPaymentScheduleJson)
+    .map(env => ({
+      name: env.name,
+      amount: env.targetAmount?.amount ?? 0,
+      scheduleJson: env.billPaymentScheduleJson
+    }))
+)
+
+const calendarJobs = computed(() =>
+  jobs.value.map(job => ({
+    name: job.name,
+    amount: job.lastPaycheck?.amount?.amount ?? 0,
+    lastPaidAt: job.lastPaycheck?.date ?? null,
+    frequency: job.recurrencePattern?.frequency ?? null,
+    interval: job.recurrencePattern?.interval ?? null
+  }))
+)
 
 // Where the money stands at month end: surplus today, expected income still to come, and bills due
 // before month end that their envelopes don't fully cover
@@ -557,7 +583,10 @@ onMounted(() => {
         </template>
       </PageHeader>
 
-      <MonthEndProjection :result="monthEnd" />
+      <template v-if="canPlan">
+        <MonthEndProjection :result="monthEnd" />
+        <PlanningCalendar :bills="calendarBills" :jobs="calendarJobs" />
+      </template>
 
       <!-- Stats Row -->
       <DashboardStats
