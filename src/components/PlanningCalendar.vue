@@ -129,14 +129,16 @@ const shift = (delta: number) => {
               v-for="cell in cellsFor(month)"
               :key="cell.key"
               class="cal-day"
-              :class="{ 'is-today': cell.isToday, 'is-empty': cell.day === null, 'has-events': cell.events.length > 0 }"
+              :class="{
+                'is-today': cell.isToday,
+                'is-empty': cell.day === null,
+                'has-events': cell.events.length > 0,
+                'has-bill': cell.events.some(e => e.kind === 'bill'),
+                'has-pay': cell.events.some(e => e.kind === 'pay')
+              }"
               :tabindex="cell.events.length ? 0 : -1"
             >
               <span v-if="cell.day !== null" class="cal-day-number">{{ cell.day }}</span>
-              <span v-if="cell.events.length" class="cal-dots">
-                <i v-if="cell.events.some(e => e.kind === 'bill')" class="dot bill"></i>
-                <i v-if="cell.events.some(e => e.kind === 'pay')" class="dot pay"></i>
-              </span>
               <!-- Hover or focus on a day with events: name and amount of each item -->
               <div v-if="cell.events.length" class="cal-tooltip" role="tooltip">
                 <div v-for="(event, index) in cell.events" :key="index" class="cal-tip-row">
@@ -276,15 +278,25 @@ const shift = (delta: number) => {
   font-weight: 700;
 }
 
+/* Tint by what falls on the day: red for a bill, green for a pay, both split */
+.cal-day.has-bill:not(.has-pay) {
+  background: rgba(239, 68, 68, 0.18);
+  border-color: rgba(239, 68, 68, 0.45);
+}
+
+.cal-day.has-pay:not(.has-bill) {
+  background: rgba(16, 185, 129, 0.18);
+  border-color: rgba(16, 185, 129, 0.45);
+}
+
+.cal-day.has-bill.has-pay {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.18) 50%, rgba(16, 185, 129, 0.18) 50%);
+  border-color: var(--border);
+}
+
 .cal-day.is-empty {
   background: transparent;
   border: none;
-}
-
-.cal-dots {
-  display: flex;
-  gap: 3px;
-  height: 6px;
 }
 
 .dot {
