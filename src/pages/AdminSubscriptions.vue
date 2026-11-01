@@ -313,6 +313,12 @@ onMounted(async () => {
       stats.value = await statsResponse.json()
     }
 
+    // Real per-tier figures from the backend (tierBreakdown: userCount and monthlyRevenue per tier)
+    const breakdownFor = (tier: string): { userCount: number; monthlyRevenue: number } => {
+      const breakdown: any[] = Object.values((stats.value as any).tierBreakdown ?? {})
+      return breakdown.find(b => b.tier === tier) ?? { userCount: 0, monthlyRevenue: 0 }
+    }
+
     // Build tiers with data from stats
     subscriptionTiers.value = [
       {
@@ -324,7 +330,8 @@ onMounted(async () => {
           t('admin.feature_basic_envelopes'),
           t('admin.feature_shared_household')
         ],
-        userCount: stats.value.activeSubscriptions * 0.7, // Estimate
+        // Free users have no paid subscription row; the backend counts them from the user table
+        userCount: (stats.value as any).freeUserCount ?? 0,
         monthlyRevenue: 0
       },
       {
@@ -337,8 +344,8 @@ onMounted(async () => {
           t('admin.feature_priority_support'),
           t('admin.feature_custom_categories')
         ],
-        userCount: stats.value.activeSubscriptions * 0.25,
-        monthlyRevenue: (stats.value.mrr * 0.7) // Estimate
+        userCount: breakdownFor('Pro').userCount,
+        monthlyRevenue: breakdownFor('Pro').monthlyRevenue
       },
       {
         id: 'Family',
@@ -350,8 +357,8 @@ onMounted(async () => {
           t('admin.feature_api_access'),
           t('admin.feature_24_7_support')
         ],
-        userCount: stats.value.activeSubscriptions * 0.05,
-        monthlyRevenue: (stats.value.mrr * 0.3) // Estimate
+        userCount: breakdownFor('Family').userCount,
+        monthlyRevenue: breakdownFor('Family').monthlyRevenue
       }
     ]
 

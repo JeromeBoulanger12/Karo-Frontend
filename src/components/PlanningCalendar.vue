@@ -46,9 +46,6 @@ const eventsByDay = computed(() => {
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat('fr-CA', { style: 'currency', currency: 'CAD' }).format(value)
 
-const formatShortDate = (value: Date) =>
-  value.toLocaleDateString('fr-CA', { weekday: 'short', day: 'numeric', month: 'short' })
-
 // Monday-first weekday names, from a known Monday (1 Jan 2024)
 const weekdays = Array.from({ length: 7 }, (_, i) =>
   new Intl.DateTimeFormat('fr-CA', { weekday: 'short' }).format(new Date(2024, 0, 1 + i))
@@ -69,7 +66,6 @@ interface Cell {
   date: Date | null
   isToday: boolean
   events: CalendarEvent[]
-  tooltip: string
 }
 
 const cellsFor = (month: Date): Cell[] => {
@@ -80,7 +76,7 @@ const cellsFor = (month: Date): Cell[] => {
   const leading = (new Date(year, monthIndex, 1).getDay() + 6) % 7
 
   const blanks: Cell[] = Array.from({ length: leading }, (_, i) => ({
-    key: `blank-${i}`, day: null, date: null, isToday: false, events: [], tooltip: ''
+    key: `blank-${i}`, day: null, date: null, isToday: false, events: []
   }))
 
   const days: Cell[] = Array.from({ length: daysInMonth }, (_, i) => {
@@ -91,8 +87,7 @@ const cellsFor = (month: Date): Cell[] => {
       day: i + 1,
       date,
       isToday: dayKey(date) === dayKey(now),
-      events: dayEvents,
-      tooltip: dayEvents.map(e => `${e.label} : ${formatCurrency(e.amount)}`).join('\n')
+      events: dayEvents
     }
   })
 
@@ -135,13 +130,21 @@ const shift = (delta: number) => {
               :key="cell.key"
               class="cal-day"
               :class="{ 'is-today': cell.isToday, 'is-empty': cell.day === null, 'has-events': cell.events.length > 0 }"
-              :title="cell.tooltip"
+              :tabindex="cell.events.length ? 0 : -1"
             >
               <span v-if="cell.day !== null" class="cal-day-number">{{ cell.day }}</span>
               <span v-if="cell.events.length" class="cal-dots">
                 <i v-if="cell.events.some(e => e.kind === 'bill')" class="dot bill"></i>
                 <i v-if="cell.events.some(e => e.kind === 'pay')" class="dot pay"></i>
               </span>
+              <!-- Hover or focus on a day with events: name and amount of each item -->
+              <div v-if="cell.events.length" class="cal-tooltip" role="tooltip">
+                <div v-for="(event, index) in cell.events" :key="index" class="cal-tip-row">
+                  <span class="cal-tip-dot" :class="event.kind"></span>
+                  <span class="cal-tip-label">{{ event.label }}</span>
+                  <strong class="cal-tip-amount">{{ formatCurrency(event.amount) }}</strong>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -152,17 +155,7 @@ const shift = (delta: number) => {
         <span><i class="dot pay"></i> {{ t('dashboard.calendar.pays') }}</span>
       </div>
 
-      <ul v-if="events.length" class="cal-list">
-        <li v-for="(event, index) in events" :key="index" :class="event.kind">
-          <span class="cal-list-date">{{ formatShortDate(event.date) }}</span>
-          <span class="cal-list-label">
-            <i class="mdi" :class="event.kind === 'bill' ? 'mdi-receipt-text-outline' : 'mdi-cash-check'"></i>
-            {{ event.label }}
-          </span>
-          <strong class="cal-list-amount">{{ formatCurrency(event.amount) }}</strong>
-        </li>
-      </ul>
-      <p v-else class="cal-empty">{{ t('dashboard.calendar.empty') }}</p>
+      <p v-if="!events.length" class="cal-empty">{{ t('dashboard.calendar.empty') }}</p>
 
       <p class="cal-note">{{ t('dashboard.calendar.estimate') }}</p>
     </template>
@@ -260,6 +253,7 @@ const shift = (delta: number) => {
 }
 
 .cal-day {
+  position: relative;
   min-height: 2.25rem;
   border-radius: 6px;
   padding: 0.25rem 0;
@@ -323,43 +317,68 @@ const shift = (delta: number) => {
   gap: 0.375rem;
 }
 
-.cal-list {
-  list-style: none;
-  margin: 0.5rem 0 0;
-  padding: 0;
-  font-size: 0.875rem;
-}
-
-.cal-list li {
-  display: grid;
-  grid-template-columns: 7.5rem 1fr auto;
-  gap: 0.75rem;
-  align-items: center;
-  padding: 0.5rem 0;
-  border-top: 1px solid var(--border);
-}
-
-.cal-list li.bill .cal-list-label i {
-  color: var(--danger);
-}
-
-.cal-list li.pay .cal-list-label i {
-  color: var(--success);
-}
-
-.cal-list-date {
-  color: var(--text-muted);
-  text-transform: capitalize;
-}
-
-.cal-list-amount {
-  white-space: nowrap;
-}
-
 .cal-empty,
 .cal-note {
   margin: 0.5rem 0 0;
   font-size: 0.8125rem;
   color: var(--text-muted);
+}
+.cal-day:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+
+.cal-tooltip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  min-width: 12rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow-md);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.cal-day.has-events:hover .cal-tooltip,
+.cal-day.has-events:focus-visible .cal-tooltip {
+  display: block;
+}
+
+.cal-tip-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+  font-size: 0.8125rem;
+  color: var(--text-primary);
+}
+
+.cal-tip-row + .cal-tip-row {
+  border-top: 1px solid var(--border);
+}
+
+.cal-tip-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.cal-tip-dot.bill {
+  background: var(--danger);
+}
+
+.cal-tip-dot.pay {
+  background: var(--success);
+}
+
+.cal-tip-amount {
+  white-space: nowrap;
 }
 </style>
