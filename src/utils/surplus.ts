@@ -40,3 +40,32 @@ export function surplusStats(points: SurplusPoint[], now: Date = new Date()): Su
     current
   }
 }
+
+// Time-weighted average of the surplus over the `windowMs` ending at `at`. The surplus is a step
+// function (each point holds until the next), so each stretch counts for its duration. Returns null
+// when no point starts before `at` inside that window
+export function averageSurplusAt(points: SurplusPoint[], at: number, windowMs: number): number | null {
+  const windowStart = at - windowMs
+  let weighted = 0
+  let covered = 0
+
+  points.forEach((point, index) => {
+    const segmentStart = new Date(point.capturedAt).getTime()
+    const segmentEnd = index + 1 < points.length
+      ? new Date(points[index + 1].capturedAt).getTime()
+      : at
+    const start = Math.max(segmentStart, windowStart)
+    const end = Math.min(segmentEnd, at)
+    if (end > start) {
+      weighted += point.surplus * (end - start)
+      covered += end - start
+    }
+  })
+
+  return covered > 0 ? weighted / covered : null
+}
+
+// Moving average evaluated at each point's own timestamp, for plotting alongside the surplus
+export function movingAverageSeries(points: SurplusPoint[], windowMs: number): (number | null)[] {
+  return points.map(point => averageSurplusAt(points, new Date(point.capturedAt).getTime(), windowMs))
+}

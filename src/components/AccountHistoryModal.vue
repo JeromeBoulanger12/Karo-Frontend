@@ -9,10 +9,14 @@ import {
   PointElement,
   LineElement,
   Legend,
-  Tooltip
+  Tooltip,
+  type ChartData,
+  type ChartOptions,
+  type ScriptableLineSegmentContext,
+  type TooltipItem
 } from 'chart.js'
 import { accountsApi } from '../api/accounts'
-import { surplusStats, type SurplusPoint } from '../utils/surplus'
+import { averageSurplusAt, movingAverageSeries, surplusStats, type SurplusPoint } from '../utils/surplus'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Legend, Tooltip)
 
@@ -71,10 +75,30 @@ const formatShortDate = (value: string) =>
 
 const stats = computed(() => surplusStats(surplusPoints.value))
 
+// Moving average of the surplus, time-weighted over the chosen window (7, 14 or 30 days)
+const MA_WINDOWS = [7, 14, 30]
+const maWindowDays = ref(14)
+const DAY_MS = 24 * 60 * 60 * 1000
+
+const movingAverage = computed(() =>
+  movingAverageSeries(surplusPoints.value, maWindowDays.value * DAY_MS)
+)
+
+// Latest average against the average one window earlier: the direction the surplus is heading
+const maSummary = computed(() => {
+  const windowMs = maWindowDays.value * DAY_MS
+  const now = Date.now()
+  const latest = averageSurplusAt(surplusPoints.value, now, windowMs)
+  const earlier = averageSurplusAt(surplusPoints.value, now - windowMs, windowMs)
+  if (latest === null) return null
+  const change = earlier === null ? null : latest - earlier
+  return { latest, change }
+})
+
 // Step lines: each value holds until the next observation or envelope movement.
 // The surplus line turns red wherever it is in deficit
-const trendChart = computed(() => {
-  const isDeficit = (value: number) => value < 0
+const trendChart = computed((): { data: ChartData<'line', (number | null)[]>; options: ChartOptions<'line'> } => {
+  const isDeficit = (value: number | null) => value !== null && value < 0
   const points = surplusPoints.value
   return {
     data: {
@@ -97,6 +121,16 @@ const trendChart = computed(() => {
           pointRadius: 0
         },
         {
+          label: t('dashboard.balanceHistory.maLabel', { days: maWindowDays.value }),
+          data: movingAverage.value,
+          borderColor: 'rgb(139, 92, 246)',
+          borderWidth: 2,
+          borderDash: [6, 4],
+          stepped: false,
+          pointRadius: 0,
+          spanGaps: true
+        },
+        {
           label: t('dashboard.balanceHistory.surplusLabel'),
           data: points.map(p => p.surplus),
           borderColor: 'rgb(16, 185, 129)',
@@ -104,7 +138,7 @@ const trendChart = computed(() => {
           stepped: 'after' as const,
           pointRadius: 0,
           segment: {
-            borderColor: (ctx: { p0: { parsed: { y: number } }; p1: { parsed: { y: number } } }) =>
+            borderColor: (ctx: ScriptableLineSegmentContext) =>
               isDeficit(ctx.p0.parsed.y) || isDeficit(ctx.p1.parsed.y) ? 'rgb(239, 68, 68)' : 'rgb(16, 185, 129)'
           }
         }
@@ -118,8 +152,8 @@ const trendChart = computed(() => {
         legend: { display: true, position: 'bottom' as const, labels: { boxWidth: 12, font: { size: 11 } } },
         tooltip: {
           callbacks: {
-            label: (context: { dataset: { label?: string }; parsed: { y: number } }) =>
-              `${context.dataset.label}: ${formatCurrency(context.parsed.y)}`
+            label: (context: TooltipItem<'line'>) =>
+              `${context.dataset.label}: ${context.parsed.y === null ? '—' : formatCurrency(context.parsed.y)}`
           }
         }
       },
@@ -229,6 +263,11 @@ const formatDelta = (delta: number | null) => {
                   {{ t('dashboard.balanceHistory.periodDays', { days }) }}
                 </option>
               </select>
+              <select v-model.number="maWindowDays" class="trend-period" :aria-label="t('dashboard.balanceHistory.maWindow')">
+                <option v-for="days in MA_WINDOWS" :key="days" :value="days">
+                  {{ t('dashboard.balanceHistory.maWindowDays', { days }) }}
+                </option>
+              </select>
             </div>
             <template v-if="stats">
               <p class="surplus-summary">
@@ -240,6 +279,12 @@ const formatDelta = (delta: number | null) => {
                 </span>
                 <span class="summary-item" :class="stats.current.surplus < 0 ? 'delta-down' : 'delta-up'">
                   {{ t('dashboard.balanceHistory.current', { amount: formatCurrency(stats.current.surplus) }) }}
+                </span>
+                <span v-if="maSummary" class="summary-item" :class="{ 'delta-up': (maSummary.change ?? 0) > 0, 'delta-down': (maSummary.change ?? 0) < 0 }">
+                  {{ t('dashboard.balanceHistory.maValue', { days: maWindowDays, amount: formatCurrency(maSummary.latest) }) }}
+                  <template v-if="maSummary.change !== null">
+                    · {{ t(Math.abs(maSummary.change) < 1 ? 'dashboard.balanceHistory.maFlat' : (maSummary.change > 0 ? 'dashboard.balanceHistory.maUp' : 'dashboard.balanceHistory.maDown'), { amount: formatCurrency(Math.abs(maSummary.change)), days: maWindowDays }) }}
+                  </template>
                 </span>
               </p>
               <Line :data="trendChart.data" :options="trendChart.options" />
