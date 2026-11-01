@@ -421,6 +421,9 @@ const handleJobSave = async (jobData: any) => {
   const jobId = selectedJob.value?.id
   showJobModal.value = false
   try {
+    // The amount the plan had before this save, to decide whether fixed pay changed
+    const previousFixedAmount = selectedJob.value?.fixedAmount?.amount ?? null
+    const nextFixedAmount = jobData.fixedAmount ?? null
     let planId = jobId
     if (jobId) {
       // Edit: frequency and the payday the schedule is counted from
@@ -431,9 +434,10 @@ const handleJobSave = async (jobData: any) => {
       const created = await jobsApi.createPlan(jobData)
       planId = created.data?.id
     }
-    // Fixed pay (or null to turn it off), applied after the schedule is saved
-    if (planId) {
-      await jobsApi.setFixedPay(planId, jobData.fixedAmount ?? null)
+    // Fixed pay is only sent when it changes: a downgraded plan keeps its fixed pay until it is switched off,
+    // and the server refuses to set one on a free plan
+    if (planId && nextFixedAmount !== previousFixedAmount) {
+      await jobsApi.setFixedPay(planId, nextFixedAmount)
     }
     await loadDashboard()
   } catch (err: any) {

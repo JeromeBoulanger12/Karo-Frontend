@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, inject } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { formatRuleAmount, type DistributionRule } from '../utils/distributionRules'
 
@@ -23,7 +23,9 @@ interface JobSavePayload extends Omit<Job, 'fixedAmount'> {
 
 const validationError = ref<string>('')
 
-// Fixed pay: deposited automatically on each payday, instead of entered by hand
+// Fixed pay: deposited automatically on each payday, instead of entered by hand (paid plans only)
+const subscriptionFeatures = inject('subscriptionFeatures', ref({ allowPlanning: false }))
+const canUseFixedPay = computed(() => !!subscriptionFeatures.value.allowPlanning)
 const fixedPayEnabled = ref(false)
 const fixedPayAmount = ref<number | null>(null)
 
@@ -213,7 +215,8 @@ const formatDate = (dateString: string | undefined) => {
 
         <div class="form-group">
           <label class="checkbox-row">
-            <input v-model="fixedPayEnabled" type="checkbox" />
+            <!-- A plan that already has fixed pay can still be switched off, even after a downgrade -->
+            <input v-model="fixedPayEnabled" type="checkbox" :disabled="!canUseFixedPay && !fixedPayEnabled" />
             Paie fixe (déposée automatiquement à chaque paie)
           </label>
           <input
@@ -224,7 +227,10 @@ const formatDate = (dateString: string | undefined) => {
             min="0"
             placeholder="Montant par paie"
           />
-          <small class="hint">
+          <small v-if="!canUseFixedPay" class="hint">
+            Réservé aux abonnements payants.
+          </small>
+          <small v-else class="hint">
             Avec une paie fixe, « Déposer une paie » disparaît. Si le montant reçu est différent, utilisez « Ajuster la dernière paie ».
           </small>
         </div>
