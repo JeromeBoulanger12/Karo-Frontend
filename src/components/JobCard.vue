@@ -24,6 +24,8 @@ interface Job {
   isMainJob?: boolean
   rules?: DistributionRule[]
   lastPaycheck?: { amount: Money; date: string } | null
+  // Computed by the backend from the anchor date and frequency (YYYY-MM-DD)
+  nextPaydayDate?: string | null
 }
 
 const props = withDefaults(defineProps<{
@@ -54,6 +56,12 @@ const formatCurrency = (money: Money | undefined) => {
     style: 'currency',
     currency: money.currency || 'CAD'
   }).format(money.amount)
+}
+
+// A payday is a calendar date (YYYY-MM-DD): build it in local time so it does not shift to the day before
+const formatPayday = (value: string) => {
+  const [year, month, day] = value.slice(0, 10).split('-').map(Number)
+  return new Date(year, month - 1, day).toLocaleDateString('fr-CA', { year: 'numeric', month: 'short', day: 'numeric' })
 }
 
 const formatDate = (dateString: string | undefined) => {
@@ -110,6 +118,10 @@ const formatDate = (dateString: string | undefined) => {
     </div>
 
     <div class="job-details">
+      <div v-if="job.nextPaydayDate" class="job-detail-item">
+        <span>Prochaine paie:</span>
+        <strong>{{ formatPayday(job.nextPaydayDate) }}</strong>
+      </div>
       <div v-if="job.accountName" class="job-detail-item">
         <span>Compte:</span>
         <strong>{{ job.accountName }}</strong>

@@ -116,7 +116,7 @@ const calendarJobs = computed(() =>
   jobs.value.map(job => ({
     name: job.name,
     amount: job.lastPaycheck?.amount?.amount ?? 0,
-    lastPaidAt: job.lastPaycheck?.date ?? null,
+    anchorDate: job.recurrencePattern?.anchorDate ?? null,
     frequency: job.recurrencePattern?.frequency ?? null,
     interval: job.recurrencePattern?.interval ?? null
   }))
@@ -417,17 +417,17 @@ const openEditJobModal = (job: any) => {
 }
 
 const handleJobSave = async (jobData: any) => {
-  if (selectedJob.value?.id) {
-    // Edit existing - Backend doesn't support yet
-    console.warn('Job update not yet supported by backend. Only creation is available.')
-    // TODO: Implement updatePlan when backend supports it
-    return
-  }
+  const jobId = selectedJob.value?.id
   showJobModal.value = false
   try {
-    // Create new
-    console.log('handleJobSave - Job data from form:', jobData)
-    await jobsApi.createPlan(jobData)
+    if (jobId) {
+      // Edit: frequency and the payday the schedule is counted from
+      await jobsApi.updateRecurrence(jobId, { frequency: jobData.frequency, anchorDate: jobData.anchorDate })
+    } else {
+      // Create new
+      console.log('handleJobSave - Job data from form:', jobData)
+      await jobsApi.createPlan(jobData)
+    }
     await loadDashboard()
   } catch (err: any) {
     console.error('Error saving job:', err)

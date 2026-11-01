@@ -9,6 +9,8 @@ interface Job {
   frequency: string
   homeAccountId: string
   lastPayment?: string
+  // A real payday; the following ones are counted from it with the frequency (YYYY-MM-DD)
+  anchorDate?: string
   rules?: DistributionRule[]
 }
 
@@ -32,10 +34,17 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 
+// Today in local time as YYYY-MM-DD (toISOString would give the UTC date)
+const todayIso = () => {
+  const now = new Date()
+  return new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10)
+}
+
 const formData = ref<Job>({
   name: props.job?.name || '',
   frequency: props.job?.frequency || 'biweekly',
-  homeAccountId: props.accountId
+  homeAccountId: props.accountId,
+  anchorDate: props.job?.anchorDate || todayIso()
 })
 
 // Watch for changes to job prop to update form data
@@ -46,14 +55,16 @@ watch(() => props.job, (newJob) => {
       name: newJob.name || '',
       frequency: newJob.frequency || 'biweekly',
       homeAccountId: newJob.homeAccountId || props.accountId,
-      lastPayment: newJob.lastPayment
+      lastPayment: newJob.lastPayment,
+      anchorDate: newJob.anchorDate || todayIso()
     }
   } else {
     // Reset form for new job
     formData.value = {
       name: '',
       frequency: 'biweekly',
-      homeAccountId: props.accountId
+      homeAccountId: props.accountId,
+      anchorDate: todayIso()
     }
   }
 }, { deep: true, immediate: true })
@@ -166,6 +177,14 @@ const formatDate = (dateString: string | undefined) => {
               {{ freq.label }}
             </option>
           </select>
+        </div>
+
+        <div class="form-group">
+          <label>Date d'une paie</label>
+          <input v-model="formData.anchorDate" type="date" required />
+          <small class="hint">
+            Choisissez une date de paie réelle. Les suivantes sont calculées à partir de celle-ci selon la fréquence.
+          </small>
         </div>
 
         <!-- Distribution rules (read-only; rules are added from the envelope form) -->
@@ -457,5 +476,11 @@ const formatDate = (dateString: string | undefined) => {
   margin: 0;
   color: var(--danger);
   font-size: 0.875rem;
+}
+.hint {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--text-muted);
+  font-size: 0.75rem;
 }
 </style>

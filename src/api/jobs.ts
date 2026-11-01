@@ -47,7 +47,9 @@ export const jobsApi = {
       homeAccountId: data.homeAccountId,
       name: data.name,
       shortfallPolicy: 'ProportionalReduction',
-      recurrenceFrequency: data.frequency ? mapFrequency(data.frequency as string) : 'BiWeekly'
+      recurrenceFrequency: data.frequency ? mapFrequency(data.frequency as string) : 'BiWeekly',
+      anchorDate: data.anchorDate,
+      interval: 1
     }
 
     console.log('Creating plan with payload:', JSON.stringify(payload))
@@ -56,6 +58,15 @@ export const jobsApi = {
 
   updatePlan(id: string, data: Record<string, unknown>) {
     return client.post(`/jobs/plans/${id}`, data)
+  },
+
+  // Changes how often the paycheck arrives and the payday it is counted from
+  updateRecurrence(id: string, data: { frequency: string; anchorDate: string; interval?: number }) {
+    return client.put(`/jobs/plans/${id}/recurrence`, {
+      frequency: mapFrequency(data.frequency),
+      anchorDate: data.anchorDate,
+      interval: data.interval ?? 1
+    })
   },
 
   addRule(id: string, data: Record<string, unknown>) {

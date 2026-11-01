@@ -16,7 +16,8 @@ export interface BillInput {
 export interface JobInput {
   name: string
   amount: number
-  lastPaidAt?: string | null
+  // The real payday the schedule is counted from (YYYY-MM-DD)
+  anchorDate?: string | null
   frequency?: string | null
   interval?: number | null
 }
@@ -59,33 +60,45 @@ export function billOccurrences(bill: BillInput, from: Date, to: Date): Calendar
   return []
 }
 
-// Paydays of a job after its last recorded paycheck, inside [from, to]. Projected from the frequency,
-// so they are estimates: the real date can move (holidays, schedule changes)
+// Paydays of a job inside [from, to], counted from its anchor date (a real payday chosen by the user)
+// with its frequency and interval. Each payday is computed from the anchor, so month ends do not drift.
 export function payOccurrences(job: JobInput, from: Date, to: Date): CalendarEvent[] {
-  const last = job.lastPaidAt ? parseDateOnly(job.lastPaidAt) : null
-  if (!last || !job.frequency) return []
+  const anchor = job.anchorDate ? parseDateOnly(job.anchorDate) : null
+  if (!anchor || !job.frequency) return []
 
   const step = Math.max(job.interval ?? 1, 1)
-  const advance = (date: Date): Date | null => {
-    const next = new Date(date)
+  const occurrenceAt = (index: number): Date => {
+    const offset = index * step
     switch (job.frequency) {
-      case 'Weekly': next.setDate(next.getDate() + 7 * step); return next
-      case 'BiWeekly': next.setDate(next.getDate() + 14 * step); return next
-      case 'SemiMonthly': next.setDate(next.getDate() + 15 * step); return next
-      case 'Monthly': next.setMonth(next.getMonth() + step); return next
-      case 'Annually': next.setFullYear(next.getFullYear() + step); return next
-      default: return null
+      case 'Weekly': return new Date(anchor.getFullYear(), anchor.getMonth(), anchor.getDate() + 7 * offset)
+      case 'BiWeekly': return new Date(anchor.getFullYear(), anchor.getMonth(), anchor.getDate() + 14 * offset)
+      case 'SemiMonthly': return new Date(anchor.getFullYear(), anchor.getMonth(), anchor.getDate() + 15 * offset)
+      case 'Monthly':
+      case 'Annually': {
+        const months = job.frequency === 'Annually' ? 12 * offset : offset
+        const year = anchor.getFullYear()
+        const month = anchor.getMonth() + months
+        // Clamp to the month's last day (e.g. the 31st in a 30-day month)
+        const daysInTarget = new Date(year, month + 1, 0).getDate()
+        return new Date(year, month, Math.min(anchor.getDate(), daysInTarget))
+      }
+      default: return anchor
     }
   }
 
   const events: CalendarEvent[] = []
-  let cursor: Date | null = last
-  // Walk forward from the last paycheck; the loop is bounded by the end of the window
-  while (cursor && cursor <= to) {
-    if (cursor >= from) {
-      events.push({ date: startOfDay(cursor), kind: 'pay', label: job.name, amount: job.amount })
+  if (job.frequency === 'OneTime' || job.frequency === 'Irregular') {
+    return anchor >= from && anchor <= to
+      ? [{ date: startOfDay(anchor), kind: 'pay', label: job.name, amount: job.amount }]
+      : []
+  }
+
+  for (let index = 0; index < 10000; index++) {
+    const date = occurrenceAt(index)
+    if (date > to) break
+    if (date >= from) {
+      events.push({ date: startOfDay(date), kind: 'pay', label: job.name, amount: job.amount })
     }
-    cursor = advance(cursor)
   }
   return events
 }
