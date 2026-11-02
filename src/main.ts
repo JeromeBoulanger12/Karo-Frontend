@@ -88,7 +88,11 @@ const routes = [
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes
+  routes,
+  // A new page starts at the top, under the fixed navbar, instead of keeping the scroll position of the previous one
+  scrollBehavior(to) {
+    return to.hash ? { el: to.hash } : { top: 0 }
+  }
 })
 
 // Set up auth interceptor to redirect on 401/403
