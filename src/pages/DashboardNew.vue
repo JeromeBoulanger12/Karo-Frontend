@@ -43,6 +43,8 @@ const router = useRouter()
 const accounts = ref<any[]>([])
 const envelopes = ref<any[]>([])
 const jobs = ref<any[]>([])
+// With an automatic paycheck, paychecks are deposited on their own: the header deposit button is not needed
+const hasAutomaticPaycheck = computed(() => jobs.value.some((job) => !!job.fixedAmount))
 const dashboardStats = ref<any>(null)
 const loading = ref(true)
 const error = ref('')
@@ -626,7 +628,7 @@ onMounted(() => {
             <i class="mdi mdi-help-circle-outline"></i>
             {{ t('faq.link') }}
           </router-link>
-          <button class="btn-deposit-paycheck" @click="openDepositPaycheckModal">
+          <button v-if="!hasAutomaticPaycheck" class="btn-deposit-paycheck" @click="openDepositPaycheckModal">
             <i class="mdi mdi-plus-circle"></i>
             Déposer une paie
           </button>
