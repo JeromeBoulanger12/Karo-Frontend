@@ -54,8 +54,11 @@ export const LEGAL_DOCUMENTS: Record<'privacy' | 'terms', Record<'fr' | 'en', Le
         {
           heading: '5. Conservation',
           paragraphs: [
-            'Vos renseignements sont conservés tant que votre compte existe.',
-            'À la suppression du compte, vos données sont effacées [délai à définir]. Les renseignements de facturation sont conservés selon les obligations légales [durée à confirmer].'
+            'Compte actif : vos renseignements sont conservés tant que vous utilisez Karo.',
+            'Abonnement payant annulé : vos données sont conservées 90 jours pour vous permettre de les exporter ou de réactiver votre abonnement, puis elles sont supprimées.',
+            'Compte gratuit inactif : après 24 mois sans connexion, nous vous avisons par courriel, puis le compte est supprimé si vous ne réagissez pas.',
+            'Factures et reçus d\'abonnement : conservés pendant la durée exigée par les lois fiscales [six ans, à confirmer], même après la suppression du compte. Ces documents ne contiennent que les renseignements de facturation.',
+            'Compte supprimé par vous : vos données sont effacées immédiatement. Les sauvegardes sont purgées dans un délai de [à définir].'
           ]
         },
         {
@@ -126,8 +129,11 @@ export const LEGAL_DOCUMENTS: Record<'privacy' | 'terms', Record<'fr' | 'en', Le
         {
           heading: '5. Retention',
           paragraphs: [
-            'We keep your information as long as your account exists.',
-            'When you delete your account, your data is erased [period to define]. Billing records are kept as required by law [period to confirm].'
+            'Active account: we keep your information as long as you use Karo.',
+            'Cancelled paid subscription: we keep your data for 90 days so you can export it or reactivate your subscription, then it is deleted.',
+            'Inactive free account: after 24 months without signing in, we notify you by email, then the account is deleted if you do not respond.',
+            'Invoices and subscription receipts: kept for the period required by tax law [six years, to confirm], even after the account is deleted. They contain billing information only.',
+            'Account you delete: your data is erased immediately. Backups are purged within [period to define].'
           ]
         },
         {
