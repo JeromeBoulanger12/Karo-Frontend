@@ -198,21 +198,7 @@ const notificationIcon = (item) => ({
         @click="goHome"
         class="font-weight-bold"
       >
-        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink: 0">
-          <defs>
-            <linearGradient id="homeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
-              <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:1" />
-            </linearGradient>
-          </defs>
-          <!-- House shape -->
-          <path d="M14 2L4 11V24C4 25.1046 4.89543 26 6 26H22C23.1046 26 24 25.1046 24 24V11L14 2Z" fill="url(#homeGradient)" stroke="url(#homeGradient)" stroke-width="1.5" stroke-linejoin="round"/>
-          <!-- Door -->
-          <rect x="12" y="15" width="4" height="6" rx="0.5" fill="white" opacity="0.95"/>
-          <!-- Door knob -->
-          <circle cx="15.5" cy="18.5" r="0.8" fill="url(#homeGradient)"/>
-        </svg>
-        Karo
+        <img src="/images/logo-karo.png" alt="Karo" width="158" height="63" style="height: 36px; width: auto; display: block" />
       </v-toolbar-title>
 
       <!-- Desktop Navigation (hidden on mobile) -->
