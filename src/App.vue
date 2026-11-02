@@ -198,7 +198,8 @@ const notificationIcon = (item) => ({
         @click="goHome"
         class="font-weight-bold"
       >
-        <img src="/images/logo-karo.png" alt="Karo" width="158" height="63" style="height: 36px; width: auto; display: block" />
+        <img src="/images/karo-icon.svg" alt="" aria-hidden="true" class="navbar-logo-icon" />
+        <span class="navbar-logo-word">Karo</span>
       </v-toolbar-title>
 
       <!-- Desktop Navigation (hidden on mobile) -->
@@ -413,6 +414,20 @@ const notificationIcon = (item) => ({
 </template>
 
 <style scoped>
+/* Logo: the wallet icon with the wordmark, larger than the default toolbar title */
+.navbar-logo-icon {
+  height: 44px;
+  width: 44px;
+  flex-shrink: 0;
+}
+
+.navbar-logo-word {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #3b82f6;
+  line-height: 1;
+}
+
 /* Notification list: fits the screen, scrolls when long, and wraps long titles instead of cutting them */
 .notifications-card {
   width: min(380px, calc(100vw - 24px));
