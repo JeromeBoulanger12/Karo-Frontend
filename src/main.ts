@@ -23,6 +23,7 @@ import PendingInvitations from './pages/PendingInvitations.vue'
 import DashboardNew from './pages/DashboardNew.vue'
 import Onboarding from './pages/Onboarding.vue'
 import Faq from './pages/Faq.vue'
+import LegalPage from './pages/LegalPage.vue'
 import AdminDashboard from './pages/AdminDashboard.vue'
 import AdminPanel from './pages/AdminPanel.vue'
 import AdminSettings from './pages/AdminSettings.vue'
@@ -41,6 +42,8 @@ const routes = [
   { path: '/login', component: Login },
   { path: '/signup', component: Signup },
   { path: '/checkout', component: CheckoutPage, name: 'Checkout' },
+  { path: '/confidentialite', component: LegalPage, props: { document: 'privacy' } },
+  { path: '/conditions', component: LegalPage, props: { document: 'terms' } },
 
   // Main app routes
   { path: '/dashboard', component: DashboardNew },

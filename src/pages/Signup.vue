@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { useAuth } from '../composables/useAuth'
 import { resetRedirectFlag } from '../api/client'
 import { savePendingProfile } from '../composables/pendingProfile'
+import { LEGAL_VERSION } from '../legal/version'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -15,6 +16,7 @@ const password = ref('')
 const confirmPassword = ref('')
 const firstName = ref('')
 const lastName = ref('')
+const acceptedPolicy = ref(false)
 const street = ref('')
 const city = ref('')
 const province = ref('')
@@ -24,7 +26,7 @@ const country = ref('')
 const passwordsMatch = () => password.value === confirmPassword.value
 
 const handleSignup = async () => {
-  if (!passwordsMatch()) {
+  if (!passwordsMatch() || !acceptedPolicy.value) {
     return
   }
 
@@ -34,6 +36,7 @@ const handleSignup = async () => {
   savePendingProfile({
     // The browser's zone is a good first guess; the profile page can change it
     timeZoneId: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    consentVersion: LEGAL_VERSION,
     address: {
       street: street.value,
       city: city.value,
@@ -135,12 +138,25 @@ onMounted(() => {
           @keyup.enter="handleSignup"
         ></v-text-field>
 
+        <!-- Consent: recorded with the version of the policy and terms the user saw -->
+        <v-checkbox v-model="acceptedPolicy" density="comfortable" class="mb-2" hide-details>
+          <template #label>
+            <span>
+              {{ t('legal.acceptPrefix') }}
+              <a href="/confidentialite" target="_blank" rel="noopener" @click.stop>{{ t('legal.privacy') }}</a>
+              {{ t('legal.and') }}
+              <a href="/conditions" target="_blank" rel="noopener" @click.stop>{{ t('legal.terms') }}</a>
+            </span>
+          </template>
+        </v-checkbox>
+        <p v-if="!acceptedPolicy && (email || password)" class="legal-required">{{ t('legal.acceptRequired') }}</p>
+
         <v-btn
           type="submit"
           color="primary"
           block
           :loading="loading"
-          :disabled="!passwordsMatch() || !email || !password"
+          :disabled="!passwordsMatch() || !email || !password || !acceptedPolicy"
           class="mb-3"
         >
           {{ t('auth.signup') }}
@@ -196,6 +212,12 @@ onMounted(() => {
   font-size: 0.95rem;
   color: #666666;
   margin-top: 0.5rem;
+}
+
+.legal-required {
+  font-size: 0.85rem;
+  color: #b00020;
+  margin: 0 0 0.75rem;
 }
 
 .auth-footer {

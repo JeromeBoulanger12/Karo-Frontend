@@ -28,7 +28,7 @@ export const useAuth = () => {
   const bootstrap = async (email: string) => {
     try {
       const token = localStorage.getItem('token')
-      console.log('Bootstrap - Email:', email, 'Token present:', !!token)
+      console.log('Bootstrap - Token present:', !!token)
 
       if (!token) {
         throw new Error('No token found in localStorage before bootstrap')
@@ -143,7 +143,7 @@ export const useAuth = () => {
   const checkAuth = async () => {
     try {
       const { data } = await supabase.auth.getSession()
-      console.log('[useAuth] checkAuth - session:', !!data.session, 'user:', data.session?.user?.email)
+      console.log('[useAuth] checkAuth - session:', !!data.session)
 
       if (data.session?.user) {
         // Verify user still exists in Supabase (handles deleted users)

@@ -1,4 +1,11 @@
 {
+  "legal": {
+    "acceptPrefix": "J'ai lu et j'accepte la",
+    "privacy": "politique de confidentialité",
+    "and": "et les",
+    "terms": "conditions d'utilisation",
+    "acceptRequired": "Cochez la case pour créer votre compte."
+  },
   "notifications": {
     "title": "Notifications",
     "empty": "Rien à signaler pour le moment.",

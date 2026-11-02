@@ -31,6 +31,10 @@ export const userSettingsApi = {
   },
   updateAddress(address: PostalAddress) {
     return client.put('/auth/address', address)
+  },
+  // Proof of consent: the version of the policy and terms the user accepted
+  recordConsent(version: string) {
+    return client.put('/auth/consent', { version })
   }
 }
 

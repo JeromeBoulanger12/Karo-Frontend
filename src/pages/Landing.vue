@@ -200,9 +200,9 @@
         <div class="footer-section">
           <h4>{{ t('landing.legal') }}</h4>
           <ul>
-            <li><a href="#">{{ t('landing.privacy') }}</a></li>
-            <li><a href="#">{{ t('landing.terms') }}</a></li>
-            <li><a href="#">{{ t('landing.cookies') }}</a></li>
+            <li><a href="/confidentialite">{{ t('landing.privacy') }}</a></li>
+            <li><a href="/conditions">{{ t('landing.terms') }}</a></li>
+            <li><a href="/confidentialite#cookies">{{ t('landing.cookies') }}</a></li>
           </ul>
         </div>
         <div class="footer-section">

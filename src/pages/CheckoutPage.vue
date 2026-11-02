@@ -200,6 +200,7 @@ import { useI18n } from 'vue-i18n'
 import { createClient } from '@supabase/supabase-js'
 import client from '../api/client'
 import { userSettingsApi } from '../api/userSettings'
+import { LEGAL_VERSION } from '../legal/version'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -354,6 +355,8 @@ const handleCheckout = async () => {
         country: form.value.country
       })
       await userSettingsApi.updatePreferences(Intl.DateTimeFormat().resolvedOptions().timeZone, true)
+      // The box is required above, so the version the user accepted is recorded here
+      await userSettingsApi.recordConsent(LEGAL_VERSION)
     } catch (profileErr) {
       console.warn('[CHECKOUT] Address or time zone not saved:', profileErr)
     }

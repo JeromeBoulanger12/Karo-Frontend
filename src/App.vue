@@ -51,7 +51,7 @@ const loadFeatures = async () => {
   }
 }
 
-console.log('[App.vue] Initial state - user.value:', user.value, 'householdId:', localStorage.getItem('householdId'))
+console.log('[App.vue] Initial state - signed in:', !!user.value)
 
 const loadUserRole = async () => {
   if (!user.value) {

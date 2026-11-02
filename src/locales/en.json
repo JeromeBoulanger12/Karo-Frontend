@@ -1,4 +1,11 @@
 {
+  "legal": {
+    "acceptPrefix": "I have read and accept the",
+    "privacy": "privacy policy",
+    "and": "and the",
+    "terms": "terms of use",
+    "acceptRequired": "Tick the box to create your account."
+  },
   "notifications": {
     "title": "Notifications",
     "empty": "Nothing to report for now.",

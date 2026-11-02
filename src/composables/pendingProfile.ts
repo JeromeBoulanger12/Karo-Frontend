@@ -6,6 +6,8 @@ const STORAGE_KEY = 'pendingProfile'
 export interface PendingProfile {
   timeZoneId?: string
   address?: PostalAddress
+  // Set when the user ticked the consent box at sign-up
+  consentVersion?: string
 }
 
 export function savePendingProfile(profile: PendingProfile) {
@@ -24,6 +26,9 @@ export async function applyPendingProfile() {
     }
     if (profile.address) {
       await userSettingsApi.updateAddress(profile.address)
+    }
+    if (profile.consentVersion) {
+      await userSettingsApi.recordConsent(profile.consentVersion)
     }
     localStorage.removeItem(STORAGE_KEY)
   } catch (err) {
