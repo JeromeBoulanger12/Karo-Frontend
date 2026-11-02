@@ -278,21 +278,29 @@ const notificationIcon = (item) => ({
       <v-menu v-if="user && features.allowPlanning && userPreferences.notificationsEnabled" location="bottom end" @update:model-value="(open) => open && loadNotifications()">
         <template #activator="{ props }">
           <v-btn icon variant="text" :aria-label="t('notifications.title')" v-bind="props">
-            <v-badge v-if="notifications.length" :content="notifications.length" color="error" floating>
+            <v-badge
+              :model-value="notifications.length > 0"
+              :content="notifications.length"
+              :max="99"
+              color="error"
+              location="top end"
+              offset-x="6"
+              offset-y="6"
+            >
               <v-icon icon="mdi-bell-outline"></v-icon>
             </v-badge>
-            <v-icon v-else icon="mdi-bell-outline"></v-icon>
           </v-btn>
         </template>
-        <v-card min-width="300" max-width="380">
-          <v-card-title class="text-subtitle-1 font-weight-bold">{{ t('notifications.title') }}</v-card-title>
-          <v-list v-if="notifications.length" density="compact">
+        <v-card class="notifications-card">
+          <v-card-title class="notifications-title">{{ t('notifications.title') }}</v-card-title>
+          <v-list v-if="notifications.length" density="compact" class="notifications-list">
             <v-list-item
               v-for="(item, index) in notifications"
               :key="index"
               :title="notificationTitle(item)"
               :subtitle="notificationSubtitle(item)"
               :prepend-icon="notificationIcon(item)"
+              class="notification-item"
             ></v-list-item>
           </v-list>
           <v-card-text v-else class="text-medium-emphasis">{{ t('notifications.empty') }}</v-card-text>
@@ -419,6 +427,30 @@ const notificationIcon = (item) => ({
 </template>
 
 <style scoped>
+/* Notification list: fits the screen, scrolls when long, and wraps long titles instead of cutting them */
+.notifications-card {
+  width: min(380px, calc(100vw - 24px));
+}
+
+.notifications-title {
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 12px 16px 4px;
+}
+
+.notifications-list {
+  max-height: 60vh;
+  overflow-y: auto;
+  padding-bottom: 8px;
+}
+
+.notification-item :deep(.v-list-item-title),
+.notification-item :deep(.v-list-item-subtitle) {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+}
+
 .navbar-custom {
   display: flex;
   align-items: center;
