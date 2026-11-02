@@ -117,6 +117,28 @@ const handleSave = async () => {
   }
 }
 
+// Downloads everything the app holds about the user, as a JSON file
+const downloadingData = ref(false)
+
+const downloadMyData = async () => {
+  downloadingData.value = true
+  error.value = null
+  try {
+    const response = await client.get('/account/export', { responseType: 'blob' })
+    const url = URL.createObjectURL(new Blob([response.data], { type: 'application/json' }))
+    const link = document.createElement('a')
+    link.href = url
+    link.download = 'karo-mes-donnees.json'
+    link.click()
+    URL.revokeObjectURL(url)
+  } catch (err) {
+    error.value = t('profile.dataError')
+    console.error('Data export error:', err)
+  } finally {
+    downloadingData.value = false
+  }
+}
+
 const openDeleteDialog = () => {
   deleteConfirmEmail.value = ''
   deleteError.value = null
@@ -349,6 +371,19 @@ const confirmDeleteAccount = async () => {
       <div v-else class="empty-placeholder">
         <i class="mdi mdi-inbox-outline"></i>
         <p>{{ t('profile.noPurchases') || 'Pas de transactions' }}</p>
+      </div>
+    </section>
+
+    <!-- Your data: a copy of what Karo holds about you (Loi 25) -->
+    <section class="section">
+      <h2 class="section-title">{{ t('profile.dataTitle') }}</h2>
+      <div class="card">
+        <div class="card-body">
+          <p class="form-hint">{{ t('profile.dataHint') }}</p>
+          <button type="button" class="btn-primary" :disabled="downloadingData" @click="downloadMyData">
+            {{ downloadingData ? t('common.loading') : t('profile.dataDownload') }}
+          </button>
+        </div>
       </div>
     </section>
 
