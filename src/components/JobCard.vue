@@ -47,10 +47,14 @@ const frequencyLabel = computed(() => {
   const freqMap: Record<string, string> = {
     weekly: 'Hebdo',
     biweekly: 'Bi-hebdo',
+    semimonthly: 'Demi-mensuel',
     monthly: 'Mensuel',
-    annual: 'Annuel'
+    annual: 'Annuel',
+    annually: 'Annuel',
+    irregular: 'Aucune'
   }
-  return freqMap[props.job.frequency] || props.job.frequency
+  // The backend sends PascalCase (BiWeekly, Irregular); the labels are keyed in lowercase
+  return freqMap[props.job.frequency?.toLowerCase()] || props.job.frequency
 })
 
 const formatCurrency = (money: Money | undefined) => {

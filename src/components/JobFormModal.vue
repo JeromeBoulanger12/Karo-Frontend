@@ -26,6 +26,7 @@ const validationError = ref<string>('')
 // Fixed pay: deposited automatically on each payday, instead of entered by hand (paid plans only)
 const subscriptionFeatures = inject('subscriptionFeatures', ref({ allowPlanning: false }))
 const canUseFixedPay = computed(() => !!subscriptionFeatures.value.allowPlanning)
+const isIrregular = computed(() => formData.value.frequency === 'irregular')
 const fixedPayEnabled = ref(false)
 const fixedPayAmount = ref<number | null>(null)
 
@@ -47,6 +48,19 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 
+// The backend sends the frequency in PascalCase (BiWeekly, Irregular); the select uses the lowercase values above
+const FORM_FREQUENCY_BY_BACKEND: Record<string, string> = {
+  weekly: 'weekly',
+  biweekly: 'biweekly',
+  semimonthly: 'semimonthly',
+  monthly: 'monthly',
+  annually: 'annual',
+  annual: 'annual',
+  irregular: 'irregular'
+}
+
+const normalizeFrequency = (raw?: string | null) => FORM_FREQUENCY_BY_BACKEND[(raw ?? '').toLowerCase()] ?? 'biweekly'
+
 // Today in local time as YYYY-MM-DD (toISOString would give the UTC date)
 const todayIso = () => {
   const now = new Date()
@@ -55,7 +69,7 @@ const todayIso = () => {
 
 const formData = ref<Job>({
   name: props.job?.name || '',
-  frequency: props.job?.frequency || 'biweekly',
+  frequency: normalizeFrequency(props.job?.frequency),
   homeAccountId: props.accountId,
   anchorDate: props.job?.anchorDate || todayIso()
 })
@@ -66,7 +80,7 @@ watch(() => props.job, (newJob) => {
     formData.value = {
       id: newJob.id,
       name: newJob.name || '',
-      frequency: newJob.frequency || 'biweekly',
+      frequency: normalizeFrequency(newJob.frequency),
       homeAccountId: newJob.homeAccountId || props.accountId,
       lastPayment: newJob.lastPayment,
       anchorDate: newJob.anchorDate || todayIso()
@@ -112,14 +126,14 @@ const handleSubmit = () => {
     return
   }
 
-  if (fixedPayEnabled.value && !(fixedPayAmount.value && fixedPayAmount.value > 0)) {
+  if (!isIrregular.value && fixedPayEnabled.value && !(fixedPayAmount.value && fixedPayAmount.value > 0)) {
     validationError.value = 'Le montant de la paie fixe doit être supérieur à 0.'
     return
   }
 
   emit('save', {
     ...formData.value,
-    fixedAmount: fixedPayEnabled.value ? fixedPayAmount.value : null
+    fixedAmount: !isIrregular.value && fixedPayEnabled.value ? fixedPayAmount.value : null
   })
 }
 
@@ -137,7 +151,8 @@ const frequencies = [
   { value: 'weekly', label: 'Hebdomadaire' },
   { value: 'biweekly', label: 'Bi-hebdomadaire' },
   { value: 'monthly', label: 'Mensuel' },
-  { value: 'annual', label: 'Annuel' }
+  { value: 'annual', label: 'Annuel' },
+  { value: 'irregular', label: 'Aucune' }
 ]
 
 const getFrequencyLabel = (freq: string) => {
@@ -205,6 +220,7 @@ const formatDate = (dateString: string | undefined) => {
           </select>
         </div>
 
+        <template v-if="!isIrregular">
         <div class="form-group">
           <label>Date d'une paie</label>
           <input v-model="formData.anchorDate" type="date" required />
@@ -234,6 +250,7 @@ const formatDate = (dateString: string | undefined) => {
             Avec une paie fixe, « Déposer une paie » disparaît. Si le montant reçu est différent, utilisez « Ajuster la dernière paie ».
           </small>
         </div>
+        </template>
 
         <!-- Distribution rules (read-only; rules are added from the envelope form) -->
         <div v-if="isEditing" class="rules-preview">

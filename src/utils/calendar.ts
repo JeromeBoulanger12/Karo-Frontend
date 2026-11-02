@@ -87,7 +87,10 @@ export function payOccurrences(job: JobInput, from: Date, to: Date): CalendarEve
   }
 
   const events: CalendarEvent[] = []
-  if (job.frequency === 'OneTime' || job.frequency === 'Irregular') {
+  // Irregular (« Aucune ») has no schedule: nothing to show on the calendar
+  if (job.frequency === 'Irregular') return []
+
+  if (job.frequency === 'OneTime') {
     return anchor >= from && anchor <= to
       ? [{ date: startOfDay(anchor), kind: 'pay', label: job.name, amount: job.amount }]
       : []
