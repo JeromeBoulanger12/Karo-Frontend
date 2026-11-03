@@ -47,5 +47,10 @@ export const envelopesApi = {
 
   setShareable(id: string, isShareable: boolean) {
     return client.put(`/envelopes/${id}/shareable`, { isShareable })
+  },
+
+  // envelopeIds must name every envelope of the account, in their new order
+  reorderEnvelopes(accountId: string, envelopeIds: string[]) {
+    return client.put('/envelopes/reorder', { accountId, envelopeIds })
   }
 }

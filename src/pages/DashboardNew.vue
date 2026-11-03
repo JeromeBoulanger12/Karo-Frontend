@@ -290,6 +290,16 @@ const handleEnvelopeSave = async (envelopeData: any) => {
   }
 }
 
+// Envelopes dragged inside an account: save the order, then reload so the dashboard shows what the server kept
+const handleEnvelopeReorder = async (accountId: string, envelopeIds: string[]) => {
+  try {
+    await envelopesApi.reorderEnvelopes(accountId, envelopeIds)
+  } catch (err) {
+    console.error('Error reordering envelopes:', err)
+  }
+  await loadDashboard()
+}
+
 const handleEnvelopeDelete = async (envelopeId: string) => {
   showEnvelopeModal.value = false
   try {
@@ -714,6 +724,7 @@ onMounted(() => {
             @edit-account="openEditAccountModal($event)"
             @edit-balance="openAccountBalanceModal($event)"
             @view-history="openAccountHistoryModal($event)"
+            @reorder-envelopes="handleEnvelopeReorder"
           />
         </div>
       </section>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, computed, inject } from 'vue'
+import { ref, computed, inject, watch, onBeforeUnmount } from 'vue'
+import Sortable from 'sortablejs'
 import EnvelopeRow from './EnvelopeRow.vue'
 import AccountBalanceChart from './AccountBalanceChart.vue'
 import AccountSparkline from './AccountSparkline.vue'
@@ -49,7 +50,42 @@ const emit = defineEmits<{
   'edit-account': [account: Account]
   'edit-balance': [account: Account]
   'view-history': [account: Account]
+  'reorder-envelopes': [accountId: string, envelopeIds: string[]]
 }>()
+
+// Drag and drop to arrange this account's envelopes. On a touch screen a short press starts the drag,
+// so a plain swipe still scrolls the list.
+const envelopeListEl = ref<HTMLElement | null>(null)
+let sortable: Sortable | null = null
+
+watch(envelopeListEl, (el) => {
+  sortable?.destroy()
+  sortable = el
+    ? Sortable.create(el, {
+        animation: 150,
+        delay: 250,
+        delayOnTouchOnly: true,
+        touchStartThreshold: 5,
+        onEnd: (evt) => {
+          const oldIndex = evt.oldIndex ?? 0
+          const newIndex = evt.newIndex ?? 0
+          if (oldIndex === newIndex) return
+
+          // Sortable moved the element in the DOM; put it back so Vue stays in charge of the list.
+          // The new order is then applied from the data, and the dashboard reloads.
+          evt.item.remove()
+          evt.from.insertBefore(evt.item, evt.from.children[oldIndex] ?? null)
+
+          const ids = props.envelopes.map(e => e.id)
+          const [moved] = ids.splice(oldIndex, 1)
+          ids.splice(newIndex, 0, moved)
+          emit('reorder-envelopes', props.account.id, ids)
+        }
+      })
+    : null
+}, { flush: 'post' })
+
+onBeforeUnmount(() => sortable?.destroy())
 
 const isExpanded = ref(true)
 // The full history chart is heavy; the header sparkline shows the trend, this opens the detail
@@ -166,9 +202,10 @@ const toggleExpand = () => {
         <p>{{ t('dashboard.account.noEnvelopes') }}</p>
       </div>
 
-      <div v-else class="envelope-list">
+      <div v-else ref="envelopeListEl" class="envelope-list">
         <EnvelopeRow
           v-for="envelope in envelopes"
+          :data-id="envelope.id"
           :key="envelope.id"
           :envelope="envelope"
           @select="emit('select-envelope', $event)"

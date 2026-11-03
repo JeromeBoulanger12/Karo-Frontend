@@ -13,6 +13,7 @@
     "@supabase/supabase-js": "^2.117.2",
     "axios": "^1.20.0",
     "chart.js": "^4.5.1",
+    "sortablejs": "^1.15.7",
     "vue": "^3.5.42",
     "vue-chartjs": "^5.3.4",
     "vue-i18n": "^11.4.13",
@@ -20,6 +21,7 @@
     "vuetify": "^4.2.3"
   },
   "devDependencies": {
+    "@types/sortablejs": "^1.15.9",
     "@vitejs/plugin-vue": "^6.0.8",
     "@vue/tsconfig": "^0.7.0",
     "sass": "^1.105.1",
