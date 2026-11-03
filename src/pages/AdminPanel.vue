@@ -70,6 +70,24 @@
           <i class="mdi mdi-percent"></i>
           <span>{{ t('admin.tax_rates_management') }}</span>
         </router-link>
+
+        <router-link
+          to="/admin/email-settings"
+          class="nav-item"
+          :class="{ active: isActive('email-settings') }"
+        >
+          <i class="mdi mdi-email-cog-outline"></i>
+          <span>{{ t('adminEmail.settingsTitle') }}</span>
+        </router-link>
+
+        <router-link
+          to="/admin/email-templates"
+          class="nav-item"
+          :class="{ active: isActive('email-templates') }"
+        >
+          <i class="mdi mdi-email-edit-outline"></i>
+          <span>{{ t('adminEmail.templatesTitle') }}</span>
+        </router-link>
       </nav>
 
       <div class="admin-footer">

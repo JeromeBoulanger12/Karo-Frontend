@@ -31,6 +31,8 @@ import AdminSubscriptions from './pages/AdminSubscriptions.vue'
 import AdminUsers from './pages/AdminUsers.vue'
 import AdminPromoCodes from './pages/AdminPromoCodes.vue'
 import AdminTaxRates from './pages/AdminTaxRates.vue'
+import AdminEmailSettings from './pages/AdminEmailSettings.vue'
+import AdminEmailTemplates from './pages/AdminEmailTemplates.vue'
 import AdminSubscriptionTierConfigurations from './pages/AdminSubscriptionTierConfigurations.vue'
 import MembersList from './pages/MembersList.vue'
 import { useAuth } from './composables/useAuth'
@@ -81,6 +83,8 @@ const routes = [
       { path: 'users', component: AdminUsers },
       { path: 'promo-codes', component: AdminPromoCodes },
       { path: 'tax-rates', component: AdminTaxRates },
+      { path: 'email-settings', component: AdminEmailSettings },
+      { path: 'email-templates', component: AdminEmailTemplates },
       { path: 'tier-configurations', component: AdminSubscriptionTierConfigurations }
     ]
   }
