@@ -44,6 +44,7 @@ const props = withDefaults(defineProps<{
 const emit = defineEmits<{
   close: []
   save: [job: JobSavePayload]
+  delete: []
 }>()
 
 const { t } = useI18n()
@@ -112,6 +113,9 @@ watch(() => props.job, (newJob) => {
 
 const isEditing = computed(() => !!props.job?.id)
 
+// Deleting is two steps: the warning only appears once the user asks for it
+const confirmingDelete = ref(false)
+
 const handleSubmit = () => {
   // Validate required fields
   validationError.value = ''
@@ -139,6 +143,7 @@ const handleSubmit = () => {
 
 const handleClose = () => {
   emit('close')
+  confirmingDelete.value = false
   formData.value = {
     name: '',
     frequency: 'biweekly',
@@ -269,6 +274,19 @@ const formatDate = (dateString: string | undefined) => {
       </div>
 
         <p v-if="submitError" class="error-text">{{ submitError }}</p>
+
+      <div v-if="isEditing" class="delete-zone">
+        <button v-if="!confirmingDelete" class="btn-danger" @click="confirmingDelete = true">
+          {{ t('entityDelete.delete') }}
+        </button>
+        <template v-else>
+          <p class="delete-warning">{{ t('entityDelete.confirmJob') }}</p>
+          <div class="delete-actions">
+            <button class="btn-danger" @click="emit('delete')">{{ t('entityDelete.confirmButton') }}</button>
+            <button class="btn-secondary" @click="confirmingDelete = false">{{ t('common.cancel') || 'Annuler' }}</button>
+          </div>
+        </template>
+      </div>
 
       <div class="modal-footer">
         <button class="btn-secondary" @click="handleClose">{{ t('common.cancel') || 'Annuler' }}</button>
@@ -455,6 +473,32 @@ const formatDate = (dateString: string | undefined) => {
   align-items: flex-start;
   gap: var(--space-sm);
   color: var(--warning, #b45309);
+}
+
+.delete-zone {
+  padding: var(--space-md) var(--space-lg);
+  border-top: 1px solid var(--border);
+}
+
+.delete-warning {
+  margin: 0 0 var(--space-sm);
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.delete-actions {
+  display: flex;
+  gap: var(--space-md);
+}
+
+.btn-danger {
+  background: #dc2626;
+  color: white;
+  border: none;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md, 8px);
+  cursor: pointer;
+  font-weight: 600;
 }
 
 .modal-footer {

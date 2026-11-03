@@ -218,6 +218,20 @@ const handleAccountSave = async (accountData: any) => {
   }
 }
 
+// Deleting an account also removes its envelopes and the paycheck plans homed on it (done by the backend)
+const handleAccountDelete = async () => {
+  const accountId = selectedAccount.value?.id
+  if (!accountId) return
+  showAccountModal.value = false
+  try {
+    await accountsApi.deleteAccount(accountId)
+    await loadDashboard()
+  } catch (err) {
+    console.error('Error deleting account:', err)
+    reopenWithError(err, t('dashboard.errors.save'), () => (showAccountModal.value = true))
+  }
+}
+
 // Modal handlers - Envelope
 const openAddEnvelopeModal = (accountId: string) => {
   submitError.value = ''
@@ -522,6 +536,20 @@ const loadDashboard = async () => {
   }
 }
 
+// Deleting a job removes its plan, rules and paycheck history; the envelopes are kept
+const handleJobDelete = async () => {
+  const jobId = selectedJob.value?.id
+  if (!jobId) return
+  showJobModal.value = false
+  try {
+    await jobsApi.deletePlan(jobId)
+    await loadDashboard()
+  } catch (err) {
+    console.error('Error deleting job:', err)
+    reopenWithError(err, t('dashboard.errors.save'), () => (showJobModal.value = true))
+  }
+}
+
 // Handle job edit - now handled by modal
 const handleJobEdit = (job: any) => {
   openEditJobModal(job)
@@ -737,6 +765,7 @@ onMounted(() => {
       :account="selectedAccount"
       @close="showAccountModal = false"
       @save="handleAccountSave"
+      @delete="handleAccountDelete"
     />
 
     <AccountBalanceModal
@@ -825,6 +854,7 @@ onMounted(() => {
       :accountId="currentAccountIdForJob"
       @close="showJobModal = false"
       @save="handleJobSave"
+      @delete="handleJobDelete"
     />
 
     <DepositPaycheckModal

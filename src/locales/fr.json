@@ -616,6 +616,12 @@
     "access_denied": "Accès refusé. Vous devez être propriétaire du ménage.",
     "error_loading": "Erreur lors du chargement du tableau de bord admin"
   },
+  "entityDelete": {
+    "delete": "Supprimer",
+    "confirmAccount": "Supprimer ce compte ? Ses enveloppes, les paies qui y sont rattachées et son historique de soldes seront supprimés. Action irréversible.",
+    "confirmJob": "Supprimer cette paie ? Ses règles de répartition et son historique de paies seront supprimés. Les enveloppes sont conservées.",
+    "confirmButton": "Confirmer la suppression"
+  },
   "adminEmail": {
     "settingsTitle": "Courriels : réglages",
     "settingsSubtitle": "Expéditeur, mode test et clé Resend",

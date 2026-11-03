@@ -623,6 +623,12 @@
     "access_denied": "Access denied. You must be the household owner.",
     "error_loading": "Error loading admin dashboard"
   },
+  "entityDelete": {
+    "delete": "Delete",
+    "confirmAccount": "Delete this account? Its envelopes, the paychecks tied to it and its balance history will be deleted. This cannot be undone.",
+    "confirmJob": "Delete this paycheck setup? Its distribution rules and paycheck history will be deleted. Envelopes are kept.",
+    "confirmButton": "Confirm deletion"
+  },
   "adminEmail": {
     "settingsTitle": "Emails: settings",
     "settingsSubtitle": "Sender, test mode and Resend key",
