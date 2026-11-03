@@ -248,7 +248,7 @@ const openEditEnvelopeModal = (envelope: any) => {
 }
 
 const handleEnvelopeSave = async (envelopeData: any) => {
-  const { selectedPlanId, planAllocationType, planFixedAmount, planPercentage, ...payload } = envelopeData
+  const { selectedPlanId, planAllocationType, planFixedAmount, planPercentage, color, ...payload } = envelopeData
   showEnvelopeModal.value = false
   try {
     let envelopeId: string
@@ -260,6 +260,11 @@ const handleEnvelopeSave = async (envelopeData: any) => {
       // Create new
       const { data: created } = await envelopesApi.createEnvelope(payload)
       envelopeId = created.id
+    }
+
+    // The colour has its own endpoint (paid plans only): sent only when the user changed it
+    if (color !== undefined && (color ?? null) !== (selectedEnvelope.value?.color ?? null)) {
+      await envelopesApi.setColor(envelopeId, color ?? null)
     }
 
     if (selectedPlanId) {

@@ -1,6 +1,11 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, inject } from 'vue'
 import { useI18n } from 'vue-i18n'
+
+// Colour and arrangement of envelopes are paid features: the palette is locked on the free plan
+const subscriptionFeatures = inject('subscriptionFeatures', ref({ allowPlanning: false }))
+const canCustomize = computed(() => !!subscriptionFeatures.value.allowPlanning)
+const colorChoices = ['#1F7A4D', '#2563EB', '#D97706', '#DC2626', '#7C3AED', '#DB2777', '#0891B2', '#64748B']
 
 interface FormData {
   name: string
@@ -20,6 +25,7 @@ interface FormData {
   planAllocationType?: 'BillProrated' | 'Automatic' | 'FixedAmount' | 'Percentage'
   planFixedAmount?: number | null
   planPercentage?: number | null
+  color?: string | null
 }
 
 const props = withDefaults(defineProps<{
@@ -64,7 +70,8 @@ const formData = ref<FormData>({
   selectedPlanId: null,
   planAllocationType: 'FixedAmount',
   planFixedAmount: null,
-  planPercentage: null
+  planPercentage: null,
+  color: props.envelope?.color ?? null
 })
 
 const validationError = ref<string>('')
@@ -252,6 +259,30 @@ const withdrawalFrequencies = [
         <div class="form-group">
           <label>Nom de l'enveloppe *</label>
           <input v-model="formData.name" type="text" placeholder="Ex: Loyer, Épicerie..." />
+        </div>
+
+        <div class="form-group">
+          <label>Couleur</label>
+          <div v-if="canCustomize" class="color-choices">
+            <button
+              type="button"
+              class="color-swatch color-none"
+              :class="{ selected: !formData.color }"
+              title="Aucune couleur"
+              @click="formData.color = null"
+            >×</button>
+            <button
+              v-for="choice in colorChoices"
+              :key="choice"
+              type="button"
+              class="color-swatch"
+              :class="{ selected: formData.color === choice }"
+              :style="{ background: choice }"
+              :title="choice"
+              @click="formData.color = choice"
+            ></button>
+          </div>
+          <p v-else class="paid-hint">Les couleurs sont offertes avec un abonnement payant.</p>
         </div>
 
         <div class="form-group">
@@ -487,6 +518,36 @@ const withdrawalFrequencies = [
   padding: var(--space-md);
   border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
+}
+
+.color-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.color-swatch {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+}
+
+.color-swatch.selected {
+  border-color: #1e293b;
+  box-shadow: 0 0 0 2px white inset;
+}
+
+.color-none {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.paid-hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #64748b;
 }
 
 .form-group {

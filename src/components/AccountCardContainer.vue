@@ -66,6 +66,7 @@ watch(envelopeListEl, (el) => {
         delay: 250,
         delayOnTouchOnly: true,
         touchStartThreshold: 5,
+        disabled: !canArrange.value,
         onEnd: (evt) => {
           const oldIndex = evt.oldIndex ?? 0
           const newIndex = evt.newIndex ?? 0
@@ -87,12 +88,16 @@ watch(envelopeListEl, (el) => {
 
 onBeforeUnmount(() => sortable?.destroy())
 
+// Free plan: the envelopes stay in their order but cannot be dragged
+const canArrange = computed(() => !!subscriptionFeatures.value.allowPlanning)
+watch(canArrange, (allowed) => sortable?.option('disabled', !allowed))
+
 const isExpanded = ref(true)
 // The full history chart is heavy; the header sparkline shows the trend, this opens the detail
 const showHistory = ref(false)
 
 // Balance history visuals are part of the paid tiers; provided by App.vue from the subscription
-const subscriptionFeatures = inject('subscriptionFeatures', ref({ allowBalanceHistory: false }))
+const subscriptionFeatures = inject('subscriptionFeatures', ref({ allowBalanceHistory: false, allowPlanning: false }))
 const canShowHistory = computed(() => !!subscriptionFeatures.value.allowBalanceHistory)
 
 const accountBalance = computed(() => {

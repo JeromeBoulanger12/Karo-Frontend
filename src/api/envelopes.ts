@@ -49,6 +49,11 @@ export const envelopesApi = {
     return client.put(`/envelopes/${id}/shareable`, { isShareable })
   },
 
+  // Paid plans only; null removes the colour
+  setColor(id: string, color: string | null) {
+    return client.put(`/envelopes/${id}/color`, { color })
+  },
+
   // envelopeIds must name every envelope of the account, in their new order
   reorderEnvelopes(accountId: string, envelopeIds: string[]) {
     return client.put('/envelopes/reorder', { accountId, envelopeIds })

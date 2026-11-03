@@ -51,7 +51,11 @@ const statusLines = computed(() => {
 </script>
 
 <template>
-  <div class="envelope-row" @click="emit('select', envelope)">
+  <div
+    class="envelope-row"
+    :style="envelope.color ? { boxShadow: `inset 4px 0 0 ${envelope.color}` } : undefined"
+    @click="emit('select', envelope)"
+  >
     <div class="row-name">
       <div class="name">{{ envelope.name }}</div>
       <div class="purpose">

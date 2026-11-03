@@ -13,6 +13,9 @@ export interface EnvelopeSummary {
   withdrawalFrequency?: string | null
   linkedEnvelopeId?: string | null
   isShareable?: boolean
+  // "#RRGGBB" chosen on a paid plan, or null
+  color?: string | null
+  displayOrder?: number
 }
 
 // Paychecks per month for a plan's recurrence (interval 2 = every other period). Irregular and one-time
