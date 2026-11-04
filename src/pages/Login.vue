@@ -1,13 +1,17 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuth } from '../composables/useAuth'
 import { resetRedirectFlag } from '../api/client'
 
 const { t } = useI18n()
 const router = useRouter()
+const route = useRoute()
 const { login, loading, error } = useAuth()
+
+// Set when the interceptor sent the user here because the session ended
+const sessionExpired = route.query.reason === 'expired'
 
 const email = ref('')
 const password = ref('')
@@ -32,6 +36,10 @@ onMounted(() => {
         <h1>Karo</h1>
         <p>{{ t('auth.login') }}</p>
       </div>
+
+      <v-alert v-if="sessionExpired && !error" type="info" class="mb-4">
+        Ta session a expiré. Reconnecte-toi pour continuer.
+      </v-alert>
 
       <v-alert v-if="error" type="error" class="mb-4">
         {{ error }}

@@ -1,13 +1,8 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { createClient } from '@supabase/supabase-js'
 import client from '../api/client'
+import { supabase } from '../api/supabase'
 import { applyPendingProfile } from './pendingProfile'
-
-const SUPABASE_URL = 'https://ikxnkhvvlsfqnwervleg.supabase.co'
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlreG5raHZ2bHNmcW53ZXJ2bGVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA0NjMwMTQsImV4cCI6MjEwNjAzOTAxNH0.EyDhkDC9ENeXrFeGKxDBVYnggYhTw5OyG-9W0TECTP8'
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
 interface User {
   id: string
