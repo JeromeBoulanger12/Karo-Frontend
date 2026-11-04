@@ -173,8 +173,12 @@ const toggleExpand = () => {
           <div class="account-balance-label">{{ t('dashboard.account.balance') }}</div>
           <div class="account-balance-amount">{{ formatCurrency(accountBalance) }}</div>
           <div class="balance-freshness" :class="{ 'is-stale': isBalanceStale }">{{ balanceFreshnessLabel }}</div>
-          <div v-if="surplus !== null" class="account-surplus" :class="surplus < 0 ? 'is-deficit' : 'is-surplus'">
-            {{ surplus < 0 ? t('dashboard.stats.deficit') : t('dashboard.stats.surplus') }} : {{ formatCurrency(Math.abs(surplus)) }}
+          <div v-if="surplus !== null" class="surplus-box" :class="surplus < 0 ? 'is-deficit' : 'is-surplus'">
+            <i class="mdi" :class="surplus < 0 ? 'mdi-alert-circle' : 'mdi-check-circle'"></i>
+            <div class="surplus-text">
+              <span class="surplus-label">{{ surplus < 0 ? t('dashboard.stats.deficit') : t('dashboard.stats.surplus') }}</span>
+              <span class="surplus-amount">{{ formatCurrency(Math.abs(surplus)) }}</span>
+            </div>
           </div>
         </div>
         <button class="btn-adjust-balance" @click.stop="emit('edit-balance', account)">
@@ -340,18 +344,54 @@ const toggleExpand = () => {
   font-weight: 600;
 }
 
-.account-surplus {
-  margin-top: 0.25rem;
-  font-size: 0.875rem;
-  font-weight: 600;
+/* Surplus / deficit of the account: a boxed callout, so it reads at a glance */
+.surplus-box {
+  margin-top: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.9rem 0.5rem 0.75rem;
+  border-radius: 10px;
+  border-left: 5px solid;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
 }
 
-.is-surplus {
-  color: var(--success);
+.surplus-box > .mdi {
+  font-size: 1.5rem;
 }
 
-.is-deficit {
-  color: var(--danger);
+.surplus-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.surplus-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.surplus-amount {
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.surplus-box.is-surplus {
+  background: #ecfdf5;
+  border-color: #10b981;
+  color: #047857;
+}
+
+.surplus-box.is-deficit {
+  background: #fef2f2;
+  border-color: #ef4444;
+  color: #b91c1c;
+}
+
+.surplus-box.is-deficit .surplus-amount::before {
+  content: '−';
 }
 
 .account-balance-amount {
