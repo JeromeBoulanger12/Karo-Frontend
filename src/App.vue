@@ -158,7 +158,35 @@ const goHome = () => {
 // Notification bell: overdue and upcoming bills, and suspended automatic paychecks
 const notifications = ref([])
 
+// Notifications the user has clicked on, kept on this device per user. An item comes back as new when its
+// kind, date or amount changes, since that makes it a different notification
+const READ_KEYS_LIMIT = 200
+const readKeys = ref([])
+const readStorageKey = () => `readNotifications:${user.value?.id ?? 'anonymous'}`
+
+const loadReadKeys = () => {
+  try {
+    readKeys.value = JSON.parse(localStorage.getItem(readStorageKey()) || '[]')
+  } catch {
+    readKeys.value = []
+  }
+}
+
+const notificationKey = (item) =>
+  [item.kind, item.name, item.dueDate ?? '', item.amount ?? '', item.envelopeId ?? '', item.planId ?? ''].join('|')
+
+const isUnread = (item) => !readKeys.value.includes(notificationKey(item))
+const unreadCount = computed(() => notifications.value.filter(isUnread).length)
+
+const markRead = (item) => {
+  const key = notificationKey(item)
+  if (readKeys.value.includes(key)) return
+  readKeys.value = [...readKeys.value, key].slice(-READ_KEYS_LIMIT)
+  localStorage.setItem(readStorageKey(), JSON.stringify(readKeys.value))
+}
+
 const loadNotifications = async () => {
+  loadReadKeys()
   try {
     const response = await notificationsApi.list()
     notifications.value = response.data ?? []
@@ -266,8 +294,8 @@ const notificationIcon = (item) => ({
         <template #activator="{ props }">
           <v-btn icon variant="text" :aria-label="t('notifications.title')" v-bind="props">
             <v-badge
-              :model-value="notifications.length > 0"
-              :content="notifications.length"
+              :model-value="unreadCount > 0"
+              :content="unreadCount"
               :max="99"
               color="error"
               location="top end"
@@ -287,7 +315,8 @@ const notificationIcon = (item) => ({
               :title="notificationTitle(item)"
               :subtitle="notificationSubtitle(item)"
               :prepend-icon="notificationIcon(item)"
-              class="notification-item"
+              :class="['notification-item', { 'notification-read': !isUnread(item) }]"
+              @click="markRead(item)"
             ></v-list-item>
           </v-list>
           <v-card-text v-else class="text-medium-emphasis">{{ t('notifications.empty') }}</v-card-text>
@@ -443,6 +472,11 @@ const notificationIcon = (item) => ({
   max-height: 60vh;
   overflow-y: auto;
   padding-bottom: 8px;
+}
+
+/* Already seen: still listed, but no longer counted on the bell */
+.notification-read {
+  opacity: 0.6;
 }
 
 .notification-item :deep(.v-list-item-title),
