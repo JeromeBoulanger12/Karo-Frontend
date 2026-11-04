@@ -334,8 +334,9 @@ const formatDate = (dateString: string) => {
   }).format(new Date(dateString))
 }
 
-const formatRelativeDate = (relativeDate: string) => {
-  return relativeDate
+// Last activity uses the same format as the join date; a user who never signed in shows a dash
+const formatRelativeDate = (lastActivity: string | null | undefined) => {
+  return lastActivity ? formatDate(lastActivity) : '—'
 }
 
 const getAvatarColor = (userId: string): string => {
