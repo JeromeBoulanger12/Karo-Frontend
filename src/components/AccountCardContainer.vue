@@ -88,7 +88,8 @@ watch(envelopeListEl, (el) => {
 
 onBeforeUnmount(() => sortable?.destroy())
 
-const isExpanded = ref(true)
+// Accounts start folded: the header shows the balance and surplus, and the envelopes open on demand
+const isExpanded = ref(false)
 // The full history chart is heavy; the header sparkline shows the trend, this opens the detail
 const showHistory = ref(false)
 

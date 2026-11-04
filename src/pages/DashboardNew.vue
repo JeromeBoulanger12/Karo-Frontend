@@ -325,6 +325,11 @@ const handleEnvelopeSave = async (envelopeData: any) => {
   }
 }
 
+// Scrolls to a dashboard section (the sections have ids; see the jump links above them)
+const jumpTo = (sectionId: string) => {
+  document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
+
 // Envelopes dragged inside an account: save the order, then reload so the dashboard shows what the server kept
 const handleEnvelopeReorder = async (accountId: string, envelopeIds: string[]) => {
   try {
@@ -722,8 +727,18 @@ onMounted(() => {
         :expectedIncome="expectedIncome"
       />
 
+      <!-- Jump links: the accounts and paychecks sections are long on a dashboard with many accounts -->
+      <nav class="section-jump" aria-label="Sections du tableau de bord">
+        <button type="button" @click="jumpTo('section-comptes')">
+          <i class="mdi mdi-bank"></i> Comptes
+        </button>
+        <button type="button" @click="jumpTo('section-paie')">
+          <i class="mdi mdi-calendar-multiple"></i> Paie
+        </button>
+      </nav>
+
       <!-- Accounts Section -->
-      <section class="section">
+      <section id="section-comptes" class="section">
         <div class="section-header">
           <h2 class="section-title">
             <i class="mdi mdi-bank"></i>
@@ -765,7 +780,7 @@ onMounted(() => {
       </section>
 
       <!-- Jobs/Paie Section -->
-      <section class="section">
+      <section id="section-paie" class="section">
         <div class="section-header">
           <h2 class="section-title">
             <i class="mdi mdi-calendar-multiple"></i>
@@ -997,6 +1012,40 @@ onMounted(() => {
 
 .section {
   margin-bottom: 3rem;
+  /* Leaves room under the fixed navbar when a jump link scrolls to the section */
+  scroll-margin-top: 8rem;
+}
+
+/* Sticky jump links: one tap from anywhere on the page to the accounts or the paychecks */
+.section-jump {
+  position: sticky;
+  top: 4.25rem;
+  z-index: 5;
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  margin-bottom: 1rem;
+  background: var(--bg, #f8fafc);
+}
+
+.section-jump button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.9rem;
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 999px;
+  background: white;
+  color: #1e293b;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.section-jump button:hover {
+  border-color: #3b82f6;
+  color: #1d4ed8;
 }
 
 .section-header {
