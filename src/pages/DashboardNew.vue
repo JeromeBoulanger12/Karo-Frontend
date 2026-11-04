@@ -24,6 +24,7 @@ import { jobsApi } from '../api/jobs'
 import { dashboardAPI } from '../api/dashboard'
 import { paychecksPerMonth, nextPaymentDate } from '../utils/envelopes'
 import { monthEndProjection, type BillCoverage } from '../utils/monthEnd'
+import { payOccurrences } from '../utils/calendar'
 import MonthEndProjection from '../components/MonthEndProjection.vue'
 import PlanningCalendar from '../components/PlanningCalendar.vue'
 import '../styles/dashboard.css'
@@ -144,10 +145,37 @@ const monthEnd = computed(() => {
 
   return monthEndProjection({
     surplus: accountSurpluses.value.reduce((sum, acc) => sum + acc.amount, 0),
-    monthlyIncome: expectedIncome.value,
+    incomeToCome: incomeToComeThisMonth.value,
     today: new Date(),
     bills
   })
+})
+
+// Paychecks still to come before month end: from tomorrow (today's payday is already in the surplus once it
+// is deposited) to the last day of the month, each at its own amount. A job with no schedule falls back to the
+// monthly forecast spread over the days left.
+const incomeToComeThisMonth = computed(() => {
+  const today = new Date()
+  const from = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1)
+  const to = new Date(today.getFullYear(), today.getMonth() + 1, 0)
+  const daysInMonth = to.getDate()
+  const daysLeft = daysInMonth - today.getDate()
+
+  return jobs.value.reduce((sum, job) => {
+    const amount = job.fixedAmount?.amount ?? job.lastPaycheck?.amount?.amount ?? 0
+    const pattern = job.recurrencePattern
+
+    if (!pattern?.anchorDate) {
+      return sum + amount * paychecksPerMonth(pattern) * (daysLeft / daysInMonth)
+    }
+
+    const paydays = payOccurrences(
+      { name: job.name, amount, anchorDate: pattern.anchorDate, frequency: pattern.frequency, interval: pattern.interval },
+      from,
+      to
+    )
+    return sum + paydays.length * amount
+  }, 0)
 })
 
 // Each paycheck's amount: the fixed amount when the job has one (automatic paychecks), otherwise the last
