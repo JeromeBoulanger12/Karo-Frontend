@@ -150,10 +150,12 @@ const monthEnd = computed(() => {
   })
 })
 
+// Each paycheck's amount: the fixed amount when the job has one (automatic paychecks), otherwise the last
+// paycheck recorded. A new job with no history yet would otherwise count as 0 in the month-end projection.
 const expectedIncome = computed(() => {
   return jobs.value.reduce((sum, job) => {
-    const lastAmount = job.lastPaycheck?.amount?.amount ?? 0
-    return sum + lastAmount * paychecksPerMonth(job.recurrencePattern)
+    const amount = job.fixedAmount?.amount ?? job.lastPaycheck?.amount?.amount ?? 0
+    return sum + amount * paychecksPerMonth(job.recurrencePattern)
   }, 0)
 })
 
