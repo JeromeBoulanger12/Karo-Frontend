@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, inject } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { isCreditAccount } from '../utils/accounts'
 
 // Colour and arrangement of envelopes are paid features: the palette is locked on the free plan
 const subscriptionFeatures = inject('subscriptionFeatures', ref({ allowPlanning: false }))
@@ -19,6 +20,8 @@ interface FormData {
   isAutomaticWithdrawal?: boolean
   withdrawalFrequency?: string
   linkedEnvelopeId?: string
+  // Debt envelopes: the credit card they pay down (chosen at creation only)
+  targetAccountId?: string
   sharedPercentage?: number
   isShared?: boolean
   selectedPlanId?: string | null
@@ -131,6 +134,11 @@ watch(() => formData.value.selectedPlanId, (planId) => {
 
 const isEditing = computed(() => !!props.envelope?.id)
 const isBillPurpose = computed(() => formData.value.purpose === 'Bill')
+const isDebtPurpose = computed(() => formData.value.purpose === 'DebtPayment')
+// Only credit cards other than the account the money comes from can be paid down
+const debtAccounts = computed(() =>
+  props.availableAccounts.filter(a => isCreditAccount(a.type) && a.id !== formData.value.homeAccountId)
+)
 const isAnnualSchedule = computed(() => formData.value.scheduleType === 'AnnualScheduled')
 
 const handleSubmit = () => {
@@ -148,6 +156,11 @@ const handleSubmit = () => {
 
   if (isBillPurpose.value && isAnnualSchedule.value && formData.value.paymentDates?.length === 0) {
     validationError.value = 'Au moins une date de paiement est requise pour un calendrier annuel'
+    return
+  }
+
+  if (isDebtPurpose.value && !isEditing.value && !formData.value.targetAccountId) {
+    validationError.value = 'La carte à rembourser est requise pour une enveloppe de dette'
     return
   }
 
@@ -292,6 +305,18 @@ const withdrawalFrequencies = [
               {{ p.label }}
             </option>
           </select>
+        </div>
+
+        <!-- Debt envelopes: paying one takes the money from this envelope and from the account it is funded from -->
+        <div v-if="isDebtPurpose && !isEditing" class="form-group">
+          <label>Carte à rembourser *</label>
+          <select v-model="formData.targetAccountId">
+            <option value="" disabled>-- Choisir une carte --</option>
+            <option v-for="acc in debtAccounts" :key="acc.id" :value="acc.id">
+              {{ acc.name }}
+            </option>
+          </select>
+          <p v-if="debtAccounts.length === 0" class="hint">Aucune carte de crédit disponible.</p>
         </div>
 
         <!-- For Bills: Payment Schedule -->
