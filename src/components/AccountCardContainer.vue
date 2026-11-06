@@ -6,6 +6,7 @@ import AccountBalanceChart from './AccountBalanceChart.vue'
 import AccountSparkline from './AccountSparkline.vue'
 import { useI18n } from 'vue-i18n'
 import type { EnvelopeSummary } from '../utils/envelopes'
+import { isCreditAccount } from '../utils/accounts'
 
 interface Account {
   id: string
@@ -106,6 +107,9 @@ const accountBalance = computed(() => {
   return props.account.latestBalance?.amount ?? props.account.latestSnapshot?.amount?.amount ?? 0
 })
 
+// A credit card's balance is what is owed: shown in red, and no surplus
+const isCredit = computed(() => isCreditAccount(props.account.type))
+
 const envelopesCount = computed(() => {
   return props.envelopes.length
 })
@@ -122,6 +126,7 @@ const getAccountIcon = (type: string) => {
     checking: 'mdi-bank',
     savings: 'mdi-piggy-bank',
     credit: 'mdi-credit-card',
+    creditcard: 'mdi-credit-card',
     investment: 'mdi-chart-line'
   }
   return typeMap[type?.toLowerCase()] || 'mdi-bank'
@@ -132,6 +137,7 @@ const getIconBackground = (type: string) => {
     checking: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)',
     savings: 'linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%)',
     credit: 'linear-gradient(135deg, #fecaca 0%, #fca5a5 100%)',
+    creditcard: 'linear-gradient(135deg, #fecaca 0%, #fca5a5 100%)',
     investment: 'linear-gradient(135deg, #e9d5ff 0%, #d8b4fe 100%)'
   }
   return typeMap[type?.toLowerCase()] || 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)'
@@ -142,6 +148,7 @@ const getIconColor = (type: string) => {
     checking: 'var(--primary)',
     savings: 'var(--success)',
     credit: 'var(--danger)',
+    creditcard: 'var(--danger)',
     investment: 'var(--secondary)'
   }
   return typeMap[type?.toLowerCase()] || 'var(--primary)'
@@ -172,9 +179,9 @@ const toggleExpand = () => {
       <div class="account-balance-section">
         <div class="account-balance">
           <div class="account-balance-label">{{ t('dashboard.account.balance') }}</div>
-          <div class="account-balance-amount">{{ formatCurrency(accountBalance) }}</div>
+          <div class="account-balance-amount" :class="{ 'is-debt': isCredit }">{{ formatCurrency(accountBalance) }}</div>
           <div class="balance-freshness" :class="{ 'is-stale': isBalanceStale }">{{ balanceFreshnessLabel }}</div>
-          <div v-if="surplus !== null" class="surplus-box" :class="surplus < 0 ? 'is-deficit' : 'is-surplus'">
+          <div v-if="surplus !== null && !isCredit" class="surplus-box" :class="surplus < 0 ? 'is-deficit' : 'is-surplus'">
             <i class="mdi" :class="surplus < 0 ? 'mdi-alert-circle' : 'mdi-check-circle'"></i>
             <div class="surplus-text">
               <span class="surplus-label">{{ surplus < 0 ? t('dashboard.stats.deficit') : t('dashboard.stats.surplus') }}</span>
@@ -399,6 +406,10 @@ const toggleExpand = () => {
   font-size: 1.5rem;
   font-weight: 800;
   color: var(--success);
+}
+
+.account-balance-amount.is-debt {
+  color: var(--danger);
 }
 
 .btn-adjust-balance {

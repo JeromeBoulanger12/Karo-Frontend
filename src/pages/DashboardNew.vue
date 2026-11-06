@@ -23,6 +23,7 @@ import { envelopesApi } from '../api/envelopes'
 import { jobsApi } from '../api/jobs'
 import { dashboardAPI } from '../api/dashboard'
 import { paychecksPerMonth, nextPaymentDate } from '../utils/envelopes'
+import { isCreditAccount } from '../utils/accounts'
 import { monthEndProjection, type BillCoverage } from '../utils/monthEnd'
 import { payOccurrences } from '../utils/calendar'
 import MonthEndProjection from '../components/MonthEndProjection.vue'
@@ -92,9 +93,10 @@ const totalBalance = computed(() => {
 })
 
 // Monthly forecast: the last distributed paycheck of each plan, times how often that plan is paid
-// Per account: its balance minus the total of its envelopes (negative means a deficit)
+// Per account: its balance minus the total of its envelopes (negative means a deficit).
+// Credit cards are left out: their balance is the amount owed, so a surplus means nothing for them.
 const accountSurpluses = computed(() => {
-  return accounts.value.map(acc => {
+  return accounts.value.filter(acc => !isCreditAccount(acc.type)).map(acc => {
     const balance = acc.latestBalance?.amount ?? acc.latestSnapshot?.amount?.amount ?? 0
     const envelopesTotal = getAccountEnvelopes(acc.id).reduce((sum, env) => sum + (env.balance?.amount ?? 0), 0)
     return { id: acc.id, name: acc.name, amount: balance - envelopesTotal }
