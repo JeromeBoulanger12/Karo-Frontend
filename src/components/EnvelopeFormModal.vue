@@ -141,6 +141,25 @@ const debtAccounts = computed(() =>
 )
 const isAnnualSchedule = computed(() => formData.value.scheduleType === 'AnnualScheduled')
 
+// Allocation types that fit this envelope: proration is for bills, automatic only with an automatic withdrawal
+// (never for a debt, which is paid by hand)
+const allocationTypes = computed(() => [
+  ...(isBillPurpose.value ? [{ value: 'BillProrated', label: t('envelopes.form.billProrated') }] : []),
+  ...(formData.value.isAutomaticWithdrawal && !isDebtPurpose.value ? [{ value: 'Automatic', label: t('envelopes.form.automatic') }] : []),
+  { value: 'FixedAmount', label: t('envelopes.form.fixedAmount') },
+  { value: 'Percentage', label: t('envelopes.form.percentage') }
+])
+
+// A debt envelope is paid with the pay button, so the options that move money on their own do not apply
+watch(isDebtPurpose, (isDebt) => {
+  if (!isDebt) return
+  formData.value.isAutomaticWithdrawal = false
+  formData.value.linkedEnvelopeId = undefined
+  if (formData.value.planAllocationType === 'BillProrated' || formData.value.planAllocationType === 'Automatic') {
+    formData.value.planAllocationType = 'FixedAmount'
+  }
+})
+
 const handleSubmit = () => {
   validationError.value = ''
 
@@ -360,49 +379,51 @@ const withdrawalFrequencies = [
 
         <!-- For Non-Bills: Target Amount & Date -->
         <div v-if="!isBillPurpose" class="section-divider">
-          <h3>Objectif</h3>
+          <h3>{{ isDebtPurpose ? 'Dette' : 'Objectif' }}</h3>
 
           <div class="form-group">
-            <label>Montant cible</label>
+            <label>{{ isDebtPurpose ? 'Montant de la dette' : 'Montant cible' }}</label>
             <input v-model.number="formData.targetAmount" type="number" placeholder="0.00" />
           </div>
 
           <div class="form-group">
-            <label>Date cible (quand atteindre cet objectif)</label>
+            <label>{{ isDebtPurpose ? 'Échéance' : 'Date cible (quand atteindre cet objectif)' }}</label>
             <input v-model="formData.targetDate" type="date" />
           </div>
         </div>
 
-        <!-- Automatic Withdrawal Section -->
+        <!-- Automatic Withdrawal Section (a debt has no automatic withdrawal: it is paid by hand) -->
         <div class="section-divider">
-          <h3>Prélèvement automatique</h3>
+          <h3>{{ isDebtPurpose ? 'Plan de distribution' : 'Prélèvement automatique' }}</h3>
 
-          <div class="form-group">
-            <label>
-              <input v-model="formData.isAutomaticWithdrawal" type="checkbox" />
-              Activer le prélèvement automatique
-            </label>
-          </div>
+          <template v-if="!isDebtPurpose">
+            <div class="form-group">
+              <label>
+                <input v-model="formData.isAutomaticWithdrawal" type="checkbox" />
+                Activer le prélèvement automatique
+              </label>
+            </div>
 
-          <div v-if="formData.isAutomaticWithdrawal" class="form-group">
-            <label>Fréquence de prélèvement *</label>
-            <select v-model="formData.withdrawalFrequency">
-              <option value="">-- Sélectionner --</option>
-              <option v-for="freq in withdrawalFrequencies" :key="freq.value" :value="freq.value">
-                {{ freq.label }}
-              </option>
-            </select>
-          </div>
+            <div v-if="formData.isAutomaticWithdrawal" class="form-group">
+              <label>Fréquence de prélèvement *</label>
+              <select v-model="formData.withdrawalFrequency">
+                <option value="">-- Sélectionner --</option>
+                <option v-for="freq in withdrawalFrequencies" :key="freq.value" :value="freq.value">
+                  {{ freq.label }}
+                </option>
+              </select>
+            </div>
 
-          <div v-if="formData.isAutomaticWithdrawal" class="form-group">
-            <label>Enveloppe liée</label>
-            <select v-model="formData.linkedEnvelopeId">
-              <option value="">-- Aucune --</option>
-              <option v-for="env in availableEnvelopes" :key="env.id" :value="env.id">
-                {{ env.name }}
-              </option>
-            </select>
-          </div>
+            <div v-if="formData.isAutomaticWithdrawal" class="form-group">
+              <label>Enveloppe liée</label>
+              <select v-model="formData.linkedEnvelopeId">
+                <option value="">-- Aucune --</option>
+                <option v-for="env in availableEnvelopes" :key="env.id" :value="env.id">
+                  {{ env.name }}
+                </option>
+              </select>
+            </div>
+          </template>
 
           <!-- Adds a rule on the chosen distribution plan once the envelope is saved -->
           <div class="form-group">
@@ -419,10 +440,7 @@ const withdrawalFrequencies = [
             <div class="form-group">
               <label>{{ t('envelopes.form.allocationType') }}</label>
               <select v-model="formData.planAllocationType">
-                <option value="BillProrated">{{ t('envelopes.form.billProrated') }}</option>
-                <option value="Automatic">{{ t('envelopes.form.automatic') }}</option>
-                <option value="FixedAmount">{{ t('envelopes.form.fixedAmount') }}</option>
-                <option value="Percentage">{{ t('envelopes.form.percentage') }}</option>
+                <option v-for="type in allocationTypes" :key="type.value" :value="type.value">{{ type.label }}</option>
               </select>
             </div>
 
