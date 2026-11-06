@@ -95,9 +95,22 @@ const parseBillSchedule = (envelope: any) => {
   }
 }
 
+// The rule this envelope already has in a distribution plan, if any: its plan opens selected, with its allocation
+const currentRule = computed(() => {
+  const envelopeId = props.envelope?.id
+  if (!envelopeId) return null
+  for (const plan of props.plans) {
+    const rule = plan.rules?.find((r: any) => r.envelopeId === envelopeId)
+    if (rule) return { planId: plan.id as string, rule }
+  }
+  return null
+})
+const originalPlanId = ref<string | null>(null)
+
 const loadFormFromEnvelope = () => {
   const envelope = props.envelope
   const schedule = parseBillSchedule(envelope)
+  originalPlanId.value = currentRule.value?.planId ?? null
   formData.value = {
     name: envelope?.name || '',
     homeAccountId: envelope?.homeAccountId || props.accountId,
@@ -113,10 +126,10 @@ const loadFormFromEnvelope = () => {
     linkedEnvelopeId: envelope?.linkedEnvelopeId,
     sharedPercentage: envelope?.sharedPercentage,
     isShared: envelope?.isShared || false,
-    selectedPlanId: null,
-    planAllocationType: 'FixedAmount',
-    planFixedAmount: null,
-    planPercentage: null
+    selectedPlanId: originalPlanId.value,
+    planAllocationType: currentRule.value?.rule.allocationType ?? 'FixedAmount',
+    planFixedAmount: currentRule.value?.rule.fixedAmount?.amount ?? null,
+    planPercentage: currentRule.value?.rule.percentageValue ?? null
   }
 }
 
@@ -124,9 +137,10 @@ watch(() => props.isOpen, (open) => {
   if (open && !props.submitError) loadFormFromEnvelope()
 })
 
-// Suggest the allocation type that fits the envelope once a plan is picked; the user can change it
+// Suggest the allocation type that fits the envelope once a different plan is picked; the user can change it.
+// The envelope's own plan keeps the allocation it already has (loaded with the form).
 watch(() => formData.value.selectedPlanId, (planId) => {
-  if (!planId) return
+  if (!planId || planId === originalPlanId.value) return
   if (isBillPurpose.value) formData.value.planAllocationType = 'BillProrated'
   else if (formData.value.isAutomaticWithdrawal) formData.value.planAllocationType = 'Automatic'
   else formData.value.planAllocationType = 'FixedAmount'
@@ -145,7 +159,9 @@ const isAnnualSchedule = computed(() => formData.value.scheduleType === 'AnnualS
 // (never for a debt, which is paid by hand)
 const allocationTypes = computed(() => [
   ...(isBillPurpose.value ? [{ value: 'BillProrated', label: t('envelopes.form.billProrated') }] : []),
-  ...(formData.value.isAutomaticWithdrawal && !isDebtPurpose.value ? [{ value: 'Automatic', label: t('envelopes.form.automatic') }] : []),
+  ...((formData.value.isAutomaticWithdrawal && !isDebtPurpose.value) || formData.value.planAllocationType === 'Automatic'
+    ? [{ value: 'Automatic', label: t('envelopes.form.automatic') }]
+    : []),
   { value: 'FixedAmount', label: t('envelopes.form.fixedAmount') },
   { value: 'Percentage', label: t('envelopes.form.percentage') }
 ])

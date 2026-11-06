@@ -299,25 +299,31 @@ const handleEnvelopeSave = async (envelopeData: any) => {
       await envelopesApi.setColor(envelopeId, color ?? null)
     }
 
-    if (selectedPlanId) {
-      // One rule per envelope per plan: skip if the plan already distributes to this envelope
-      const plan = jobs.value.find(j => j.id === selectedPlanId)
-      const alreadyInPlan = plan?.rules?.some((r: any) => r.envelopeId === envelopeId)
-      if (alreadyInPlan) {
-        console.warn('This envelope already has a rule in the selected plan; skipping.')
-      } else {
-        try {
-          await jobsApi.addRule(selectedPlanId, {
-            envelopeId,
-            allocationType: planAllocationType,
-            fixedAmount: planAllocationType === 'FixedAmount' ? planFixedAmount : null,
-            percentageValue: planAllocationType === 'Percentage' ? planPercentage : null,
-            priority: 'Medium'
-          })
-        } catch (ruleErr) {
-          console.error('Envelope saved but adding its rule to the plan failed:', ruleErr)
-        }
-      }
+    // The envelope has at most one rule, in the plan chosen in the form. Rules it has elsewhere, or an
+    // outdated rule in the same plan, are removed first; then the rule for the chosen plan is added.
+    const sameRule = (rule: any) =>
+      rule.allocationType === planAllocationType &&
+      (planAllocationType !== 'FixedAmount' || Number(rule.fixedAmount?.amount ?? 0) === Number(planFixedAmount ?? 0)) &&
+      (planAllocationType !== 'Percentage' || Number(rule.percentageValue ?? 0) === Number(planPercentage ?? 0))
+    const existingRules = jobs.value.flatMap(job =>
+      (job.rules ?? [])
+        .map((rule: any, index: number) => ({ planId: job.id, index, rule }))
+        .filter((entry: any) => entry.rule.envelopeId === envelopeId)
+    )
+    const kept = existingRules.find(entry => entry.planId === selectedPlanId && sameRule(entry.rule))
+    // Highest index first, so the indexes still to remove stay valid within their plan
+    const toRemove = existingRules.filter(entry => entry !== kept).sort((a, b) => b.index - a.index)
+    for (const entry of toRemove) {
+      await jobsApi.deleteRule(entry.planId, entry.index)
+    }
+    if (selectedPlanId && !kept) {
+      await jobsApi.addRule(selectedPlanId, {
+        envelopeId,
+        allocationType: planAllocationType,
+        fixedAmount: planAllocationType === 'FixedAmount' ? planFixedAmount : null,
+        percentageValue: planAllocationType === 'Percentage' ? planPercentage : null,
+        priority: 'Medium'
+      })
     }
 
     await loadDashboard()
