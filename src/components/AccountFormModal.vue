@@ -12,11 +12,12 @@ interface Account {
   debt?: DebtTermsForm
 }
 
-// Starting values for a new card: weekly payments, the usual monthly compounding
+// Starting values for a new card. Payments are made by hand from the debt envelope, so the
+// payment frequency is not asked; the backend still needs a value, so it is fixed here.
 const defaultDebtTerms = (): DebtTermsForm => ({
   rateType: 'Variable',
   compoundingFrequency: 'Monthly',
-  paymentFrequency: 'Weekly'
+  paymentFrequency: 'Monthly'
 })
 
 const props = withDefaults(defineProps<{
@@ -68,12 +69,6 @@ watch(() => props.account, (newAccount) => {
 // Debt terms are asked only for credit cards
 const isCredit = computed(() => isCreditAccount(formData.value.type))
 
-const paymentFrequencies = [
-  { value: 'Weekly', label: 'Chaque semaine' },
-  { value: 'BiWeekly', label: 'Aux 2 semaines' },
-  { value: 'SemiMonthly', label: 'Deux fois par mois' },
-  { value: 'Monthly', label: 'Chaque mois' }
-]
 
 const isEditing = computed(() => !!props.account?.id)
 
@@ -211,15 +206,6 @@ const currencies = [
           <div class="form-group">
             <label>Paiement minimum</label>
             <input v-model.number="formData.debt.minimumPayment" type="number" min="0" step="0.01" placeholder="Ex: 75" />
-          </div>
-
-          <div class="form-group">
-            <label>Fréquence des paiements</label>
-            <select v-model="formData.debt.paymentFrequency">
-              <option v-for="freq in paymentFrequencies" :key="freq.value" :value="freq.value">
-                {{ freq.label }}
-              </option>
-            </select>
           </div>
 
           <div class="form-group">
