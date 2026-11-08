@@ -1,13 +1,23 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { isCreditAccount } from '../utils/accounts'
+import type { DebtTermsForm } from '../api/accounts'
 
 interface Account {
   id?: string
   name: string
   type: string
   currency: string
+  debt?: DebtTermsForm
 }
+
+// Starting values for a new card: weekly payments, the usual monthly compounding
+const defaultDebtTerms = (): DebtTermsForm => ({
+  rateType: 'Variable',
+  compoundingFrequency: 'Monthly',
+  paymentFrequency: 'Weekly'
+})
 
 const props = withDefaults(defineProps<{
   isOpen: boolean
@@ -30,7 +40,8 @@ const { t } = useI18n()
 const formData = ref<Account>({
   name: props.account?.name || '',
   type: props.account?.type || 'checking',
-  currency: props.account?.currency || 'CAD'
+  currency: props.account?.currency || 'CAD',
+  debt: props.account?.debt || defaultDebtTerms()
 })
 
 // Watch for changes to account prop to update form data
@@ -40,17 +51,29 @@ watch(() => props.account, (newAccount) => {
       id: newAccount.id,
       name: newAccount.name || '',
       type: newAccount.type || 'checking',
-      currency: newAccount.currency || 'CAD'
+      currency: newAccount.currency || 'CAD',
+      debt: newAccount.debt || defaultDebtTerms()
     }
   } else {
     // Reset form for new account
     formData.value = {
       name: '',
       type: 'checking',
-      currency: 'CAD'
+      currency: 'CAD',
+      debt: defaultDebtTerms()
     }
   }
 }, { deep: true, immediate: true })
+
+// Debt terms are asked only for credit cards
+const isCredit = computed(() => isCreditAccount(formData.value.type))
+
+const paymentFrequencies = [
+  { value: 'Weekly', label: 'Chaque semaine' },
+  { value: 'BiWeekly', label: 'Aux 2 semaines' },
+  { value: 'SemiMonthly', label: 'Deux fois par mois' },
+  { value: 'Monthly', label: 'Chaque mois' }
+]
 
 const isEditing = computed(() => !!props.account?.id)
 
@@ -73,6 +96,20 @@ const handleSubmit = () => {
     return
   }
 
+  if (isCredit.value) {
+    const debt = formData.value.debt
+    // v-model.number leaves an empty field as '' rather than a number
+    const isMissing = (value: unknown) => value === undefined || value === null || value === ''
+    if (isMissing(debt?.interestRate) || Number(debt?.interestRate) < 0) {
+      validationError.value = 'Le taux d\'intérêt annuel est requis'
+      return
+    }
+    if (isMissing(debt?.minimumPayment) || Number(debt?.minimumPayment) < 0) {
+      validationError.value = 'Le paiement minimum est requis'
+      return
+    }
+  }
+
   console.log('Submitting account form:', formData.value)
   emit('save', formData.value)
 }
@@ -83,7 +120,8 @@ const handleClose = () => {
   formData.value = {
     name: '',
     type: 'checking',
-    currency: 'CAD'
+    currency: 'CAD',
+    debt: defaultDebtTerms()
   }
 }
 
@@ -144,6 +182,51 @@ const currencies = [
             </option>
           </select>
         </div>
+
+        <template v-if="isCredit && formData.debt">
+          <h3 class="debt-title">Conditions de la carte</h3>
+
+          <div class="form-group">
+            <label>Taux d'intérêt annuel (%)</label>
+            <input v-model.number="formData.debt.interestRate" type="number" min="0" step="0.01" placeholder="Ex: 19.99" />
+          </div>
+
+          <div class="form-group">
+            <label>Type de taux</label>
+            <select v-model="formData.debt.rateType">
+              <option value="Variable">Variable</option>
+              <option value="Fixed">Fixe</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Capitalisation des intérêts</label>
+            <select v-model="formData.debt.compoundingFrequency">
+              <option value="Daily">Quotidienne</option>
+              <option value="Monthly">Mensuelle</option>
+              <option value="Annually">Annuelle</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Paiement minimum</label>
+            <input v-model.number="formData.debt.minimumPayment" type="number" min="0" step="0.01" placeholder="Ex: 75" />
+          </div>
+
+          <div class="form-group">
+            <label>Fréquence des paiements</label>
+            <select v-model="formData.debt.paymentFrequency">
+              <option v-for="freq in paymentFrequencies" :key="freq.value" :value="freq.value">
+                {{ freq.label }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Limite de crédit (facultatif)</label>
+            <input v-model.number="formData.debt.creditLimit" type="number" min="0" step="0.01" placeholder="Ex: 3000" />
+          </div>
+        </template>
       </div>
 
         <p v-if="submitError" class="error-text">{{ submitError }}</p>
@@ -266,6 +349,12 @@ const currencies = [
   outline: none;
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.debt-title {
+  margin: 0;
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
 }
 
 .delete-zone {

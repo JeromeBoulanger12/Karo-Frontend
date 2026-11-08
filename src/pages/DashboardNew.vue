@@ -18,7 +18,7 @@ import WithdrawEnvelopeModal from '../components/WithdrawEnvelopeModal.vue'
 import AddFundsModal from '../components/AddFundsModal.vue'
 import JobFormModal from '../components/JobFormModal.vue'
 import DepositPaycheckModal from '../components/DepositPaycheckModal.vue'
-import { accountsApi } from '../api/accounts'
+import { accountsApi, toDebtProfileInput, fromDebtProfileDto } from '../api/accounts'
 import { envelopesApi } from '../api/envelopes'
 import { jobsApi } from '../api/jobs'
 import { dashboardAPI } from '../api/dashboard'
@@ -223,10 +223,21 @@ const openAddAccountModal = () => {
   showAccountModal.value = true
 }
 
-const openEditAccountModal = (account: any) => {
+const openEditAccountModal = async (account: any) => {
   submitError.value = ''
   selectedAccount.value = account
   showAccountModal.value = true
+  // The overview does not carry debt terms, so a credit card's terms are read from its detail
+  if (isCreditAccount(account.type)) {
+    try {
+      const { data: detail } = await accountsApi.getAccount(account.id)
+      if (detail.debtProfile && selectedAccount.value?.id === account.id) {
+        selectedAccount.value = { ...account, debt: fromDebtProfileDto(detail.debtProfile) }
+      }
+    } catch (err) {
+      console.error('Error loading account details:', err)
+    }
+  }
 }
 
 const handleAccountSave = async (accountData: any) => {
@@ -236,7 +247,11 @@ const handleAccountSave = async (accountData: any) => {
       // Edit existing - transform balance to NewBalance for API
       const updateData = {
         name: accountData.name,
-        newBalance: accountData.balance
+        newBalance: accountData.balance,
+        // Debt terms are sent for a credit card, so one created before they were captured can get them
+        debtProfile: isCreditAccount(selectedAccount.value.type) && accountData.debt
+          ? toDebtProfileInput(accountData.debt)
+          : undefined
       }
       await accountsApi.updateAccount(selectedAccount.value.id, updateData)
     } else {
