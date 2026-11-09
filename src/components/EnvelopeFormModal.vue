@@ -20,7 +20,7 @@ interface FormData {
   isAutomaticWithdrawal?: boolean
   withdrawalFrequency?: string
   linkedEnvelopeId?: string
-  // Debt envelopes: the credit card they pay down (chosen at creation only)
+  // Debt envelopes: the credit card they pay down
   targetAccountId?: string
   sharedPercentage?: number
   isShared?: boolean
@@ -68,6 +68,7 @@ const formData = ref<FormData>({
   isAutomaticWithdrawal: props.envelope?.isAutomaticWithdrawal || false,
   withdrawalFrequency: props.envelope?.withdrawalFrequency,
   linkedEnvelopeId: props.envelope?.linkedEnvelopeId,
+  targetAccountId: props.envelope?.targetAccountId,
   sharedPercentage: props.envelope?.sharedPercentage,
   isShared: props.envelope?.isShared || false,
   selectedPlanId: null,
@@ -124,6 +125,7 @@ const loadFormFromEnvelope = () => {
     isAutomaticWithdrawal: envelope?.isAutomaticWithdrawal || false,
     withdrawalFrequency: envelope?.withdrawalFrequency,
     linkedEnvelopeId: envelope?.linkedEnvelopeId,
+    targetAccountId: envelope?.targetAccountId,
     sharedPercentage: envelope?.sharedPercentage,
     isShared: envelope?.isShared || false,
     selectedPlanId: originalPlanId.value,
@@ -194,7 +196,7 @@ const handleSubmit = () => {
     return
   }
 
-  if (isDebtPurpose.value && !isEditing.value && !formData.value.targetAccountId) {
+  if (isDebtPurpose.value && !formData.value.targetAccountId) {
     validationError.value = 'La carte à rembourser est requise pour une enveloppe de dette'
     return
   }
@@ -224,7 +226,8 @@ const handleSubmit = () => {
     }
   }
 
-  emit('save', formData.value)
+  // Only a debt envelope has a card; a card left over from an earlier debt purpose is not sent
+  emit('save', { ...formData.value, targetAccountId: isDebtPurpose.value ? formData.value.targetAccountId : undefined })
 }
 
 // Deleting also removes the envelope from any distribution plan rules (done by the backend)
@@ -343,7 +346,7 @@ const withdrawalFrequencies = [
         </div>
 
         <!-- Debt envelopes: paying one takes the money from this envelope and from the account it is funded from -->
-        <div v-if="isDebtPurpose && !isEditing" class="form-group">
+        <div v-if="isDebtPurpose" class="form-group">
           <label>Carte à rembourser *</label>
           <select v-model="formData.targetAccountId">
             <option value="" disabled>-- Choisir une carte --</option>
