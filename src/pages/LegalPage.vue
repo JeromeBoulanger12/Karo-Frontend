@@ -7,7 +7,7 @@ import { LEGAL_VERSION } from '../legal/version'
 // The route decides which document is shown: 'privacy' or 'terms'
 const props = defineProps<{ document: 'privacy' | 'terms' }>()
 
-const { locale } = useI18n()
+const { t, locale } = useI18n()
 
 const content = computed(() => {
   const lang = locale.value === 'en' ? 'en' : 'fr'
@@ -22,12 +22,12 @@ const content = computed(() => {
 
       <!-- Shown until a lawyer or privacy expert has reviewed the text -->
       <v-alert type="warning" variant="tonal" class="mb-6">
-        {{ locale === 'en' ? 'Draft: this text is pending legal review.' : 'Ébauche : ce texte est en attente de révision juridique.' }}
+        {{ t('legalPage.draft') }}
       </v-alert>
 
       <h1>{{ content.title }}</h1>
       <p class="legal-version">
-        Version {{ LEGAL_VERSION }}
+        {{ t('legalPage.version', { version: LEGAL_VERSION }) }}
       </p>
 
       <section v-for="section in content.sections" :key="section.heading" class="legal-section">

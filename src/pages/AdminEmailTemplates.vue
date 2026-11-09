@@ -13,8 +13,8 @@
         <label class="field">
           <span>{{ t('adminEmail.locale') }}</span>
           <select v-model="locale" @change="loadTemplate">
-            <option value="fr">Français</option>
-            <option value="en">English</option>
+            <option value="fr">{{ t('adminEmailTemplates.languageFrench') }}</option>
+            <option value="en">{{ t('adminEmailTemplates.languageEnglish') }}</option>
           </select>
         </label>
 
@@ -33,7 +33,7 @@
       <!-- Editor -->
       <section v-if="template" class="editor card">
         <p class="variables">
-          <strong>{{ t('adminEmail.availableVariables') }} :</strong>
+          <strong>{{ t('adminEmailTemplates.labelWithColon', { label: t('adminEmail.availableVariables') }) }}</strong>
           <code v-for="variable in template.variables" :key="variable">{{ placeholder(variable) }}</code>
         </p>
 
@@ -109,7 +109,7 @@
 
         <div v-if="previewResult" class="preview">
           <h3>{{ t('adminEmail.previewTitle') }}</h3>
-          <p><strong>{{ t('adminEmail.subject') }} :</strong> {{ previewResult.subject }}</p>
+          <p><strong>{{ t('adminEmailTemplates.labelWithColon', { label: t('adminEmail.subject') }) }}</strong> {{ previewResult.subject }}</p>
           <iframe sandbox="" :srcdoc="previewResult.html" class="preview-frame" :title="t('adminEmail.previewTitle')"></iframe>
           <details>
             <summary>{{ t('adminEmail.textVersion') }}</summary>

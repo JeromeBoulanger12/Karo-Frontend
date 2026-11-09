@@ -32,13 +32,13 @@ import '../styles/dashboard.css'
 
 // Helper function for formatting currency
 const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('fr-CA', {
+  return new Intl.NumberFormat(locale.value, {
     style: 'currency',
     currency: 'CAD'
   }).format(value)
 }
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const router = useRouter()
 
 // Data refs
@@ -202,8 +202,8 @@ const tierBadge = computed(() => {
   const tier = dashboardStats.value?.subscriptionTier || 'Free'
   const priceMap: Record<string, string> = {
     Free: '$0',
-    Pro: '$9.99/mois',
-    Family: '$19.99/mois'
+    Pro: t('dashboardPage.tierPrice.pro'),
+    Family: t('dashboardPage.tierPrice.family')
   }
   return {
     tier: tier as 'Free' | 'Pro' | 'Family',
@@ -549,7 +549,7 @@ const openAdjustModal = async (job: any) => {
       .filter(e => e.isAutomatic)
       .sort((a, b) => new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime())[0]
     if (!latest) {
-      window.alert("Aucune paie automatique n'a encore été déposée pour cette source. Elle pourra être ajustée après son premier dépôt.")
+      window.alert(t('dashboardPage.alerts.noAutomaticPaycheck'))
       return
     }
     selectedAdjustJob.value = job
@@ -557,7 +557,7 @@ const openAdjustModal = async (job: any) => {
     showAdjustModal.value = true
   } catch (err) {
     console.error('Error loading paychecks:', err)
-    window.alert('Impossible de charger les paies de cette source. Réessayez.')
+    window.alert(t('dashboardPage.alerts.adjustLoadError'))
   }
 }
 
@@ -599,7 +599,7 @@ const loadDashboard = async () => {
     // Enrich jobs with account names
     jobs.value = (overview.jobs || []).map((job: any) => ({
       ...job,
-      accountName: accounts.value.find(a => a.id === job.homeAccountId)?.name || 'Account'
+      accountName: accounts.value.find(a => a.id === job.homeAccountId)?.name || t('dashboardPage.defaultAccountName')
     }))
   } catch (err: any) {
     error.value = err?.message || t('dashboard.error_loading')
@@ -705,7 +705,7 @@ onMounted(() => {
     <!-- Loading state -->
     <div v-if="loading" class="loading-container">
       <div class="spinner"></div>
-      <p>{{ t('common.loading') || 'Chargement...' }}</p>
+      <p>{{ t('common.loading') || t('dashboardPage.loading') }}</p>
     </div>
 
     <!-- Error state -->
@@ -731,7 +731,7 @@ onMounted(() => {
           </router-link>
           <button v-if="!hasAutomaticPaycheck" class="btn-deposit-paycheck" @click="openDepositPaycheckModal">
             <i class="mdi mdi-plus-circle"></i>
-            Déposer une paie
+            {{ t('dashboardPage.actions.depositPaycheck') }}
           </button>
         </template>
       </PageHeader>
@@ -751,12 +751,12 @@ onMounted(() => {
       />
 
       <!-- Jump links: the accounts and paychecks sections are long on a dashboard with many accounts -->
-      <nav class="section-jump" aria-label="Sections du tableau de bord">
+      <nav class="section-jump" :aria-label="t('dashboardPage.jumpLabel')">
         <button type="button" @click="jumpTo('section-comptes')">
-          <i class="mdi mdi-bank"></i> Comptes
+          <i class="mdi mdi-bank"></i> {{ t('dashboardPage.jump.accounts') }}
         </button>
         <button type="button" @click="jumpTo('section-paie')">
-          <i class="mdi mdi-calendar-multiple"></i> Paie
+          <i class="mdi mdi-calendar-multiple"></i> {{ t('dashboardPage.jump.paycheck') }}
         </button>
       </nav>
 
@@ -767,11 +767,11 @@ onMounted(() => {
         <div class="section-header">
           <h2 class="section-title">
             <i class="mdi mdi-bank"></i>
-            Vos comptes et enveloppes
+            {{ t('dashboardPage.sections.accounts') }}
           </h2>
           <button class="btn-add-account" @click="openAddAccountModal">
             <i class="mdi mdi-plus"></i>
-            Ajouter un compte
+            {{ t('dashboardPage.actions.addAccount') }}
           </button>
         </div>
 
@@ -780,7 +780,7 @@ onMounted(() => {
           <p>{{ t('dashboard.noAccounts') }}</p>
           <button class="btn-create" @click="openAddAccountModal">
             <i class="mdi mdi-plus"></i>
-            Créer un compte
+            {{ t('dashboardPage.actions.createAccount') }}
           </button>
         </div>
 
@@ -809,19 +809,19 @@ onMounted(() => {
         <div class="section-header">
           <h2 class="section-title">
             <i class="mdi mdi-calendar-multiple"></i>
-            Paie et revenus
+            {{ t('dashboardPage.sections.paycheck') }}
           </h2>
           <button class="btn-add-paycheck" @click="openDepositPaycheckModal">
             <i class="mdi mdi-plus-circle"></i>
-            Déposer une paie
+            {{ t('dashboardPage.actions.depositPaycheck') }}
           </button>
         </div>
 
         <div v-if="jobs.length === 0" class="jobs-grid">
           <div class="add-job-card" @click="openAddJobModal('')">
             <i class="mdi mdi-plus"></i>
-            <p>Ajouter une source de revenu</p>
-            <button class="btn-create">Ajouter</button>
+            <p>{{ t('dashboardPage.jobs.addSource') }}</p>
+            <button class="btn-create">{{ t('dashboardPage.jobs.add') }}</button>
           </div>
         </div>
 
@@ -837,8 +837,8 @@ onMounted(() => {
           />
           <div class="add-job-card" @click="openAddJobModal('')">
             <i class="mdi mdi-plus"></i>
-            <p>Ajouter une source de revenu</p>
-            <button class="btn-create">Ajouter</button>
+            <p>{{ t('dashboardPage.jobs.addSource') }}</p>
+            <button class="btn-create">{{ t('dashboardPage.jobs.add') }}</button>
           </div>
         </div>
       </section>

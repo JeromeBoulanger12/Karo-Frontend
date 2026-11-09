@@ -82,12 +82,12 @@ const handleSubmit = () => {
 
   // Validate required fields
   if (!formData.value.name || !formData.value.name.trim()) {
-    validationError.value = 'Account name is required'
+    validationError.value = t('accountForm.form.nameRequired')
     return
   }
 
   if (!formData.value.type) {
-    validationError.value = 'Account type is required'
+    validationError.value = t('accountForm.form.typeRequired')
     return
   }
 
@@ -140,7 +140,7 @@ const currencies = [
   <div v-if="isOpen" class="modal-overlay" @click="handleClose">
     <div class="modal" @click.stop>
       <div class="modal-header">
-        <h2>{{ isEditing ? 'Éditer' : 'Ajouter' }} Compte</h2>
+        <h2>{{ isEditing ? t('accountForm.form.editTitle') : t('accountForm.form.addTitle') }}</h2>
         <button class="modal-close" @click="handleClose">
           <i class="mdi mdi-close"></i>
         </button>
@@ -152,12 +152,12 @@ const currencies = [
         </div>
 
         <div class="form-group">
-          <label>{{ t('accounts.name') || 'Nom du compte' }}</label>
-          <input v-model="formData.name" type="text" :placeholder="isEditing ? formData.name : 'Ex: Mon compte chèques...'" />
+          <label>{{ t('accounts.name') }}</label>
+          <input v-model="formData.name" type="text" :placeholder="isEditing ? formData.name : t('accountForm.form.namePlaceholder')" />
         </div>
 
         <div class="form-group">
-          <label>{{ t('accounts.type') || 'Type de compte' }}</label>
+          <label>{{ t('accounts.type') }}</label>
           <select v-model="formData.type">
             <option v-if="!accountTypes.find(t => t.value === formData.type) && formData.type" :value="formData.type">
               {{ formData.type }}
@@ -169,7 +169,7 @@ const currencies = [
         </div>
 
         <div class="form-group">
-          <label>{{ t('accounts.currency') || 'Devise' }}</label>
+          <label>{{ t('accounts.currency') }}</label>
           <select v-model="formData.currency">
             <option v-if="!currencies.find(c => c.value === formData.currency) && formData.currency" :value="formData.currency">
               {{ formData.currency }}
@@ -227,14 +227,14 @@ const currencies = [
           <p class="delete-warning">{{ t('entityDelete.confirmAccount') }}</p>
           <div class="delete-actions">
             <button class="btn-danger" @click="emit('delete')">{{ t('entityDelete.confirmButton') }}</button>
-            <button class="btn-secondary" @click="confirmingDelete = false">{{ t('common.cancel') || 'Annuler' }}</button>
+            <button class="btn-secondary" @click="confirmingDelete = false">{{ t('common.cancel') }}</button>
           </div>
         </template>
       </div>
 
       <div class="modal-footer">
-        <button class="btn-secondary" @click="handleClose">{{ t('common.cancel') || 'Annuler' }}</button>
-        <button class="btn-primary" @click="handleSubmit">{{ t('common.save') || 'Enregistrer' }}</button>
+        <button class="btn-secondary" @click="handleClose">{{ t('common.cancel') }}</button>
+        <button class="btn-primary" @click="handleSubmit">{{ t('common.save') }}</button>
       </div>
     </div>
   </div>

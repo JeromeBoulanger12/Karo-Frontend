@@ -38,7 +38,7 @@ onMounted(() => {
       </div>
 
       <v-alert v-if="sessionExpired && !error" type="info" class="mb-4">
-        Ta session a expiré. Reconnecte-toi pour continuer.
+        {{ t('loginPage.sessionExpired') }}
       </v-alert>
 
       <v-alert v-if="error" type="error" class="mb-4">

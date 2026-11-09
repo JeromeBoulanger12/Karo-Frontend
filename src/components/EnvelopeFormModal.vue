@@ -182,27 +182,27 @@ const handleSubmit = () => {
   validationError.value = ''
 
   if (!formData.value.name || !formData.value.name.trim()) {
-    validationError.value = 'Le nom est requis'
+    validationError.value = t('envelopeForm.errors.nameRequired')
     return
   }
 
   if (isBillPurpose.value && !formData.value.scheduleType) {
-    validationError.value = 'Le type de calendrier est requis pour une facture'
+    validationError.value = t('envelopeForm.errors.billScheduleRequired')
     return
   }
 
   if (isBillPurpose.value && isAnnualSchedule.value && formData.value.paymentDates?.length === 0) {
-    validationError.value = 'Au moins une date de paiement est requise pour un calendrier annuel'
+    validationError.value = t('envelopeForm.errors.annualDatesRequired')
     return
   }
 
   if (isDebtPurpose.value && !formData.value.targetAccountId) {
-    validationError.value = 'La carte à rembourser est requise pour une enveloppe de dette'
+    validationError.value = t('envelopeForm.errors.debtCardRequired')
     return
   }
 
   if (formData.value.isAutomaticWithdrawal && !formData.value.withdrawalFrequency) {
-    validationError.value = 'La fréquence de prélèvement est requise'
+    validationError.value = t('envelopeForm.errors.withdrawalFrequencyRequired')
     return
   }
 
@@ -234,7 +234,7 @@ const handleSubmit = () => {
 const handleDelete = () => {
   if (!props.envelope?.id) return
   const confirmed = window.confirm(
-    `Supprimer l'enveloppe « ${props.envelope.name} » ? Elle sera aussi retirée des règles de distribution.`
+    t('envelopeForm.confirmDelete', { name: props.envelope.name })
   )
   if (confirmed) emit('delete', props.envelope.id)
 }
@@ -267,27 +267,28 @@ const removePaymentDate = (index: number) => {
   formData.value.paymentDates?.splice(index, 1)
 }
 
+// Labels are translation keys, resolved with t() in the template so they follow the locale
 const purposes = [
-  { value: 'GeneralReserve', label: 'Réserve générale' },
-  { value: 'SavingsGoal', label: 'Objectif d\'épargne' },
-  { value: 'Bill', label: 'Facture' },
-  { value: 'DebtPayment', label: 'Remboursement de dette' },
-  { value: 'WeeklyExpenses', label: 'Dépenses hebdomadaires' },
-  { value: 'Mortgage', label: 'Hypothèque/Loyer' }
+  { value: 'GeneralReserve', label: 'envelopeForm.purposes.GeneralReserve' },
+  { value: 'SavingsGoal', label: 'envelopeForm.purposes.SavingsGoal' },
+  { value: 'Bill', label: 'envelopeForm.purposes.Bill' },
+  { value: 'DebtPayment', label: 'envelopeForm.purposes.DebtPayment' },
+  { value: 'WeeklyExpenses', label: 'envelopeForm.purposes.WeeklyExpenses' },
+  { value: 'Mortgage', label: 'envelopeForm.purposes.Mortgage' }
 ]
 
 const billScheduleTypes = [
-  { value: 'Monthly', label: 'Mensuel' },
-  { value: 'AnnualScheduled', label: 'Annuel (dates spécifiques)' }
+  { value: 'Monthly', label: 'envelopeForm.scheduleTypes.Monthly' },
+  { value: 'AnnualScheduled', label: 'envelopeForm.scheduleTypes.AnnualScheduled' }
 ]
 
 const withdrawalFrequencies = [
-  { value: 'Weekly', label: 'Hebdomadaire' },
-  { value: 'BiWeekly', label: 'Tous les 2 semaines' },
-  { value: 'Monthly', label: 'Mensuel' },
-  { value: 'Quarterly', label: 'Trimestriel' },
-  { value: 'SemiAnnual', label: 'Semestriel' },
-  { value: 'Annual', label: 'Annuel' }
+  { value: 'Weekly', label: 'envelopeForm.withdrawalFrequencies.Weekly' },
+  { value: 'BiWeekly', label: 'envelopeForm.withdrawalFrequencies.BiWeekly' },
+  { value: 'Monthly', label: 'envelopeForm.withdrawalFrequencies.Monthly' },
+  { value: 'Quarterly', label: 'envelopeForm.withdrawalFrequencies.Quarterly' },
+  { value: 'SemiAnnual', label: 'envelopeForm.withdrawalFrequencies.SemiAnnual' },
+  { value: 'Annual', label: 'envelopeForm.withdrawalFrequencies.Annual' }
 ]
 </script>
 
@@ -295,7 +296,7 @@ const withdrawalFrequencies = [
   <div v-if="isOpen" class="modal-overlay" @click="handleClose">
     <div class="modal" @click.stop>
       <div class="modal-header">
-        <h2>{{ isEditing ? 'Éditer' : 'Ajouter' }} Enveloppe</h2>
+        <h2>{{ isEditing ? t('envelopeForm.title.edit') : t('envelopeForm.title.add') }}</h2>
         <button class="modal-close" @click="handleClose">
           <i class="mdi mdi-close"></i>
         </button>
@@ -308,18 +309,18 @@ const withdrawalFrequencies = [
 
         <!-- Basic Info -->
         <div class="form-group">
-          <label>Nom de l'enveloppe *</label>
-          <input v-model="formData.name" type="text" placeholder="Ex: Loyer, Épicerie..." />
+          <label>{{ t('envelopeForm.name.label') }}</label>
+          <input v-model="formData.name" type="text" :placeholder="t('envelopeForm.name.placeholder')" />
         </div>
 
         <div class="form-group">
-          <label>Couleur</label>
+          <label>{{ t('envelopeForm.color.label') }}</label>
           <div v-if="canCustomize" class="color-choices">
             <button
               type="button"
               class="color-swatch color-none"
               :class="{ selected: !formData.color }"
-              title="Aucune couleur"
+              :title="t('envelopeForm.color.none')"
               @click="formData.color = null"
             >×</button>
             <button
@@ -333,56 +334,56 @@ const withdrawalFrequencies = [
               @click="formData.color = choice"
             ></button>
           </div>
-          <p v-else class="paid-hint">Les couleurs sont offertes avec un abonnement payant.</p>
+          <p v-else class="paid-hint">{{ t('envelopeForm.color.paidHint') }}</p>
         </div>
 
         <div class="form-group">
-          <label>Objectif *</label>
+          <label>{{ t('envelopeForm.purposeLabel') }}</label>
           <select v-model="formData.purpose">
             <option v-for="p in purposes" :key="p.value" :value="p.value">
-              {{ p.label }}
+              {{ t(p.label) }}
             </option>
           </select>
         </div>
 
         <!-- Debt envelopes: paying one takes the money from this envelope and from the account it is funded from -->
         <div v-if="isDebtPurpose" class="form-group">
-          <label>Carte à rembourser *</label>
+          <label>{{ t('envelopeForm.debtCard.label') }}</label>
           <select v-model="formData.targetAccountId">
-            <option value="" disabled>-- Choisir une carte --</option>
+            <option value="" disabled>{{ t('envelopeForm.debtCard.choose') }}</option>
             <option v-for="acc in debtAccounts" :key="acc.id" :value="acc.id">
               {{ acc.name }}
             </option>
           </select>
-          <p v-if="debtAccounts.length === 0" class="hint">Aucune carte de crédit disponible.</p>
+          <p v-if="debtAccounts.length === 0" class="hint">{{ t('envelopeForm.debtCard.none') }}</p>
         </div>
 
         <!-- For Bills: Payment Schedule -->
         <div v-if="isBillPurpose" class="section-divider">
-          <h3>Montant et calendrier de paiement</h3>
+          <h3>{{ t('envelopeForm.sections.bill') }}</h3>
 
           <div class="form-group">
-            <label>Montant de la facture</label>
+            <label>{{ t('envelopeForm.bill.amount') }}</label>
             <input v-model.number="formData.targetAmount" type="number" placeholder="0.00" />
           </div>
 
           <div class="form-group">
-            <label>Calendrier de paiement *</label>
+            <label>{{ t('envelopeForm.bill.schedule') }}</label>
             <select v-model="formData.scheduleType">
-              <option value="">-- Sélectionner --</option>
+              <option value="">{{ t('envelopeForm.selectPlaceholder') }}</option>
               <option v-for="type in billScheduleTypes" :key="type.value" :value="type.value">
-                {{ type.label }}
+                {{ t(type.label) }}
               </option>
             </select>
           </div>
 
           <div v-if="formData.scheduleType === 'Monthly'" class="form-group">
-            <label>Jour du mois où la facture est due (1-31)</label>
+            <label>{{ t('envelopeForm.bill.dayOfMonth') }}</label>
             <input v-model.number="formData.dayOfMonth" type="number" min="1" max="31" placeholder="15" />
           </div>
 
           <div v-if="isAnnualSchedule" class="form-group">
-            <label>Dates de paiement dans l'année</label>
+            <label>{{ t('envelopeForm.bill.paymentDates') }}</label>
             <div class="date-list">
               <div v-for="(date, idx) in formData.paymentDates" :key="idx" class="date-item">
                 <span>{{ date }}</span>
@@ -390,53 +391,53 @@ const withdrawalFrequencies = [
               </div>
             </div>
             <div class="date-input-group">
-              <input v-model="newPaymentDate" type="date" placeholder="Sélectionner une date" />
-              <button type="button" class="btn-add" @click="addPaymentDate">Ajouter</button>
+              <input v-model="newPaymentDate" type="date" :placeholder="t('envelopeForm.bill.paymentDatePlaceholder')" />
+              <button type="button" class="btn-add" @click="addPaymentDate">{{ t('envelopeForm.bill.addPaymentDate') }}</button>
             </div>
           </div>
         </div>
 
         <!-- For Non-Bills: Target Amount & Date -->
         <div v-if="!isBillPurpose" class="section-divider">
-          <h3>{{ isDebtPurpose ? 'Dette' : 'Objectif' }}</h3>
+          <h3>{{ isDebtPurpose ? t('envelopeForm.sections.debt') : t('envelopeForm.sections.goal') }}</h3>
 
           <div class="form-group">
-            <label>{{ isDebtPurpose ? 'Montant de la dette' : 'Montant cible' }}</label>
+            <label>{{ isDebtPurpose ? t('envelopeForm.debt.amount') : t('envelopeForm.goal.targetAmount') }}</label>
             <input v-model.number="formData.targetAmount" type="number" placeholder="0.00" />
           </div>
 
           <div class="form-group">
-            <label>{{ isDebtPurpose ? 'Échéance' : 'Date cible (quand atteindre cet objectif)' }}</label>
+            <label>{{ isDebtPurpose ? t('envelopeForm.debt.dueDate') : t('envelopeForm.goal.targetDate') }}</label>
             <input v-model="formData.targetDate" type="date" />
           </div>
         </div>
 
         <!-- Automatic Withdrawal Section (a debt has no automatic withdrawal: it is paid by hand) -->
         <div class="section-divider">
-          <h3>{{ isDebtPurpose ? 'Plan de distribution' : 'Prélèvement automatique' }}</h3>
+          <h3>{{ isDebtPurpose ? t('envelopeForm.sections.distribution') : t('envelopeForm.sections.withdrawal') }}</h3>
 
           <template v-if="!isDebtPurpose">
             <div class="form-group">
               <label>
                 <input v-model="formData.isAutomaticWithdrawal" type="checkbox" />
-                Activer le prélèvement automatique
+                {{ t('envelopeForm.withdrawal.enable') }}
               </label>
             </div>
 
             <div v-if="formData.isAutomaticWithdrawal" class="form-group">
-              <label>Fréquence de prélèvement *</label>
+              <label>{{ t('envelopeForm.withdrawal.frequency') }}</label>
               <select v-model="formData.withdrawalFrequency">
-                <option value="">-- Sélectionner --</option>
+                <option value="">{{ t('envelopeForm.selectPlaceholder') }}</option>
                 <option v-for="freq in withdrawalFrequencies" :key="freq.value" :value="freq.value">
-                  {{ freq.label }}
+                  {{ t(freq.label) }}
                 </option>
               </select>
             </div>
 
             <div v-if="formData.isAutomaticWithdrawal" class="form-group">
-              <label>Enveloppe liée</label>
+              <label>{{ t('envelopeForm.withdrawal.linkedEnvelope') }}</label>
               <select v-model="formData.linkedEnvelopeId">
-                <option value="">-- Aucune --</option>
+                <option value="">{{ t('envelopeForm.withdrawal.linkedNone') }}</option>
                 <option v-for="env in availableEnvelopes" :key="env.id" :value="env.id">
                   {{ env.name }}
                 </option>
@@ -446,9 +447,9 @@ const withdrawalFrequencies = [
 
           <!-- Adds a rule on the chosen distribution plan once the envelope is saved -->
           <div class="form-group">
-            <label>Ajouter à un plan de distribution</label>
+            <label>{{ t('envelopeForm.plan.add') }}</label>
             <select v-model="formData.selectedPlanId">
-              <option :value="null">-- Aucun --</option>
+              <option :value="null">{{ t('envelopeForm.plan.none') }}</option>
               <option v-for="plan in plans" :key="plan.id" :value="plan.id">
                 {{ plan.name }}
               </option>
@@ -480,12 +481,12 @@ const withdrawalFrequencies = [
           <div class="form-group">
             <label>
               <input v-model="formData.isShared" type="checkbox" />
-              Partager avec les membres du ménage
+              {{ t('envelopeForm.share.checkbox') }}
             </label>
           </div>
 
           <div v-if="formData.isShared" class="form-group">
-            <label>Pourcentage partagé (0-100)</label>
+            <label>{{ t('envelopeForm.share.percentage') }}</label>
             <input v-model.number="formData.sharedPercentage" type="number" min="0" max="100" placeholder="0" />
           </div>
         </div>
@@ -496,7 +497,7 @@ const withdrawalFrequencies = [
       <div class="modal-footer">
         <button v-if="isEditing" class="btn-danger" @click="handleDelete">
           <i class="mdi mdi-trash-can-outline"></i>
-          Supprimer
+          {{ t('envelopeForm.delete') }}
         </button>
         <button class="btn-secondary" @click="handleClose">{{ t('common.cancel') || 'Annuler' }}</button>
         <button class="btn-primary" @click="handleSubmit">{{ t('common.save') || 'Enregistrer' }}</button>

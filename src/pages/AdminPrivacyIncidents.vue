@@ -2,35 +2,35 @@
   <div class="incidents-container">
     <div class="page-header">
       <div>
-        <h1>Registre des incidents de confidentialité</h1>
+        <h1>{{ t('privacyIncidents.header.title') }}</h1>
         <p class="subtitle">
-          Tout incident est consigné, même sans risque de préjudice sérieux. Procédure : PRIVACY_INCIDENT_PROCEDURE.md.
+          {{ t('privacyIncidents.header.subtitle') }}
         </p>
       </div>
       <button class="btn btn-primary" @click="openNew">
         <i class="mdi mdi-plus"></i>
-        Consigner un incident
+        {{ t('privacyIncidents.header.record') }}
       </button>
     </div>
 
     <p v-if="message" class="message" :class="messageKind">{{ message }}</p>
 
-    <div v-if="loading" class="loading">Chargement…</div>
+    <div v-if="loading" class="loading">{{ t('privacyIncidents.header.loading') }}</div>
 
     <div v-else-if="incidents.length === 0" class="card empty">
-      Aucun incident consigné.
+      {{ t('privacyIncidents.header.empty') }}
     </div>
 
     <div v-else class="card table-card">
       <table>
         <thead>
           <tr>
-            <th>Détecté le</th>
-            <th>Description</th>
-            <th>Risque sérieux</th>
-            <th>CAI</th>
-            <th>Personnes</th>
-            <th>Statut</th>
+            <th>{{ t('privacyIncidents.table.detectedAt') }}</th>
+            <th>{{ t('privacyIncidents.table.description') }}</th>
+            <th>{{ t('privacyIncidents.table.seriousRisk') }}</th>
+            <th>{{ t('privacyIncidents.table.cai') }}</th>
+            <th>{{ t('privacyIncidents.table.people') }}</th>
+            <th>{{ t('privacyIncidents.table.status') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -49,7 +49,7 @@
             <td>{{ incident.affectedPeopleNotifiedAt ? formatDate(incident.affectedPeopleNotifiedAt) : '—' }}</td>
             <td>
               <span class="badge" :class="incident.closedAt ? 'closed' : 'open'">
-                {{ incident.closedAt ? 'Fermé' : 'Ouvert' }}
+                {{ incident.closedAt ? t('privacyIncidents.status.closed') : t('privacyIncidents.status.open') }}
               </span>
             </td>
           </tr>
@@ -60,29 +60,29 @@
     <!-- Detail of the selected incident -->
     <div v-if="selected" class="card detail">
       <div class="detail-header">
-        <h2>Incident du {{ formatDate(selected.detectedAt) }}</h2>
+        <h2>{{ t('privacyIncidents.detail.title', { date: formatDate(selected.detectedAt) }) }}</h2>
         <button v-if="!selected.closedAt" class="btn btn-secondary" @click="openEdit(selected)">
           <i class="mdi mdi-pencil"></i>
-          Modifier les faits
+          {{ t('privacyIncidents.detail.edit') }}
         </button>
       </div>
 
       <dl class="facts">
-        <dt>Description</dt>
+        <dt>{{ t('privacyIncidents.facts.description') }}</dt>
         <dd>{{ selected.description }}</dd>
-        <dt>Renseignements touchés</dt>
+        <dt>{{ t('privacyIncidents.facts.personalInformation') }}</dt>
         <dd>{{ selected.personalInformation }}</dd>
-        <dt>Date de l'incident</dt>
-        <dd>{{ selected.occurredAt ? formatDate(selected.occurredAt) : 'Inconnue' }}</dd>
-        <dt>Personnes touchées</dt>
-        <dd>{{ selected.affectedPeopleCount ?? 'Inconnu' }}</dd>
-        <dt>Mesures de confinement</dt>
+        <dt>{{ t('privacyIncidents.facts.occurredAt') }}</dt>
+        <dd>{{ selected.occurredAt ? formatDate(selected.occurredAt) : t('privacyIncidents.facts.unknownDate') }}</dd>
+        <dt>{{ t('privacyIncidents.facts.affectedCount') }}</dt>
+        <dd>{{ selected.affectedPeopleCount ?? t('privacyIncidents.facts.unknownCount') }}</dd>
+        <dt>{{ t('privacyIncidents.facts.containment') }}</dt>
         <dd>{{ selected.containmentMeasures || '—' }}</dd>
       </dl>
 
       <!-- Risk assessment -->
       <section class="step">
-        <h3>1. Risque de préjudice sérieux</h3>
+        <h3>{{ t('privacyIncidents.assessment.title') }}</h3>
         <template v-if="selected.riskOfSeriousInjury !== null">
           <p>
             <span class="badge" :class="riskClass(selected)">{{ riskLabel(selected) }}</span>
@@ -91,92 +91,92 @@
         </template>
         <template v-else-if="!selected.closedAt">
           <div class="radio-row">
-            <label><input v-model="assessRisk" type="radio" value="yes" /> Oui, risque de préjudice sérieux</label>
-            <label><input v-model="assessRisk" type="radio" value="no" /> Non</label>
+            <label><input v-model="assessRisk" type="radio" value="yes" /> {{ t('privacyIncidents.assessment.yes') }}</label>
+            <label><input v-model="assessRisk" type="radio" value="no" /> {{ t('privacyIncidents.assessment.no') }}</label>
           </div>
-          <textarea v-model="assessNotes" rows="3" maxlength="2000" placeholder="Raisonnement : sensibilité, conséquences, probabilité"></textarea>
-          <button class="btn btn-secondary" :disabled="!assessRisk" @click="assess">Enregistrer l'évaluation</button>
+          <textarea v-model="assessNotes" rows="3" maxlength="2000" :placeholder="t('privacyIncidents.assessment.notesPlaceholder')"></textarea>
+          <button class="btn btn-secondary" :disabled="!assessRisk" @click="assess">{{ t('privacyIncidents.assessment.save') }}</button>
         </template>
-        <p v-else class="muted">Non évalué.</p>
+        <p v-else class="muted">{{ t('privacyIncidents.assessment.notAssessed') }}</p>
       </section>
 
       <!-- Notifications -->
       <section class="step">
-        <h3>2. Avis</h3>
+        <h3>{{ t('privacyIncidents.notices.title') }}</h3>
         <div class="notify-row">
-          <span>Commission d'accès à l'information :</span>
-          <strong v-if="selected.caiNotifiedAt">envoyé le {{ formatDate(selected.caiNotifiedAt) }}</strong>
+          <span>{{ t('privacyIncidents.notices.cai') }}</span>
+          <strong v-if="selected.caiNotifiedAt">{{ t('privacyIncidents.notices.sentOn', { date: formatDate(selected.caiNotifiedAt) }) }}</strong>
           <button
             v-else-if="!selected.closedAt"
             class="btn btn-secondary"
-            @click="runAction(() => adminPrivacyIncidentsApi.notifyCai(selected!.id), 'Avis à la CAI consigné.')"
+            @click="runAction(() => adminPrivacyIncidentsApi.notifyCai(selected!.id), t('privacyIncidents.message.caiNotified'))"
           >
-            Marquer comme envoyé maintenant
+            {{ t('privacyIncidents.notices.markSent') }}
           </button>
-          <span v-else class="muted">non envoyé</span>
+          <span v-else class="muted">{{ t('privacyIncidents.notices.notSent') }}</span>
         </div>
         <div class="notify-row">
-          <span>Personnes concernées :</span>
-          <strong v-if="selected.affectedPeopleNotifiedAt">envoyé le {{ formatDate(selected.affectedPeopleNotifiedAt) }}</strong>
+          <span>{{ t('privacyIncidents.notices.affectedPeople') }}</span>
+          <strong v-if="selected.affectedPeopleNotifiedAt">{{ t('privacyIncidents.notices.sentOn', { date: formatDate(selected.affectedPeopleNotifiedAt) }) }}</strong>
           <button
             v-else-if="!selected.closedAt"
             class="btn btn-secondary"
-            @click="runAction(() => adminPrivacyIncidentsApi.notifyAffectedPeople(selected!.id), 'Avis aux personnes consigné.')"
+            @click="runAction(() => adminPrivacyIncidentsApi.notifyAffectedPeople(selected!.id), t('privacyIncidents.message.peopleNotified'))"
           >
-            Marquer comme envoyé maintenant
+            {{ t('privacyIncidents.notices.markSent') }}
           </button>
-          <span v-else class="muted">non envoyé</span>
+          <span v-else class="muted">{{ t('privacyIncidents.notices.notSent') }}</span>
         </div>
-        <p class="hint">Les avis se font par les moyens prévus dans la procédure ; ici on consigne la date de l'envoi.</p>
+        <p class="hint">{{ t('privacyIncidents.notices.hint') }}</p>
       </section>
 
       <!-- Closing -->
       <section class="step">
-        <h3>3. Fermeture</h3>
+        <h3>{{ t('privacyIncidents.closing.title') }}</h3>
         <template v-if="!selected.closedAt">
-          <p v-if="selected.riskOfSeriousInjury === null" class="hint">Évaluez le risque avant de fermer.</p>
+          <p v-if="selected.riskOfSeriousInjury === null" class="hint">{{ t('privacyIncidents.closing.assessFirst') }}</p>
           <p v-else-if="selected.riskOfSeriousInjury && (!selected.caiNotifiedAt || !selected.affectedPeopleNotifiedAt)" class="hint">
-            Risque sérieux : les deux avis doivent être consignés avant la fermeture.
+            {{ t('privacyIncidents.closing.noticesRequired') }}
           </p>
           <button
             class="btn btn-primary"
             :disabled="selected.riskOfSeriousInjury === null"
             @click="closeIncident"
           >
-            Fermer l'entrée
+            {{ t('privacyIncidents.closing.close') }}
           </button>
         </template>
-        <p v-else>Fermé le {{ formatDate(selected.closedAt) }}. Une entrée fermée ne peut plus être modifiée.</p>
+        <p v-else>{{ t('privacyIncidents.closing.closedOn', { date: formatDate(selected.closedAt) }) }}</p>
       </section>
     </div>
 
     <!-- Record or edit the facts -->
     <div v-if="showForm" class="modal-overlay" @click.self="showForm = false">
       <form class="card modal" @submit.prevent="submitFacts">
-        <h2>{{ editing ? "Modifier les faits" : 'Consigner un incident' }}</h2>
+        <h2>{{ editing ? t('privacyIncidents.detail.edit') : t('privacyIncidents.header.record') }}</h2>
 
-        <label>Description (factuelle, sans nom)
+        <label>{{ t('privacyIncidents.form.description') }}
           <textarea v-model="form.description" rows="3" maxlength="2000" required></textarea>
         </label>
-        <label>Renseignements touchés
-          <input v-model="form.personalInformation" type="text" maxlength="1000" required placeholder="Ex. courriel, données financières" />
+        <label>{{ t('privacyIncidents.facts.personalInformation') }}
+          <input v-model="form.personalInformation" type="text" maxlength="1000" required :placeholder="t('privacyIncidents.form.personalPlaceholder')" />
         </label>
-        <label>Date de l'incident (si connue)
+        <label>{{ t('privacyIncidents.form.occurredAt') }}
           <input v-model="form.occurredAt" type="datetime-local" />
         </label>
-        <label>Nombre de personnes touchées (si connu)
+        <label>{{ t('privacyIncidents.form.affectedCount') }}
           <input v-model="form.affectedPeopleCount" type="number" min="0" />
         </label>
-        <label>Mesures de confinement
+        <label>{{ t('privacyIncidents.facts.containment') }}
           <textarea v-model="form.containmentMeasures" rows="2" maxlength="2000"></textarea>
         </label>
 
         <p v-if="formError" class="message error">{{ formError }}</p>
 
         <div class="actions">
-          <button type="button" class="btn btn-secondary" @click="showForm = false">Annuler</button>
+          <button type="button" class="btn btn-secondary" @click="showForm = false">{{ t('privacyIncidents.form.cancel') }}</button>
           <button type="submit" class="btn btn-primary" :disabled="saving">
-            {{ saving ? 'Enregistrement…' : 'Enregistrer' }}
+            {{ saving ? t('privacyIncidents.form.saving') : t('privacyIncidents.form.save') }}
           </button>
         </div>
       </form>
@@ -186,6 +186,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import {
   adminPrivacyIncidentsApi,
   type IncidentFacts,
@@ -199,6 +200,8 @@ interface FactsForm {
   affectedPeopleCount: string
   containmentMeasures: string
 }
+
+const { t, locale } = useI18n()
 
 const incidents = ref<PrivacyIncident[]>([])
 const loading = ref(true)
@@ -230,12 +233,12 @@ function toLocalInput(iso: string | null): string {
 }
 
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleString('fr-CA', { dateStyle: 'medium', timeStyle: 'short' })
+  return new Date(iso).toLocaleString(locale.value, { dateStyle: 'medium', timeStyle: 'short' })
 }
 
 function riskLabel(incident: PrivacyIncident): string {
-  if (incident.riskOfSeriousInjury === null) return 'Non évalué'
-  return incident.riskOfSeriousInjury ? 'Oui' : 'Non'
+  if (incident.riskOfSeriousInjury === null) return t('privacyIncidents.risk.notAssessed')
+  return incident.riskOfSeriousInjury ? t('privacyIncidents.risk.yes') : t('privacyIncidents.risk.no')
 }
 
 function riskClass(incident: PrivacyIncident): string {
@@ -249,7 +252,7 @@ function showMessage(text: string, kind: 'ok' | 'error' = 'ok') {
 }
 
 function errorText(error: any): string {
-  return error?.response?.data?.message ?? 'Une erreur est survenue.'
+  return error?.response?.data?.message ?? t('privacyIncidents.error.generic')
 }
 
 async function load() {
@@ -304,7 +307,7 @@ async function submitFacts() {
     showForm.value = false
     await load()
     selectedId.value = data.id
-    showMessage(editing.value ? 'Faits modifiés.' : 'Incident consigné.')
+    showMessage(editing.value ? t('privacyIncidents.message.factsEdited') : t('privacyIncidents.message.incidentRecorded'))
   } catch (error) {
     formError.value = errorText(error)
   } finally {
@@ -328,16 +331,16 @@ async function assess() {
   const incidentId = selected.value.id
   const risk = assessRisk.value === 'yes'
   const notes = assessNotes.value.trim() || null
-  await runAction(() => adminPrivacyIncidentsApi.assess(incidentId, risk, notes), 'Évaluation enregistrée.')
+  await runAction(() => adminPrivacyIncidentsApi.assess(incidentId, risk, notes), t('privacyIncidents.message.assessed'))
   assessRisk.value = ''
   assessNotes.value = ''
 }
 
 async function closeIncident() {
   if (!selected.value) return
-  if (!window.confirm("Fermer cette entrée ? Elle ne pourra plus être modifiée.")) return
+  if (!window.confirm(t('privacyIncidents.confirm.close'))) return
   const incidentId = selected.value.id
-  await runAction(() => adminPrivacyIncidentsApi.close(incidentId), 'Entrée fermée.')
+  await runAction(() => adminPrivacyIncidentsApi.close(incidentId), t('privacyIncidents.message.closed'))
 }
 
 onMounted(load)

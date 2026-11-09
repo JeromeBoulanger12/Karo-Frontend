@@ -1,6 +1,9 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import client from '../api/client'
+
+const { t } = useI18n()
 
 const props = defineProps({
   envelope: {
@@ -32,7 +35,7 @@ const openLinkDialog = async () => {
     console.log('Available envelopes to link:', availableEnvelopes.value)
   } catch (err) {
     console.error('Failed to load envelopes:', err)
-    error.value = 'Failed to load envelopes for linking'
+    error.value = t('linkedEnvelope.loadError')
   }
   showLinkDialog.value = true
 }
@@ -69,7 +72,7 @@ const linkEnvelope = async () => {
 }
 
 const unlinkEnvelope = async () => {
-  if (!confirm('Êtes-vous sûr de vouloir délier cette enveloppe?')) return
+  if (!confirm(t('linkedEnvelope.unlinkConfirm'))) return
 
   loading.value = true
   error.value = null
@@ -96,16 +99,16 @@ const getContributionAmount = () => {
 
 <template>
   <v-card class="mt-4">
-    <v-card-title>Enveloppe Liée</v-card-title>
+    <v-card-title>{{ t('linkedEnvelope.title') }}</v-card-title>
     <v-card-text>
       <v-alert v-if="error" type="error" class="mb-4">
         {{ error }}
       </v-alert>
 
       <div v-if="envelope.linkedEnvelopeId" class="mb-4">
-        <p class="text-body2"><strong>Liée à:</strong> {{ getLinkedEnvelopeName() }}</p>
-        <p class="text-body2"><strong>Contribution:</strong> {{ sharedPercentage }}%</p>
-        <p class="text-body2"><strong>Montant:</strong> ${{ getContributionAmount().toFixed(2) }}</p>
+        <p class="text-body2"><strong>{{ t('linkedEnvelope.linkedTo') }}</strong> {{ getLinkedEnvelopeName() }}</p>
+        <p class="text-body2"><strong>{{ t('linkedEnvelope.contribution') }}</strong> {{ sharedPercentage }}%</p>
+        <p class="text-body2"><strong>{{ t('linkedEnvelope.amount') }}</strong> ${{ getContributionAmount().toFixed(2) }}</p>
 
         <v-btn
           color="error"
@@ -115,12 +118,12 @@ const getContributionAmount = () => {
           :loading="loading"
           class="mt-2"
         >
-          Délier cette enveloppe
+          {{ t('linkedEnvelope.unlink') }}
         </v-btn>
       </div>
 
       <div v-else>
-        <p class="text-body2 text-grey">Cette enveloppe n'est pas liée à une autre.</p>
+        <p class="text-body2 text-grey">{{ t('linkedEnvelope.notLinked') }}</p>
 
         <v-btn
           color="primary"
@@ -129,7 +132,7 @@ const getContributionAmount = () => {
           @click="openLinkDialog"
           class="mt-2"
         >
-          Lier une enveloppe
+          {{ t('linkedEnvelope.linkEnvelope') }}
         </v-btn>
       </div>
     </v-card-text>
@@ -138,21 +141,21 @@ const getContributionAmount = () => {
   <!-- Link Dialog -->
   <v-dialog v-model="showLinkDialog" width="500">
     <v-card>
-      <v-card-title>Lier une enveloppe</v-card-title>
+      <v-card-title>{{ t('linkedEnvelope.linkEnvelope') }}</v-card-title>
       <v-card-text>
         <v-select
           v-model="selectedTargetEnvelope"
           :items="availableEnvelopes"
           item-title="name"
           item-value="id"
-          label="Sélectionnez une enveloppe"
+          :label="t('linkedEnvelope.selectEnvelope')"
           outlined
           class="mb-4"
         ></v-select>
 
         <v-slider
           v-model="sharedPercentage"
-          label="Pourcentage partagé (%)"
+          :label="t('linkedEnvelope.sharedPercentage')"
           min="0"
           max="100"
           step="1"
@@ -160,7 +163,7 @@ const getContributionAmount = () => {
         ></v-slider>
 
         <p class="text-caption text-grey">
-          Vous contribuerez {{ sharedPercentage }}% des montants dans cette enveloppe.
+          {{ t('linkedEnvelope.contributeNote', { percent: sharedPercentage }) }}
         </p>
       </v-card-text>
 
@@ -171,7 +174,7 @@ const getContributionAmount = () => {
           @click="showLinkDialog = false"
           :disabled="loading"
         >
-          Annuler
+          {{ t('linkedEnvelope.cancel') }}
         </v-btn>
         <v-btn
           color="primary"
@@ -180,7 +183,7 @@ const getContributionAmount = () => {
           :loading="loading"
           :disabled="!selectedTargetEnvelope"
         >
-          Lier
+          {{ t('linkedEnvelope.link') }}
         </v-btn>
       </v-card-actions>
     </v-card>

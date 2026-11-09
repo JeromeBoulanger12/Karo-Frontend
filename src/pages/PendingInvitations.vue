@@ -49,7 +49,7 @@ onMounted(() => {
 
 <template>
   <v-container class="py-4">
-    <h1 class="text-h4 mb-4">{{ t('household.pendingInvitations') }}</h1>
+    <h1 class="text-h4 mb-4">{{ t('invitations.pending.title') }}</h1>
 
     <v-alert v-if="error" type="error" class="mb-4">
       {{ error }}
@@ -59,7 +59,7 @@ onMounted(() => {
 
     <v-card v-if="!loading && invitations.length === 0" class="text-center py-8">
       <v-card-text>
-        <p class="text-subtitle1">{{ t('household.noInvitations') }}</p>
+        <p class="text-subtitle1">{{ t('invitations.pending.empty') }}</p>
       </v-card-text>
     </v-card>
 
@@ -73,7 +73,7 @@ onMounted(() => {
       >
         <v-card>
           <v-card-text>
-            <p class="text-subtitle2 mb-2">Invité par:</p>
+            <p class="text-subtitle2 mb-2">{{ t('invitations.pending.invitedBy') }}</p>
             <p class="text-body2 mb-4">{{ invitation.invitedByEmail }}</p>
             <p class="text-caption text-grey">{{ new Date(invitation.createdAt).toLocaleDateString() }}</p>
           </v-card-text>
@@ -85,7 +85,7 @@ onMounted(() => {
               size="small"
               @click="rejectInvitation(invitation.id)"
             >
-              Refuser
+              {{ t('invitations.pending.reject') }}
             </v-btn>
             <v-btn
               color="primary"
@@ -93,7 +93,7 @@ onMounted(() => {
               size="small"
               @click="acceptInvitation(invitation.id)"
             >
-              Accepter
+              {{ t('invitations.pending.accept') }}
             </v-btn>
           </v-card-actions>
         </v-card>

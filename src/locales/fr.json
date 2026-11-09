@@ -1084,5 +1084,452 @@
       "interestRequired": "Le taux d’intérêt annuel est requis",
       "minimumNegative": "Le paiement minimum ne peut pas être négatif"
     }
+  },
+  "accountBalance": {
+    "title": "Ajuster le solde",
+    "currentBalance": "Solde actuel:",
+    "newBalanceLabel": "Nouveau solde",
+    "previewLabel": "Nouveau solde:",
+    "noteLabel": "Note (optionnel)",
+    "notePlaceholder": "ex. Achat imprévu : pneus"
+  },
+  "accountForm": {
+    "form": {
+      "addTitle": "Ajouter Compte",
+      "editTitle": "Éditer Compte",
+      "namePlaceholder": "Ex: Mon compte chèques...",
+      "nameRequired": "Le nom du compte est requis",
+      "typeRequired": "Le type de compte est requis"
+    }
+  },
+  "adminEmailTemplates": {
+    "languageFrench": "Français",
+    "languageEnglish": "English",
+    "labelWithColon": "{label} :"
+  },
+  "adminPanel": {
+    "tierConfigurations": "Tier Configurations",
+    "privacyIncidents": "Incidents de confidentialité"
+  },
+  "dashboardPage": {
+    "loading": "Chargement...",
+    "defaultAccountName": "Compte",
+    "jumpLabel": "Sections du tableau de bord",
+    "jump": {
+      "accounts": "Comptes",
+      "paycheck": "Paie"
+    },
+    "sections": {
+      "accounts": "Vos comptes et enveloppes",
+      "paycheck": "Paie et revenus"
+    },
+    "actions": {
+      "addAccount": "Ajouter un compte",
+      "createAccount": "Créer un compte",
+      "depositPaycheck": "Déposer une paie"
+    },
+    "jobs": {
+      "addSource": "Ajouter une source de revenu",
+      "add": "Ajouter"
+    },
+    "tierPrice": {
+      "pro": "$9.99/mois",
+      "family": "$19.99/mois"
+    },
+    "alerts": {
+      "noAutomaticPaycheck": "Aucune paie automatique n'a encore été déposée pour cette source. Elle pourra être ajustée après son premier dépôt.",
+      "adjustLoadError": "Impossible de charger les paies de cette source. Réessayez."
+    }
+  },
+  "envelopeForm": {
+    "title": {
+      "add": "Ajouter Enveloppe",
+      "edit": "Éditer Enveloppe"
+    },
+    "confirmDelete": "Supprimer l'enveloppe « {name} » ? Elle sera aussi retirée des règles de distribution.",
+    "errors": {
+      "nameRequired": "Le nom est requis",
+      "billScheduleRequired": "Le type de calendrier est requis pour une facture",
+      "annualDatesRequired": "Au moins une date de paiement est requise pour un calendrier annuel",
+      "debtCardRequired": "La carte à rembourser est requise pour une enveloppe de dette",
+      "withdrawalFrequencyRequired": "La fréquence de prélèvement est requise"
+    },
+    "name": {
+      "label": "Nom de l'enveloppe *",
+      "placeholder": "Ex: Loyer, Épicerie..."
+    },
+    "color": {
+      "label": "Couleur",
+      "none": "Aucune couleur",
+      "paidHint": "Les couleurs sont offertes avec un abonnement payant."
+    },
+    "purposeLabel": "Objectif *",
+    "purposes": {
+      "GeneralReserve": "Réserve générale",
+      "SavingsGoal": "Objectif d'épargne",
+      "Bill": "Facture",
+      "DebtPayment": "Remboursement de dette",
+      "WeeklyExpenses": "Dépenses hebdomadaires",
+      "Mortgage": "Hypothèque/Loyer"
+    },
+    "debtCard": {
+      "label": "Carte à rembourser *",
+      "choose": "-- Choisir une carte --",
+      "none": "Aucune carte de crédit disponible."
+    },
+    "sections": {
+      "bill": "Montant et calendrier de paiement",
+      "goal": "Objectif",
+      "debt": "Dette",
+      "withdrawal": "Prélèvement automatique",
+      "distribution": "Plan de distribution"
+    },
+    "bill": {
+      "amount": "Montant de la facture",
+      "schedule": "Calendrier de paiement *",
+      "dayOfMonth": "Jour du mois où la facture est due (1-31)",
+      "paymentDates": "Dates de paiement dans l'année",
+      "paymentDatePlaceholder": "Sélectionner une date",
+      "addPaymentDate": "Ajouter"
+    },
+    "scheduleTypes": {
+      "Monthly": "Mensuel",
+      "AnnualScheduled": "Annuel (dates spécifiques)"
+    },
+    "selectPlaceholder": "-- Sélectionner --",
+    "goal": {
+      "targetAmount": "Montant cible",
+      "targetDate": "Date cible (quand atteindre cet objectif)"
+    },
+    "debt": {
+      "amount": "Montant de la dette",
+      "dueDate": "Échéance"
+    },
+    "withdrawal": {
+      "enable": "Activer le prélèvement automatique",
+      "frequency": "Fréquence de prélèvement *",
+      "linkedEnvelope": "Enveloppe liée",
+      "linkedNone": "-- Aucune --"
+    },
+    "withdrawalFrequencies": {
+      "Weekly": "Hebdomadaire",
+      "BiWeekly": "Tous les 2 semaines",
+      "Monthly": "Mensuel",
+      "Quarterly": "Trimestriel",
+      "SemiAnnual": "Semestriel",
+      "Annual": "Annuel"
+    },
+    "plan": {
+      "add": "Ajouter à un plan de distribution",
+      "none": "-- Aucun --"
+    },
+    "share": {
+      "checkbox": "Partager avec les membres du ménage",
+      "percentage": "Pourcentage partagé (0-100)"
+    },
+    "delete": "Supprimer"
+  },
+  "householdPage": {
+    "errors": {
+      "householdNotFound": "Ménage introuvable",
+      "loadMembersFailed": "Impossible de charger les membres",
+      "acceptInvitationFailed": "Impossible d'accepter l'invitation",
+      "sendInvitationFailed": "Impossible d'envoyer l'invitation",
+      "deleteInvitationFailed": "Impossible d'annuler l'invitation"
+    },
+    "messages": {
+      "invitationAccepted": "Invitation acceptée! Rechargement..."
+    },
+    "form": {
+      "emailPlaceholder": "exemple{'@'}email.com"
+    },
+    "sections": {
+      "receivedInvitations": "Invitations reçues ({count})"
+    },
+    "actions": {
+      "accept": "Accepter"
+    },
+    "initialFallback": "U"
+  },
+  "invitations": {
+    "pending": {
+      "title": "Invitations en attente",
+      "empty": "Aucune invitation en attente",
+      "invitedBy": "Invité par:",
+      "reject": "Refuser",
+      "accept": "Accepter"
+    },
+    "invite": {
+      "title": "Inviter quelqu'un",
+      "success": "Invitation envoyée avec succès!",
+      "email": "Email",
+      "emailPlaceholder": "nom@exemple.com",
+      "submit": "Envoyer l'invitation",
+      "back": "Retour au ménage"
+    }
+  },
+  "jobCard": {
+    "badge": {
+      "main": "Principal"
+    },
+    "star": {
+      "unset": "Retirer de principal",
+      "set": "Marquer comme principal"
+    },
+    "frequency": {
+      "weekly": "Hebdo",
+      "biweekly": "Bi-hebdo",
+      "semimonthly": "Demi-mensuel",
+      "monthly": "Mensuel",
+      "annual": "Annuel",
+      "irregular": "Aucune"
+    },
+    "lastPayment": "Dernière paie",
+    "noPaycheck": "Aucune paie distribuée",
+    "date": "Date",
+    "fixedPay": {
+      "label": "Paie fixe:",
+      "automatic": "· automatique"
+    },
+    "nextPayday": "Prochaine paie:",
+    "account": "Compte:",
+    "lastDeposit": "Dernier versement:",
+    "nextDeposit": "Prochain versement:",
+    "rules": {
+      "header": "Répartition",
+      "empty": "Aucune règle : cette paie n'alloue rien aux enveloppes."
+    },
+    "deposit": "Déposer une paie",
+    "adjust": "Ajuster la dernière paie"
+  },
+  "jobForm": {
+    "title": {
+      "add": "Ajouter Paie",
+      "edit": "Éditer Paie"
+    },
+    "info": {
+      "name": "Nom:",
+      "frequency": "Fréquence:",
+      "lastPayment": "Dernière paie:"
+    },
+    "form": {
+      "name": "Nom du travail",
+      "namePlaceholder": "Ex: Emploi principal...",
+      "frequency": "Fréquence",
+      "anchorDate": "Date d'une paie",
+      "anchorDateHint": "Choisissez une date de paie réelle. Les suivantes sont calculées à partir de celle-ci selon la fréquence.",
+      "fixedPay": "Paie fixe (déposée automatiquement à chaque paie)",
+      "fixedAmountPlaceholder": "Montant par paie",
+      "fixedPayPaidOnly": "Réservé aux abonnements payants.",
+      "fixedPayHint": "Avec une paie fixe, « Déposer une paie » disparaît. Si le montant reçu est différent, utilisez « Ajuster la dernière paie »."
+    },
+    "frequency": {
+      "weekly": "Hebdomadaire",
+      "biweekly": "Bi-hebdomadaire",
+      "monthly": "Mensuel",
+      "annual": "Annuel",
+      "irregular": "Aucune"
+    },
+    "rules": {
+      "header": "Répartition prévue",
+      "empty": "Aucune règle : cette paie n'alloue rien aux enveloppes. Ajoute une règle depuis le formulaire d'enveloppe (prélèvement automatique)."
+    },
+    "errors": {
+      "nameRequired": "Le nom du travail est requis.",
+      "accountRequired": "Un compte doit être sélectionné.",
+      "fixedAmountInvalid": "Le montant de la paie fixe doit être supérieur à 0."
+    }
+  },
+  "legalPage": {
+    "draft": "Ébauche : ce texte est en attente de révision juridique.",
+    "version": "Version {version}"
+  },
+  "linkedEnvelope": {
+    "title": "Enveloppe Liée",
+    "linkedTo": "Liée à:",
+    "contribution": "Contribution:",
+    "amount": "Montant:",
+    "unlink": "Délier cette enveloppe",
+    "unlinkConfirm": "Êtes-vous sûr de vouloir délier cette enveloppe?",
+    "notLinked": "Cette enveloppe n'est pas liée à une autre.",
+    "linkEnvelope": "Lier une enveloppe",
+    "loadError": "Impossible de charger les enveloppes à lier",
+    "selectEnvelope": "Sélectionnez une enveloppe",
+    "sharedPercentage": "Pourcentage partagé (%)",
+    "contributeNote": "Vous contribuerez {percent}% des montants dans cette enveloppe.",
+    "cancel": "Annuler",
+    "link": "Lier"
+  },
+  "loginPage": {
+    "sessionExpired": "Ta session a expiré. Reconnecte-toi pour continuer."
+  },
+  "membersPage": {
+    "loading": "Chargement",
+    "retry": "Réessayer",
+    "header": {
+      "title": "Gestion des membres",
+      "invite": "Inviter un membre"
+    },
+    "activeMembers": "Membres actifs",
+    "table": {
+      "noMembers": "Aucun membre",
+      "name": "Nom",
+      "email": "Courriel",
+      "role": "Rôle",
+      "actions": "Actions",
+      "invitedOn": "Invité le"
+    },
+    "roles": {
+      "owner": "Propriétaire",
+      "admin": "Admin",
+      "member": "Membre",
+      "guest": "Invité"
+    },
+    "pending": {
+      "title": "Invitations en attente"
+    },
+    "invite": {
+      "email": "Courriel",
+      "emailPlaceholder": "exemple@email.com",
+      "submit": "Envoyer l'invitation",
+      "cancel": "Annuler"
+    },
+    "confirm": {
+      "remove": "Êtes-vous sûr de vouloir supprimer {name}?",
+      "cancelInvitation": "Êtes-vous sûr de vouloir annuler cette invitation?"
+    },
+    "errors": {
+      "loading": "Erreur lors du chargement des membres",
+      "inviting": "Erreur lors de l'envoi de l'invitation",
+      "removing": "Erreur lors de la suppression du membre",
+      "canceling": "Erreur lors de l'annulation de l'invitation"
+    }
+  },
+  "paycheck": {
+    "deposit": {
+      "title": "Déposer une paie",
+      "source": "Source de revenu:",
+      "selectPlaceholder": "-- Sélectionner --",
+      "rules": {
+        "header": "Répartition prévue",
+        "empty": "Aucune règle pour cette source : la paie sera enregistrée sans allocation aux enveloppes."
+      },
+      "amount": "Montant déposé",
+      "accountBalance": "Solde du compte chèques (après paie)",
+      "date": "Date du dépôt"
+    },
+    "adjust": {
+      "title": "Ajuster la dernière paie",
+      "expected": "Paie fixe prévue :",
+      "on": "le {date}",
+      "received": "Montant réellement reçu",
+      "added": "Ajouté aux enveloppes :",
+      "removed": "Retiré aux enveloppes :",
+      "hint": "La différence suit les mêmes règles de répartition que la paie : elle est ajoutée ou retirée des enveloppes concernées.",
+      "errors": {
+        "negative": "Le montant reçu doit être 0 ou plus."
+      }
+    }
+  },
+  "payModal": {
+    "billSeparator": " — ",
+    "balanceColon": " : "
+  },
+  "privacyIncidents": {
+    "header": {
+      "title": "Registre des incidents de confidentialité",
+      "subtitle": "Tout incident est consigné, même sans risque de préjudice sérieux. Procédure : PRIVACY_INCIDENT_PROCEDURE.md.",
+      "record": "Consigner un incident",
+      "loading": "Chargement…",
+      "empty": "Aucun incident consigné."
+    },
+    "table": {
+      "detectedAt": "Détecté le",
+      "description": "Description",
+      "seriousRisk": "Risque sérieux",
+      "cai": "CAI",
+      "people": "Personnes",
+      "status": "Statut"
+    },
+    "status": {
+      "open": "Ouvert",
+      "closed": "Fermé"
+    },
+    "risk": {
+      "notAssessed": "Non évalué",
+      "yes": "Oui",
+      "no": "Non"
+    },
+    "detail": {
+      "title": "Incident du {date}",
+      "edit": "Modifier les faits"
+    },
+    "facts": {
+      "description": "Description",
+      "personalInformation": "Renseignements touchés",
+      "occurredAt": "Date de l'incident",
+      "unknownDate": "Inconnue",
+      "affectedCount": "Personnes touchées",
+      "unknownCount": "Inconnu",
+      "containment": "Mesures de confinement"
+    },
+    "assessment": {
+      "title": "1. Risque de préjudice sérieux",
+      "yes": "Oui, risque de préjudice sérieux",
+      "no": "Non",
+      "notesPlaceholder": "Raisonnement : sensibilité, conséquences, probabilité",
+      "save": "Enregistrer l'évaluation",
+      "notAssessed": "Non évalué."
+    },
+    "notices": {
+      "title": "2. Avis",
+      "cai": "Commission d'accès à l'information :",
+      "sentOn": "envoyé le {date}",
+      "markSent": "Marquer comme envoyé maintenant",
+      "notSent": "non envoyé",
+      "affectedPeople": "Personnes concernées :",
+      "hint": "Les avis se font par les moyens prévus dans la procédure ; ici on consigne la date de l'envoi."
+    },
+    "message": {
+      "caiNotified": "Avis à la CAI consigné.",
+      "peopleNotified": "Avis aux personnes consigné.",
+      "factsEdited": "Faits modifiés.",
+      "incidentRecorded": "Incident consigné.",
+      "assessed": "Évaluation enregistrée.",
+      "closed": "Entrée fermée."
+    },
+    "closing": {
+      "title": "3. Fermeture",
+      "assessFirst": "Évaluez le risque avant de fermer.",
+      "noticesRequired": "Risque sérieux : les deux avis doivent être consignés avant la fermeture.",
+      "close": "Fermer l'entrée",
+      "closedOn": "Fermé le {date}. Une entrée fermée ne peut plus être modifiée."
+    },
+    "form": {
+      "description": "Description (factuelle, sans nom)",
+      "personalPlaceholder": "Ex. courriel, données financières",
+      "occurredAt": "Date de l'incident (si connue)",
+      "affectedCount": "Nombre de personnes touchées (si connu)",
+      "cancel": "Annuler",
+      "saving": "Enregistrement…",
+      "save": "Enregistrer"
+    },
+    "error": {
+      "generic": "Une erreur est survenue."
+    },
+    "confirm": {
+      "close": "Fermer cette entrée ? Elle ne pourra plus être modifiée."
+    }
+  },
+  "profilePage": {
+    "data": {
+      "exportFileName": "karo-mes-donnees.json"
+    },
+    "subscription": {
+      "planFallback": "Plan",
+      "statusFallback": "actif",
+      "billingPeriodFallback": "mois",
+      "freePlanNote": "Vous êtes sur le plan gratuit"
+    }
   }
 }

@@ -41,17 +41,17 @@ const emit = defineEmits<{
   'set-main-job': [job: Job]
 }>()
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 const frequencyLabel = computed(() => {
   const freqMap: Record<string, string> = {
-    weekly: 'Hebdo',
-    biweekly: 'Bi-hebdo',
-    semimonthly: 'Demi-mensuel',
-    monthly: 'Mensuel',
-    annual: 'Annuel',
-    annually: 'Annuel',
-    irregular: 'Aucune'
+    weekly: t('jobCard.frequency.weekly'),
+    biweekly: t('jobCard.frequency.biweekly'),
+    semimonthly: t('jobCard.frequency.semimonthly'),
+    monthly: t('jobCard.frequency.monthly'),
+    annual: t('jobCard.frequency.annual'),
+    annually: t('jobCard.frequency.annual'),
+    irregular: t('jobCard.frequency.irregular')
   }
   // The backend sends PascalCase (BiWeekly, Irregular); the labels are keyed in lowercase
   return freqMap[props.job.frequency?.toLowerCase()] || props.job.frequency
@@ -59,7 +59,7 @@ const frequencyLabel = computed(() => {
 
 const formatCurrency = (money: Money | undefined) => {
   if (!money) return '$0.00'
-  return new Intl.NumberFormat('fr-CA', {
+  return new Intl.NumberFormat(locale.value, {
     style: 'currency',
     currency: money.currency || 'CAD'
   }).format(money.amount)
@@ -68,14 +68,14 @@ const formatCurrency = (money: Money | undefined) => {
 // A payday is a calendar date (YYYY-MM-DD): build it in local time so it does not shift to the day before
 const formatPayday = (value: string) => {
   const [year, month, day] = value.slice(0, 10).split('-').map(Number)
-  return new Date(year, month - 1, day).toLocaleDateString('fr-CA', { year: 'numeric', month: 'short', day: 'numeric' })
+  return new Date(year, month - 1, day).toLocaleDateString(locale.value, { year: 'numeric', month: 'short', day: 'numeric' })
 }
 
 const formatDate = (dateString: string | undefined) => {
   if (!dateString) return '-'
   try {
     const date = new Date(dateString)
-    return new Intl.DateTimeFormat('fr-CA', {
+    return new Intl.DateTimeFormat(locale.value, {
       year: 'numeric',
       month: 'short',
       day: 'numeric'
@@ -93,7 +93,7 @@ const formatDate = (dateString: string | undefined) => {
         {{ job.name }}
         <span v-if="job.isMainJob" class="badge-main">
           <i class="mdi mdi-star"></i>
-          Principal
+          {{ t('jobCard.badge.main') }}
         </span>
       </div>
       <div class="job-header-right">
@@ -101,7 +101,7 @@ const formatDate = (dateString: string | undefined) => {
           class="btn-star"
           :class="{ 'is-main': job.isMainJob }"
           @click="emit('set-main-job', job)"
-          :title="job.isMainJob ? 'Retirer de principal' : 'Marquer comme principal'"
+          :title="job.isMainJob ? t('jobCard.star.unset') : t('jobCard.star.set')"
         >
           <i :class="job.isMainJob ? 'mdi mdi-star' : 'mdi mdi-star-outline'"></i>
         </button>
@@ -114,42 +114,42 @@ const formatDate = (dateString: string | undefined) => {
 
     <div class="job-amount">
       <div>
-        <div class="job-label">Dernière paie</div>
+        <div class="job-label">{{ t('jobCard.lastPayment') }}</div>
         <div v-if="job.lastPaycheck" class="job-value">{{ formatCurrency(job.lastPaycheck.amount) }}</div>
-        <div v-else class="job-value job-value-empty">Aucune paie distribuée</div>
+        <div v-else class="job-value job-value-empty">{{ t('jobCard.noPaycheck') }}</div>
       </div>
       <div v-if="job.lastPaycheck" class="job-last-amount">
-        <div class="job-label">Date</div>
+        <div class="job-label">{{ t('jobCard.date') }}</div>
         <div class="job-last-value">{{ formatDate(job.lastPaycheck.date) }}</div>
       </div>
     </div>
 
     <div class="job-details">
       <div v-if="job.fixedAmount" class="job-detail-item fixed-pay">
-        <span>Paie fixe:</span>
-        <strong>{{ formatCurrency(job.fixedAmount) }} · automatique</strong>
+        <span>{{ t('jobCard.fixedPay.label') }}</span>
+        <strong>{{ formatCurrency(job.fixedAmount) }} {{ t('jobCard.fixedPay.automatic') }}</strong>
       </div>
       <div v-if="job.nextPaydayDate" class="job-detail-item">
-        <span>Prochaine paie:</span>
+        <span>{{ t('jobCard.nextPayday') }}</span>
         <strong>{{ formatPayday(job.nextPaydayDate) }}</strong>
       </div>
       <div v-if="job.accountName" class="job-detail-item">
-        <span>Compte:</span>
+        <span>{{ t('jobCard.account') }}</span>
         <strong>{{ job.accountName }}</strong>
       </div>
       <div v-if="job.lastPayment" class="job-detail-item">
-        <span>Dernier versement:</span>
+        <span>{{ t('jobCard.lastDeposit') }}</span>
         <strong>{{ formatDate(job.lastPayment) }}</strong>
       </div>
       <div v-if="job.nextPayment" class="job-detail-item">
-        <span>Prochain versement:</span>
+        <span>{{ t('jobCard.nextDeposit') }}</span>
         <strong>{{ formatDate(job.nextPayment) }}</strong>
       </div>
     </div>
 
     <!-- Distribution rules: where each paycheck goes -->
     <div class="job-rules">
-      <div class="job-label">Répartition</div>
+      <div class="job-label">{{ t('jobCard.rules.header') }}</div>
       <ul v-if="job.rules?.length" class="job-rules-list">
         <li v-for="(rule, index) in job.rules" :key="index" class="job-rule-row">
           <span>{{ rule.envelopeName }}</span>
@@ -158,7 +158,7 @@ const formatDate = (dateString: string | undefined) => {
       </ul>
       <p v-else class="job-rules-empty">
         <i class="mdi mdi-alert-outline"></i>
-        Aucune règle : cette paie n'alloue rien aux enveloppes.
+        {{ t('jobCard.rules.empty') }}
       </p>
     </div>
 
@@ -166,15 +166,15 @@ const formatDate = (dateString: string | undefined) => {
       <!-- With a fixed pay the paycheck arrives on its own: no manual deposit -->
       <button v-if="!job.fixedAmount" class="btn btn-primary" @click="emit('deposit', job)">
         <i class="mdi mdi-plus"></i>
-        Déposer une paie
+        {{ t('jobCard.deposit') }}
       </button>
       <button v-else class="btn btn-primary" @click="emit('adjust', job)">
         <i class="mdi mdi-tune-variant"></i>
-        Ajuster la dernière paie
+        {{ t('jobCard.adjust') }}
       </button>
       <button class="btn btn-primary-sm" @click="emit('edit', job)">
         <i class="mdi mdi-pencil"></i>
-        {{ t('common.edit') || 'Éditer' }}
+        {{ t('common.edit') }}
       </button>
     </div>
   </div>

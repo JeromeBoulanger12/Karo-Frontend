@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n'
 import client from '../api/client'
 import '../styles/dashboard.css'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 const householdId = ref('')
 const members = ref<any[]>([])
@@ -28,7 +28,7 @@ const loadMembers = async () => {
   try {
     const householdIdFromStorage = localStorage.getItem('householdId')
     if (!householdIdFromStorage) {
-      error.value = 'Household not found'
+      error.value = t('householdPage.errors.householdNotFound')
       return
     }
 
@@ -42,7 +42,7 @@ const loadMembers = async () => {
     pendingInvitations.value = membersResp.data.pendingInvitations
     receivedInvitations.value = invitationsResp.data
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Failed to load members'
+    error.value = err instanceof Error ? err.message : t('householdPage.errors.loadMembersFailed')
   } finally {
     loading.value = false
   }
@@ -55,10 +55,10 @@ const acceptInvitation = async (invitationId: string) => {
     if (response.data.householdId) {
       localStorage.setItem('householdId', response.data.householdId)
     }
-    success.value = 'Invitation accepted! Reloading...'
+    success.value = t('householdPage.messages.invitationAccepted')
     setTimeout(() => location.reload(), 1000)
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Failed to accept invitation'
+    error.value = err instanceof Error ? err.message : t('householdPage.errors.acceptInvitationFailed')
   }
 }
 
@@ -79,14 +79,14 @@ const handleInvite = async () => {
 
     await loadMembers()
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Failed to send invitation'
+    error.value = err instanceof Error ? err.message : t('householdPage.errors.sendInvitationFailed')
   } finally {
     inviteLoading.value = false
   }
 }
 
 const formatDate = (date: string) => {
-  return new Intl.DateTimeFormat('fr-CA', {
+  return new Intl.DateTimeFormat(locale.value, {
     year: 'numeric',
     month: 'short',
     day: 'numeric'
@@ -96,7 +96,7 @@ const formatDate = (date: string) => {
 const getInitials = (member: any) => {
   const first = member.firstName?.charAt(0)?.toUpperCase() || ''
   const last = member.lastName?.charAt(0)?.toUpperCase() || ''
-  return `${first}${last}` || 'U'
+  return `${first}${last}` || t('householdPage.initialFallback')
 }
 
 const deleteInvitation = async (invitationId: string, email: string) => {
@@ -110,7 +110,7 @@ const deleteInvitation = async (invitationId: string, email: string) => {
     error.value = null
     await loadMembers()
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Failed to delete invitation'
+    error.value = err instanceof Error ? err.message : t('householdPage.errors.deleteInvitationFailed')
   }
 }
 </script>
@@ -120,7 +120,7 @@ const deleteInvitation = async (invitationId: string, email: string) => {
     <!-- Loading state -->
     <div v-if="loading" class="loading-container">
       <div class="spinner"></div>
-      <p>{{ t('common.loading') || 'Chargement...' }}</p>
+      <p>{{ t('common.loading') }}</p>
     </div>
 
     <!-- Main content -->
@@ -158,7 +158,7 @@ const deleteInvitation = async (invitationId: string, email: string) => {
               <input
                 v-model="inviteEmail"
                 type="email"
-                placeholder="exemple@email.com"
+                :placeholder="t('householdPage.form.emailPlaceholder')"
                 class="form-input"
                 required
               />
@@ -238,7 +238,7 @@ const deleteInvitation = async (invitationId: string, email: string) => {
       <section v-if="receivedInvitations.length > 0" class="section">
         <h2 class="section-title">
           <i class="mdi mdi-email-receive"></i>
-          Invitations reçues ({{ receivedInvitations.length }})
+          {{ t('householdPage.sections.receivedInvitations', { count: receivedInvitations.length }) }}
         </h2>
 
         <div class="invitations-grid">
@@ -259,7 +259,7 @@ const deleteInvitation = async (invitationId: string, email: string) => {
                 class="btn-accept"
               >
                 <i class="mdi mdi-check"></i>
-                Accepter
+                {{ t('householdPage.actions.accept') }}
               </button>
             </div>
           </div>

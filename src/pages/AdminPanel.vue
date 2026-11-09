@@ -41,7 +41,7 @@
           :class="{ active: isActive('tier-configurations') }"
         >
           <i class="mdi mdi-sliders-vertical"></i>
-          <span>Tier Configurations</span>
+          <span>{{ t('adminPanel.tierConfigurations') }}</span>
         </router-link>
 
         <router-link
@@ -95,7 +95,7 @@
           :class="{ active: isActive('privacy-incidents') }"
         >
           <i class="mdi mdi-shield-alert-outline"></i>
-          <span>Incidents de confidentialité</span>
+          <span>{{ t('adminPanel.privacyIncidents') }}</span>
         </router-link>
       </nav>
 

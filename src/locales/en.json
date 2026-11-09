@@ -1000,5 +1000,452 @@
       "interestRequired": "The annual interest rate is required",
       "minimumNegative": "The minimum payment cannot be negative"
     }
+  },
+  "accountBalance": {
+    "title": "Adjust balance",
+    "currentBalance": "Current balance:",
+    "newBalanceLabel": "New balance",
+    "previewLabel": "New balance:",
+    "noteLabel": "Note (optional)",
+    "notePlaceholder": "e.g. Unexpected expense: tires"
+  },
+  "accountForm": {
+    "form": {
+      "addTitle": "Add account",
+      "editTitle": "Edit account",
+      "namePlaceholder": "E.g. My checking account...",
+      "nameRequired": "Account name is required",
+      "typeRequired": "Account type is required"
+    }
+  },
+  "adminEmailTemplates": {
+    "languageFrench": "French",
+    "languageEnglish": "English",
+    "labelWithColon": "{label}:"
+  },
+  "adminPanel": {
+    "tierConfigurations": "Tier Configurations",
+    "privacyIncidents": "Privacy incidents"
+  },
+  "dashboardPage": {
+    "loading": "Loading...",
+    "defaultAccountName": "Account",
+    "jumpLabel": "Dashboard sections",
+    "jump": {
+      "accounts": "Accounts",
+      "paycheck": "Paychecks"
+    },
+    "sections": {
+      "accounts": "Your accounts and envelopes",
+      "paycheck": "Paychecks and income"
+    },
+    "actions": {
+      "addAccount": "Add an account",
+      "createAccount": "Create an account",
+      "depositPaycheck": "Deposit a paycheck"
+    },
+    "jobs": {
+      "addSource": "Add an income source",
+      "add": "Add"
+    },
+    "tierPrice": {
+      "pro": "$9.99/month",
+      "family": "$19.99/month"
+    },
+    "alerts": {
+      "noAutomaticPaycheck": "No automatic paycheck has been deposited for this income source yet. It can be adjusted after its first deposit.",
+      "adjustLoadError": "Could not load the paychecks for this income source. Please try again."
+    }
+  },
+  "envelopeForm": {
+    "title": {
+      "add": "Add envelope",
+      "edit": "Edit envelope"
+    },
+    "confirmDelete": "Delete the envelope « {name} »? It will also be removed from the distribution rules.",
+    "errors": {
+      "nameRequired": "Name is required",
+      "billScheduleRequired": "A payment schedule is required for a bill",
+      "annualDatesRequired": "At least one payment date is required for an annual schedule",
+      "debtCardRequired": "The card to repay is required for a debt envelope",
+      "withdrawalFrequencyRequired": "The withdrawal frequency is required"
+    },
+    "name": {
+      "label": "Envelope name *",
+      "placeholder": "E.g.: Rent, Groceries..."
+    },
+    "color": {
+      "label": "Colour",
+      "none": "No colour",
+      "paidHint": "Colours are available with a paid subscription."
+    },
+    "purposeLabel": "Purpose *",
+    "purposes": {
+      "GeneralReserve": "General reserve",
+      "SavingsGoal": "Savings goal",
+      "Bill": "Bill",
+      "DebtPayment": "Debt repayment",
+      "WeeklyExpenses": "Weekly expenses",
+      "Mortgage": "Mortgage/Rent"
+    },
+    "debtCard": {
+      "label": "Card to repay *",
+      "choose": "-- Choose a card --",
+      "none": "No credit card available."
+    },
+    "sections": {
+      "bill": "Amount and payment schedule",
+      "goal": "Goal",
+      "debt": "Debt",
+      "withdrawal": "Automatic withdrawal",
+      "distribution": "Distribution plan"
+    },
+    "bill": {
+      "amount": "Bill amount",
+      "schedule": "Payment schedule *",
+      "dayOfMonth": "Day of the month the bill is due (1-31)",
+      "paymentDates": "Payment dates in the year",
+      "paymentDatePlaceholder": "Select a date",
+      "addPaymentDate": "Add"
+    },
+    "scheduleTypes": {
+      "Monthly": "Monthly",
+      "AnnualScheduled": "Annual (specific dates)"
+    },
+    "selectPlaceholder": "-- Select --",
+    "goal": {
+      "targetAmount": "Target amount",
+      "targetDate": "Target date (when to reach this goal)"
+    },
+    "debt": {
+      "amount": "Debt amount",
+      "dueDate": "Due date"
+    },
+    "withdrawal": {
+      "enable": "Enable automatic withdrawal",
+      "frequency": "Withdrawal frequency *",
+      "linkedEnvelope": "Linked envelope",
+      "linkedNone": "-- None --"
+    },
+    "withdrawalFrequencies": {
+      "Weekly": "Weekly",
+      "BiWeekly": "Every 2 weeks",
+      "Monthly": "Monthly",
+      "Quarterly": "Quarterly",
+      "SemiAnnual": "Semi-annual",
+      "Annual": "Annual"
+    },
+    "plan": {
+      "add": "Add to a distribution plan",
+      "none": "-- None --"
+    },
+    "share": {
+      "checkbox": "Share with household members",
+      "percentage": "Shared percentage (0-100)"
+    },
+    "delete": "Delete"
+  },
+  "householdPage": {
+    "errors": {
+      "householdNotFound": "Household not found",
+      "loadMembersFailed": "Failed to load members",
+      "acceptInvitationFailed": "Failed to accept invitation",
+      "sendInvitationFailed": "Failed to send invitation",
+      "deleteInvitationFailed": "Failed to delete invitation"
+    },
+    "messages": {
+      "invitationAccepted": "Invitation accepted! Reloading..."
+    },
+    "form": {
+      "emailPlaceholder": "example{'@'}email.com"
+    },
+    "sections": {
+      "receivedInvitations": "Received invitations ({count})"
+    },
+    "actions": {
+      "accept": "Accept"
+    },
+    "initialFallback": "U"
+  },
+  "invitations": {
+    "pending": {
+      "title": "Pending Invitations",
+      "empty": "No pending invitations",
+      "invitedBy": "Invited by:",
+      "reject": "Decline",
+      "accept": "Accept"
+    },
+    "invite": {
+      "title": "Invite someone",
+      "success": "Invitation sent successfully!",
+      "email": "Email",
+      "emailPlaceholder": "name@example.com",
+      "submit": "Send invitation",
+      "back": "Back to household"
+    }
+  },
+  "jobCard": {
+    "badge": {
+      "main": "Main"
+    },
+    "star": {
+      "unset": "Remove as main job",
+      "set": "Mark as main job"
+    },
+    "frequency": {
+      "weekly": "Weekly",
+      "biweekly": "Bi-weekly",
+      "semimonthly": "Semi-monthly",
+      "monthly": "Monthly",
+      "annual": "Annual",
+      "irregular": "None"
+    },
+    "lastPayment": "Last paycheck",
+    "noPaycheck": "No paycheck distributed",
+    "date": "Date",
+    "fixedPay": {
+      "label": "Fixed pay:",
+      "automatic": "· automatic"
+    },
+    "nextPayday": "Next payday:",
+    "account": "Account:",
+    "lastDeposit": "Last deposit:",
+    "nextDeposit": "Next deposit:",
+    "rules": {
+      "header": "Allocation",
+      "empty": "No rule: this paycheck allocates nothing to envelopes."
+    },
+    "deposit": "Deposit a paycheck",
+    "adjust": "Adjust last paycheck"
+  },
+  "jobForm": {
+    "title": {
+      "add": "Add pay",
+      "edit": "Edit pay"
+    },
+    "info": {
+      "name": "Name:",
+      "frequency": "Frequency:",
+      "lastPayment": "Last paycheck:"
+    },
+    "form": {
+      "name": "Job name",
+      "namePlaceholder": "e.g. Main job...",
+      "frequency": "Frequency",
+      "anchorDate": "Date of a paycheck",
+      "anchorDateHint": "Pick an actual payday. The following ones are calculated from it based on the frequency.",
+      "fixedPay": "Fixed pay (deposited automatically on each payday)",
+      "fixedAmountPlaceholder": "Amount per paycheck",
+      "fixedPayPaidOnly": "Available on paid plans only.",
+      "fixedPayHint": "With fixed pay, \"Deposit a paycheck\" is hidden. If the amount received is different, use \"Adjust last paycheck\"."
+    },
+    "frequency": {
+      "weekly": "Weekly",
+      "biweekly": "Bi-weekly",
+      "monthly": "Monthly",
+      "annual": "Annual",
+      "irregular": "None"
+    },
+    "rules": {
+      "header": "Planned allocation",
+      "empty": "No rule: this paycheck allocates nothing to envelopes. Add a rule from the envelope form (automatic withdrawal)."
+    },
+    "errors": {
+      "nameRequired": "Job name is required.",
+      "accountRequired": "An account must be selected.",
+      "fixedAmountInvalid": "The fixed pay amount must be greater than 0."
+    }
+  },
+  "legalPage": {
+    "draft": "Draft: this text is pending legal review.",
+    "version": "Version {version}"
+  },
+  "linkedEnvelope": {
+    "title": "Linked envelope",
+    "linkedTo": "Linked to:",
+    "contribution": "Contribution:",
+    "amount": "Amount:",
+    "unlink": "Unlink this envelope",
+    "unlinkConfirm": "Are you sure you want to unlink this envelope?",
+    "notLinked": "This envelope is not linked to another one.",
+    "linkEnvelope": "Link an envelope",
+    "loadError": "Failed to load envelopes for linking",
+    "selectEnvelope": "Select an envelope",
+    "sharedPercentage": "Shared percentage (%)",
+    "contributeNote": "You will contribute {percent}% of the amounts in this envelope.",
+    "cancel": "Cancel",
+    "link": "Link"
+  },
+  "loginPage": {
+    "sessionExpired": "Your session has expired. Log in again to continue."
+  },
+  "membersPage": {
+    "loading": "Loading",
+    "retry": "Retry",
+    "header": {
+      "title": "Members Management",
+      "invite": "Invite Member"
+    },
+    "activeMembers": "Active Members",
+    "table": {
+      "noMembers": "No members",
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "actions": "Actions",
+      "invitedOn": "Invited on"
+    },
+    "roles": {
+      "owner": "Owner",
+      "admin": "Admin",
+      "member": "Member",
+      "guest": "Guest"
+    },
+    "pending": {
+      "title": "Pending Invitations"
+    },
+    "invite": {
+      "email": "Email",
+      "emailPlaceholder": "example@email.com",
+      "submit": "Send Invitation",
+      "cancel": "Cancel"
+    },
+    "confirm": {
+      "remove": "Are you sure you want to remove {name}?",
+      "cancelInvitation": "Are you sure you want to cancel this invitation?"
+    },
+    "errors": {
+      "loading": "Error loading members",
+      "inviting": "Error sending invitation",
+      "removing": "Error removing member",
+      "canceling": "Error canceling invitation"
+    }
+  },
+  "paycheck": {
+    "deposit": {
+      "title": "Deposit a paycheck",
+      "source": "Income source:",
+      "selectPlaceholder": "-- Select --",
+      "rules": {
+        "header": "Planned allocation",
+        "empty": "No rule for this source: the paycheck will be recorded without any allocation to envelopes."
+      },
+      "amount": "Amount deposited",
+      "accountBalance": "Checking account balance (after paycheck)",
+      "date": "Deposit date"
+    },
+    "adjust": {
+      "title": "Adjust last paycheck",
+      "expected": "Expected fixed pay:",
+      "on": "on {date}",
+      "received": "Amount actually received",
+      "added": "Added to envelopes:",
+      "removed": "Removed from envelopes:",
+      "hint": "The difference follows the same allocation rules as the paycheck: it is added to or removed from the relevant envelopes.",
+      "errors": {
+        "negative": "The amount received must be 0 or more."
+      }
+    }
+  },
+  "payModal": {
+    "billSeparator": " — ",
+    "balanceColon": ": "
+  },
+  "privacyIncidents": {
+    "header": {
+      "title": "Privacy incident register",
+      "subtitle": "Every incident is recorded, even if there is no risk of serious injury. Procedure: PRIVACY_INCIDENT_PROCEDURE.md.",
+      "record": "Record an incident",
+      "loading": "Loading…",
+      "empty": "No incidents recorded."
+    },
+    "table": {
+      "detectedAt": "Detected on",
+      "description": "Description",
+      "seriousRisk": "Serious risk",
+      "cai": "CAI",
+      "people": "People",
+      "status": "Status"
+    },
+    "status": {
+      "open": "Open",
+      "closed": "Closed"
+    },
+    "risk": {
+      "notAssessed": "Not assessed",
+      "yes": "Yes",
+      "no": "No"
+    },
+    "detail": {
+      "title": "Incident of {date}",
+      "edit": "Edit facts"
+    },
+    "facts": {
+      "description": "Description",
+      "personalInformation": "Personal information involved",
+      "occurredAt": "Incident date",
+      "unknownDate": "Unknown",
+      "affectedCount": "People affected",
+      "unknownCount": "Unknown",
+      "containment": "Containment measures"
+    },
+    "assessment": {
+      "title": "1. Risk of serious injury",
+      "yes": "Yes, risk of serious injury",
+      "no": "No",
+      "notesPlaceholder": "Reasoning: sensitivity, consequences, likelihood",
+      "save": "Save assessment",
+      "notAssessed": "Not assessed."
+    },
+    "notices": {
+      "title": "2. Notices",
+      "cai": "Commission d'accès à l'information :",
+      "sentOn": "sent on {date}",
+      "markSent": "Mark as sent now",
+      "notSent": "not sent",
+      "affectedPeople": "Affected people:",
+      "hint": "Notices are given through the means set out in the procedure; here we record the date they were sent."
+    },
+    "message": {
+      "caiNotified": "Notice to the CAI recorded.",
+      "peopleNotified": "Notice to affected people recorded.",
+      "factsEdited": "Facts updated.",
+      "incidentRecorded": "Incident recorded.",
+      "assessed": "Assessment saved.",
+      "closed": "Entry closed."
+    },
+    "closing": {
+      "title": "3. Closing",
+      "assessFirst": "Assess the risk before closing.",
+      "noticesRequired": "Serious risk: both notices must be recorded before closing.",
+      "close": "Close entry",
+      "closedOn": "Closed on {date}. A closed entry can no longer be edited."
+    },
+    "form": {
+      "description": "Description (factual, no names)",
+      "personalPlaceholder": "E.g. email, financial data",
+      "occurredAt": "Incident date (if known)",
+      "affectedCount": "Number of people affected (if known)",
+      "cancel": "Cancel",
+      "saving": "Saving…",
+      "save": "Save"
+    },
+    "error": {
+      "generic": "An error occurred."
+    },
+    "confirm": {
+      "close": "Close this entry? It can no longer be edited."
+    }
+  },
+  "profilePage": {
+    "data": {
+      "exportFileName": "karo-my-data.json"
+    },
+    "subscription": {
+      "planFallback": "Plan",
+      "statusFallback": "active",
+      "billingPeriodFallback": "month",
+      "freePlanNote": "You are on the free plan"
+    }
   }
 }

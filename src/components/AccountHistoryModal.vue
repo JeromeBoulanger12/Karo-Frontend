@@ -21,7 +21,7 @@ import { showsSurplus } from '../utils/accounts'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Legend, Tooltip)
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 interface Account {
   id: string
@@ -67,13 +67,13 @@ const surplusPoints = ref<SurplusPoint[]>([])
 const trendDays = ref(90)
 
 const formatCurrency = (value: number) =>
-  new Intl.NumberFormat('fr-CA', { style: 'currency', currency: 'CAD' }).format(value)
+  new Intl.NumberFormat(locale.value, { style: 'currency', currency: 'CAD' }).format(value)
 
 const formatDate = (value: string) =>
-  new Date(value).toLocaleString('fr-CA', { dateStyle: 'medium', timeStyle: 'short' })
+  new Date(value).toLocaleString(locale.value, { dateStyle: 'medium', timeStyle: 'short' })
 
 const formatShortDate = (value: string) =>
-  new Date(value).toLocaleDateString('fr-CA', { month: 'short', day: 'numeric' })
+  new Date(value).toLocaleDateString(locale.value, { month: 'short', day: 'numeric' })
 
 const stats = computed(() => surplusStats(surplusPoints.value))
 

@@ -18,7 +18,7 @@ interface Account {
   creditLimit?: { amount: number; currency?: string } | null
 }
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 const props = withDefaults(defineProps<{
   account: Account
@@ -139,7 +139,7 @@ const envelopesCount = computed(() => {
 })
 
 const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('fr-CA', {
+  return new Intl.NumberFormat(locale.value, {
     style: 'currency',
     currency: props.account.currency || 'CAD'
   }).format(value)

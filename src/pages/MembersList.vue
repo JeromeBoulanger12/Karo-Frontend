@@ -3,7 +3,7 @@
     <!-- Loading state -->
     <div v-if="loading" class="loading-container">
       <div class="spinner"></div>
-      <p>{{ t('common.loading') || 'Chargement...' }}</p>
+      <p>{{ t('membersPage.loading') }}</p>
     </div>
 
     <!-- Error state -->
@@ -12,7 +12,7 @@
         <i class="mdi mdi-alert-circle"></i>
         {{ error }}
       </div>
-      <button class="btn-retry" @click="loadMembers">{{ t('common.retry') || 'Réessayer' }}</button>
+      <button class="btn-retry" @click="loadMembers">{{ t('membersPage.retry') }}</button>
     </div>
 
     <!-- Main content -->
@@ -20,12 +20,12 @@
       <!-- Page Header -->
       <div class="page-header">
         <div>
-          <h1 class="page-title">{{ t('members.title') }}</h1>
-          <p class="page-subtitle">{{ members.length }} {{ t('members.active_members').toLowerCase() }}</p>
+          <h1 class="page-title">{{ t('membersPage.header.title') }}</h1>
+          <p class="page-subtitle">{{ members.length }} {{ t('membersPage.activeMembers').toLowerCase() }}</p>
         </div>
         <button v-if="canInvite" @click="showInviteModal = true" class="btn-create">
           <i class="mdi mdi-plus"></i>
-          {{ t('members.invite_member') }}
+          {{ t('membersPage.header.invite') }}
         </button>
       </div>
 
@@ -33,22 +33,22 @@
       <section class="section">
         <h2 class="section-title">
           <i class="mdi mdi-account-multiple"></i>
-          {{ t('members.active_members') }}
+          {{ t('membersPage.activeMembers') }}
         </h2>
 
         <div v-if="members.length === 0" class="empty-state">
           <i class="mdi mdi-inbox-outline"></i>
-          <p>{{ t('members.no_members') }}</p>
+          <p>{{ t('membersPage.table.noMembers') }}</p>
         </div>
 
         <div v-else class="table-card">
           <table class="modern-table">
             <thead>
               <tr>
-                <th>{{ t('members.name') }}</th>
-                <th>{{ t('members.email') }}</th>
-                <th>{{ t('members.role') }}</th>
-                <th v-if="canRemoveMembers">{{ t('members.actions') }}</th>
+                <th>{{ t('membersPage.table.name') }}</th>
+                <th>{{ t('membersPage.table.email') }}</th>
+                <th>{{ t('membersPage.table.role') }}</th>
+                <th v-if="canRemoveMembers">{{ t('membersPage.table.actions') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -87,16 +87,16 @@
       <section v-if="pendingInvitations.length > 0" class="section">
         <h2 class="section-title">
           <i class="mdi mdi-email-outline"></i>
-          {{ t('members.pending_invitations') }}
+          {{ t('membersPage.pending.title') }}
         </h2>
 
         <div class="table-card">
           <table class="modern-table">
             <thead>
               <tr>
-                <th>{{ t('members.email') }}</th>
-                <th>{{ t('members.invited_on') }}</th>
-                <th v-if="canInvite">{{ t('members.actions') }}</th>
+                <th>{{ t('membersPage.table.email') }}</th>
+                <th>{{ t('membersPage.table.invitedOn') }}</th>
+                <th v-if="canInvite">{{ t('membersPage.table.actions') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -122,28 +122,28 @@
     <div v-if="showInviteModal" class="modal-overlay" @click="showInviteModal = false">
       <div class="modal" @click.stop>
         <div class="modal-header">
-          <h2>{{ t('members.invite_member') }}</h2>
+          <h2>{{ t('membersPage.header.invite') }}</h2>
           <button class="modal-close" @click="showInviteModal = false">
             <i class="mdi mdi-close"></i>
           </button>
         </div>
         <div class="modal-body">
           <div class="form-group">
-            <label>{{ t('members.email') }}</label>
+            <label>{{ t('membersPage.invite.email') }}</label>
             <input
               v-model="inviteEmail"
               type="email"
-              placeholder="exemple@email.com"
+              :placeholder="t('membersPage.invite.emailPlaceholder')"
               class="form-input"
             />
           </div>
         </div>
         <div class="modal-footer">
           <button class="btn-secondary" @click="showInviteModal = false">
-            {{ t('common.cancel') }}
+            {{ t('membersPage.invite.cancel') }}
           </button>
           <button class="btn-primary" @click="sendInvitation" :disabled="!inviteEmail">
-            {{ t('members.send_invitation') }}
+            {{ t('membersPage.invite.submit') }}
           </button>
         </div>
       </div>
@@ -157,7 +157,7 @@ import { useI18n } from 'vue-i18n'
 import { householdsAPI, type HouseholdMember, type PendingInvitation } from '../api/households'
 import '../styles/dashboard.css'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 const members = ref<HouseholdMember[]>([])
 const pendingInvitations = ref<PendingInvitation[]>([])
@@ -174,7 +174,7 @@ const canInvite = computed(() => userRole.value === 'Owner' || userRole.value ==
 const canRemoveMembers = computed(() => userRole.value === 'Owner')
 
 const getRoleLabel = (role: string) => {
-  return t(`members.role_${role.toLowerCase()}`)
+  return t(`membersPage.roles.${role.toLowerCase()}`)
 }
 
 const getRoleColor = (role: string) => {
@@ -194,7 +194,7 @@ const getInitials = (member: HouseholdMember) => {
 }
 
 const formatDate = (dateString: string) => {
-  return new Intl.DateTimeFormat('fr-CA', {
+  return new Intl.DateTimeFormat(locale.value, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -218,7 +218,7 @@ const loadMembers = async () => {
 
     error.value = ''
   } catch (err) {
-    error.value = t('members.error_loading')
+    error.value = t('membersPage.errors.loading')
     console.error('Error loading members:', err)
   } finally {
     loading.value = false
@@ -234,13 +234,13 @@ const sendInvitation = async () => {
     showInviteModal.value = false
     await loadMembers()
   } catch (err) {
-    error.value = t('members.error_inviting')
+    error.value = t('membersPage.errors.inviting')
     console.error('Error sending invitation:', err)
   }
 }
 
 const removeMember = async (member: HouseholdMember) => {
-  if (!confirm(t('members.confirm_remove', { name: member.firstName }))) {
+  if (!confirm(t('membersPage.confirm.remove', { name: member.firstName }))) {
     return
   }
 
@@ -248,13 +248,13 @@ const removeMember = async (member: HouseholdMember) => {
     await householdsAPI.removeMember(householdId.value, member.id)
     await loadMembers()
   } catch (err) {
-    error.value = t('members.error_removing')
+    error.value = t('membersPage.errors.removing')
     console.error('Error removing member:', err)
   }
 }
 
 const cancelInvitation = async (invitation: PendingInvitation) => {
-  if (!confirm(t('members.confirm_cancel_invitation'))) {
+  if (!confirm(t('membersPage.confirm.cancelInvitation'))) {
     return
   }
 
@@ -262,7 +262,7 @@ const cancelInvitation = async (invitation: PendingInvitation) => {
     await householdsAPI.deleteInvitation(householdId.value, invitation.id)
     await loadMembers()
   } catch (err) {
-    error.value = t('members.error_canceling')
+    error.value = t('membersPage.errors.canceling')
     console.error('Error canceling invitation:', err)
   }
 }

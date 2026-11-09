@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 interface Paycheck {
   id: string
@@ -22,6 +23,8 @@ const emit = defineEmits<{
   save: [actualAmount: number]
 }>()
 
+const { t, locale } = useI18n()
+
 const actual = ref<number | null>(null)
 const error = ref('')
 
@@ -30,10 +33,10 @@ const currency = computed(() => props.paycheck?.amount.currency ?? 'CAD')
 const difference = computed(() => (actual.value ?? expected.value) - expected.value)
 
 const formatCurrency = (value: number) =>
-  new Intl.NumberFormat('fr-CA', { style: 'currency', currency: currency.value }).format(value)
+  new Intl.NumberFormat(locale.value, { style: 'currency', currency: currency.value }).format(value)
 
 const formatDate = (value: string) =>
-  new Date(value).toLocaleDateString('fr-CA', { year: 'numeric', month: 'short', day: 'numeric' })
+  new Date(value).toLocaleDateString(locale.value, { year: 'numeric', month: 'short', day: 'numeric' })
 
 // Start from the expected amount each time the modal opens; keep the typed value after an error
 watch(() => props.isOpen, (open) => {
@@ -46,7 +49,7 @@ watch(() => props.isOpen, (open) => {
 const handleSubmit = () => {
   error.value = ''
   if (actual.value === null || actual.value < 0) {
-    error.value = 'Le montant reçu doit être 0 ou plus.'
+    error.value = t('paycheck.adjust.errors.negative')
     return
   }
   emit('save', actual.value)
@@ -57,7 +60,7 @@ const handleSubmit = () => {
   <div v-if="isOpen && paycheck" class="modal-overlay" @click="emit('close')">
     <div class="modal" @click.stop>
       <div class="modal-header">
-        <h2>Ajuster la dernière paie</h2>
+        <h2>{{ t('paycheck.adjust.title') }}</h2>
         <button class="modal-close" @click="emit('close')">
           <i class="mdi mdi-close"></i>
         </button>
@@ -65,28 +68,28 @@ const handleSubmit = () => {
 
       <div class="modal-body">
         <p class="info">
-          Paie fixe prévue : <strong>{{ formatCurrency(expected) }}</strong>
-          le {{ formatDate(paycheck.occurredAt) }}
+          {{ t('paycheck.adjust.expected') }} <strong>{{ formatCurrency(expected) }}</strong>
+          {{ t('paycheck.adjust.on', { date: formatDate(paycheck.occurredAt) }) }}
         </p>
 
         <div class="form-group">
-          <label>Montant réellement reçu</label>
+          <label>{{ t('paycheck.adjust.received') }}</label>
           <input v-model.number="actual" type="number" step="0.01" min="0" />
         </div>
 
         <p v-if="difference !== 0" class="difference" :class="difference > 0 ? 'is-up' : 'is-down'">
-          {{ difference > 0 ? 'Ajouté' : 'Retiré' }} aux enveloppes : {{ formatCurrency(Math.abs(difference)) }}
+          {{ difference > 0 ? t('paycheck.adjust.added') : t('paycheck.adjust.removed') }} {{ formatCurrency(Math.abs(difference)) }}
         </p>
         <p class="hint">
-          La différence suit les mêmes règles de répartition que la paie : elle est ajoutée ou retirée des enveloppes concernées.
+          {{ t('paycheck.adjust.hint') }}
         </p>
 
         <p v-if="error || submitError" class="error-text">{{ error || submitError }}</p>
       </div>
 
       <div class="modal-footer">
-        <button class="btn-secondary" @click="emit('close')">Annuler</button>
-        <button class="btn-primary" @click="handleSubmit">Enregistrer</button>
+        <button class="btn-secondary" @click="emit('close')">{{ t('common.cancel') }}</button>
+        <button class="btn-primary" @click="handleSubmit">{{ t('common.save') }}</button>
       </div>
     </div>
   </div>

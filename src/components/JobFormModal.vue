@@ -47,7 +47,7 @@ const emit = defineEmits<{
   delete: []
 }>()
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 // The backend sends the frequency in PascalCase (BiWeekly, Irregular); the select uses the lowercase values above
 const FORM_FREQUENCY_BY_BACKEND: Record<string, string> = {
@@ -121,17 +121,17 @@ const handleSubmit = () => {
   validationError.value = ''
 
   if (!formData.value.name || !formData.value.name.trim()) {
-    validationError.value = 'Job name is required'
+    validationError.value = t('jobForm.errors.nameRequired')
     return
   }
 
   if (!formData.value.homeAccountId) {
-    validationError.value = 'Account must be selected'
+    validationError.value = t('jobForm.errors.accountRequired')
     return
   }
 
   if (!isIrregular.value && fixedPayEnabled.value && !(fixedPayAmount.value && fixedPayAmount.value > 0)) {
-    validationError.value = 'Le montant de la paie fixe doit être supérieur à 0.'
+    validationError.value = t('jobForm.errors.fixedAmountInvalid')
     return
   }
 
@@ -152,16 +152,16 @@ const handleClose = () => {
   }
 }
 
-const frequencies = [
-  { value: 'weekly', label: 'Hebdomadaire' },
-  { value: 'biweekly', label: 'Bi-hebdomadaire' },
-  { value: 'monthly', label: 'Mensuel' },
-  { value: 'annual', label: 'Annuel' },
-  { value: 'irregular', label: 'Aucune' }
-]
+const frequencies = computed(() => [
+  { value: 'weekly', label: t('jobForm.frequency.weekly') },
+  { value: 'biweekly', label: t('jobForm.frequency.biweekly') },
+  { value: 'monthly', label: t('jobForm.frequency.monthly') },
+  { value: 'annual', label: t('jobForm.frequency.annual') },
+  { value: 'irregular', label: t('jobForm.frequency.irregular') }
+])
 
 const getFrequencyLabel = (freq: string) => {
-  const found = frequencies.find(f => f.value === freq)
+  const found = frequencies.value.find(f => f.value === freq)
   return found?.label || freq
 }
 
@@ -169,7 +169,7 @@ const formatDate = (dateString: string | undefined) => {
   if (!dateString) return '-'
   try {
     const date = new Date(dateString)
-    return new Intl.DateTimeFormat('fr-CA', {
+    return new Intl.DateTimeFormat(locale.value, {
       year: 'numeric',
       month: 'short',
       day: 'numeric'
@@ -184,7 +184,7 @@ const formatDate = (dateString: string | undefined) => {
   <div v-if="isOpen" class="modal-overlay" @click="handleClose">
     <div class="modal" @click.stop>
       <div class="modal-header">
-        <h2>{{ isEditing ? 'Éditer' : 'Ajouter' }} Paie</h2>
+        <h2>{{ isEditing ? t('jobForm.title.edit') : t('jobForm.title.add') }}</h2>
         <button class="modal-close" @click="handleClose">
           <i class="mdi mdi-close"></i>
         </button>
@@ -193,15 +193,15 @@ const formatDate = (dateString: string | undefined) => {
       <!-- Info Box (only when editing) -->
       <div v-if="isEditing" class="job-info-box">
         <div class="info-row">
-          <span class="info-label">Nom:</span>
+          <span class="info-label">{{ t('jobForm.info.name') }}</span>
           <span class="info-value">{{ formData.name }}</span>
         </div>
         <div class="info-row">
-          <span class="info-label">Fréquence:</span>
+          <span class="info-label">{{ t('jobForm.info.frequency') }}</span>
           <span class="info-value">{{ getFrequencyLabel(formData.frequency) }}</span>
         </div>
         <div v-if="formData.lastPayment" class="info-row">
-          <span class="info-label">Dernière paie:</span>
+          <span class="info-label">{{ t('jobForm.info.lastPayment') }}</span>
           <span class="info-value">{{ formatDate(formData.lastPayment) }}</span>
         </div>
       </div>
@@ -212,12 +212,12 @@ const formatDate = (dateString: string | undefined) => {
         </div>
 
         <div class="form-group">
-          <label>Nom du travail</label>
-          <input v-model="formData.name" type="text" placeholder="Ex: Emploi principal..." />
+          <label>{{ t('jobForm.form.name') }}</label>
+          <input v-model="formData.name" type="text" :placeholder="t('jobForm.form.namePlaceholder')" />
         </div>
 
         <div class="form-group">
-          <label>Fréquence</label>
+          <label>{{ t('jobForm.form.frequency') }}</label>
           <select v-model="formData.frequency">
             <option v-for="freq in frequencies" :key="freq.value" :value="freq.value">
               {{ freq.label }}
@@ -227,10 +227,10 @@ const formatDate = (dateString: string | undefined) => {
 
         <template v-if="!isIrregular">
         <div class="form-group">
-          <label>Date d'une paie</label>
+          <label>{{ t('jobForm.form.anchorDate') }}</label>
           <input v-model="formData.anchorDate" type="date" required />
           <small class="hint">
-            Choisissez une date de paie réelle. Les suivantes sont calculées à partir de celle-ci selon la fréquence.
+            {{ t('jobForm.form.anchorDateHint') }}
           </small>
         </div>
 
@@ -238,7 +238,7 @@ const formatDate = (dateString: string | undefined) => {
           <label class="checkbox-row">
             <!-- A plan that already has fixed pay can still be switched off, even after a downgrade -->
             <input v-model="fixedPayEnabled" type="checkbox" :disabled="!canUseFixedPay && !fixedPayEnabled" />
-            Paie fixe (déposée automatiquement à chaque paie)
+            {{ t('jobForm.form.fixedPay') }}
           </label>
           <input
             v-if="fixedPayEnabled"
@@ -246,20 +246,20 @@ const formatDate = (dateString: string | undefined) => {
             type="number"
             step="0.01"
             min="0"
-            placeholder="Montant par paie"
+            :placeholder="t('jobForm.form.fixedAmountPlaceholder')"
           />
           <small v-if="!canUseFixedPay" class="hint">
-            Réservé aux abonnements payants.
+            {{ t('jobForm.form.fixedPayPaidOnly') }}
           </small>
           <small v-else class="hint">
-            Avec une paie fixe, « Déposer une paie » disparaît. Si le montant reçu est différent, utilisez « Ajuster la dernière paie ».
+            {{ t('jobForm.form.fixedPayHint') }}
           </small>
         </div>
         </template>
 
         <!-- Distribution rules (read-only; rules are added from the envelope form) -->
         <div v-if="isEditing" class="rules-preview">
-          <div class="rules-header">Répartition prévue</div>
+          <div class="rules-header">{{ t('jobForm.rules.header') }}</div>
           <ul v-if="job?.rules?.length" class="rules-list">
             <li v-for="(rule, index) in job.rules" :key="index" class="rule-row">
               <span class="rule-envelope">{{ rule.envelopeName }}</span>
@@ -268,7 +268,7 @@ const formatDate = (dateString: string | undefined) => {
           </ul>
           <p v-else class="rules-empty">
             <i class="mdi mdi-alert-outline"></i>
-            Aucune règle : cette paie n'alloue rien aux enveloppes. Ajoute une règle depuis le formulaire d'enveloppe (prélèvement automatique).
+            {{ t('jobForm.rules.empty') }}
           </p>
         </div>
       </div>
@@ -283,14 +283,14 @@ const formatDate = (dateString: string | undefined) => {
           <p class="delete-warning">{{ t('entityDelete.confirmJob') }}</p>
           <div class="delete-actions">
             <button class="btn-danger" @click="emit('delete')">{{ t('entityDelete.confirmButton') }}</button>
-            <button class="btn-secondary" @click="confirmingDelete = false">{{ t('common.cancel') || 'Annuler' }}</button>
+            <button class="btn-secondary" @click="confirmingDelete = false">{{ t('common.cancel') }}</button>
           </div>
         </template>
       </div>
 
       <div class="modal-footer">
-        <button class="btn-secondary" @click="handleClose">{{ t('common.cancel') || 'Annuler' }}</button>
-        <button class="btn-primary" @click="handleSubmit">{{ t('common.save') || 'Enregistrer' }}</button>
+        <button class="btn-secondary" @click="handleClose">{{ t('common.cancel') }}</button>
+        <button class="btn-primary" @click="handleSubmit">{{ t('common.save') }}</button>
       </div>
     </div>
   </div>

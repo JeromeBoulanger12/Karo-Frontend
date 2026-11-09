@@ -23,7 +23,7 @@ const emit = defineEmits<{
   save: [payload: { balance: number; note?: string }]
 }>()
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 const formData = ref<{ balance: number }>({
   balance: props.account?.balance || 0
@@ -50,7 +50,7 @@ const handleClose = () => {
 }
 
 const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('fr-CA', {
+  return new Intl.NumberFormat(locale.value, {
     style: 'currency',
     currency: 'CAD'
   }).format(value)
@@ -61,7 +61,7 @@ const formatCurrency = (value: number) => {
   <div v-if="isOpen" class="modal-overlay" @click="handleClose">
     <div class="modal" @click.stop>
       <div class="modal-header">
-        <h2>Ajuster le solde</h2>
+        <h2>{{ t('accountBalance.title') }}</h2>
         <button class="modal-close" @click="handleClose">
           <i class="mdi mdi-close"></i>
         </button>
@@ -71,31 +71,31 @@ const formatCurrency = (value: number) => {
         <div class="account-info">
           <p class="account-name">{{ account?.name }}</p>
           <p class="account-current">
-            Solde actuel: <strong>{{ formatCurrency(account?.balance || 0) }}</strong>
+            {{ t('accountBalance.currentBalance') }} <strong>{{ formatCurrency(account?.balance || 0) }}</strong>
           </p>
         </div>
 
         <div class="form-group">
-          <label>Nouveau solde</label>
+          <label>{{ t('accountBalance.newBalanceLabel') }}</label>
           <input v-model.number="formData.balance" type="number" step="0.01" placeholder="0.00" />
         </div>
 
         <div class="balance-preview">
-          <span class="preview-label">Nouveau solde:</span>
+          <span class="preview-label">{{ t('accountBalance.previewLabel') }}</span>
           <span class="preview-value">{{ formatCurrency(formData.balance) }}</span>
         </div>
 
         <div class="form-group">
-          <label>Note (optionnel)</label>
-          <input v-model="note" type="text" maxlength="500" placeholder="ex. Achat imprévu : pneus" />
+          <label>{{ t('accountBalance.noteLabel') }}</label>
+          <input v-model="note" type="text" maxlength="500" :placeholder="t('accountBalance.notePlaceholder')" />
         </div>
       </div>
 
         <p v-if="submitError" class="error-text">{{ submitError }}</p>
 
       <div class="modal-footer">
-        <button class="btn-secondary" @click="handleClose">{{ t('common.cancel') || 'Annuler' }}</button>
-        <button class="btn-primary" @click="handleSubmit">{{ t('common.save') || 'Enregistrer' }}</button>
+        <button class="btn-secondary" @click="handleClose">{{ t('common.cancel') }}</button>
+        <button class="btn-primary" @click="handleSubmit">{{ t('common.save') }}</button>
       </div>
     </div>
   </div>

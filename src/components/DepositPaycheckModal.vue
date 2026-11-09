@@ -90,7 +90,7 @@ const handleClose = () => {
   <div v-if="isOpen" class="modal-overlay" @click="handleClose">
     <div class="modal" @click.stop>
       <div class="modal-header">
-        <h2>Déposer une paie</h2>
+        <h2>{{ t('paycheck.deposit.title') }}</h2>
         <button class="modal-close" @click="handleClose">
           <i class="mdi mdi-close"></i>
         </button>
@@ -99,9 +99,9 @@ const handleClose = () => {
       <div class="modal-body">
         <!-- Job Selection (always shown) -->
         <div class="form-group">
-          <label>Source de revenu:</label>
+          <label>{{ t('paycheck.deposit.source') }}</label>
           <select v-model="formData.jobId">
-            <option value="">-- Sélectionner --</option>
+            <option value="">{{ t('paycheck.deposit.selectPlaceholder') }}</option>
             <option v-for="j in jobs" :key="j.id" :value="j.id">
               {{ j.name }}
             </option>
@@ -109,7 +109,7 @@ const handleClose = () => {
 
           <!-- Distribution rules (read-only) -->
           <div v-if="selectedJob" class="rules-preview">
-            <div class="rules-header">Répartition prévue</div>
+            <div class="rules-header">{{ t('paycheck.deposit.rules.header') }}</div>
             <ul v-if="selectedJob.rules?.length" class="rules-list">
               <li v-for="(rule, index) in selectedJob.rules" :key="index" class="rule-row">
                 <span class="rule-envelope">{{ rule.envelopeName }}</span>
@@ -118,14 +118,14 @@ const handleClose = () => {
             </ul>
             <p v-else class="rules-empty">
               <i class="mdi mdi-alert-outline"></i>
-              Aucune règle pour cette source : la paie sera enregistrée sans allocation aux enveloppes.
+              {{ t('paycheck.deposit.rules.empty') }}
             </p>
           </div>
         </div>
 
         <!-- Amount Input -->
         <div class="form-group">
-          <label>Montant déposé</label>
+          <label>{{ t('paycheck.deposit.amount') }}</label>
           <input
             v-model.number="formData.amount"
             type="number"
@@ -137,7 +137,7 @@ const handleClose = () => {
 
         <!-- Account Balance Input (after paycheck) -->
         <div class="form-group">
-          <label>Solde du compte chèques (après paie)</label>
+          <label>{{ t('paycheck.deposit.accountBalance') }}</label>
           <input
             v-model.number="formData.accountBalance"
             type="number"
@@ -148,7 +148,7 @@ const handleClose = () => {
 
         <!-- Date Input -->
         <div class="form-group">
-          <label>Date du dépôt</label>
+          <label>{{ t('paycheck.deposit.date') }}</label>
           <input
             v-model="formData.date"
             type="date"
@@ -159,8 +159,8 @@ const handleClose = () => {
         <p v-if="submitError" class="error-text">{{ submitError }}</p>
 
       <div class="modal-footer">
-        <button class="btn-secondary" @click="handleClose">{{ t('common.cancel') || 'Annuler' }}</button>
-        <button class="btn-primary" @click="handleSubmit">{{ t('common.save') || 'Enregistrer' }}</button>
+        <button class="btn-secondary" @click="handleClose">{{ t('common.cancel') }}</button>
+        <button class="btn-primary" @click="handleSubmit">{{ t('common.save') }}</button>
       </div>
     </div>
   </div>

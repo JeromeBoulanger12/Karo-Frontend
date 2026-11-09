@@ -1,9 +1,11 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAuth } from '../composables/useAuth'
 import client from '../api/client'
 
+const { t } = useI18n()
 const router = useRouter()
 const { householdId } = useAuth()
 
@@ -37,22 +39,22 @@ const handleInvite = async () => {
 
 <template>
   <v-container class="py-4" style="max-width: 500px">
-    <h1 class="text-h4 mb-4">Inviter quelqu'un</h1>
+    <h1 class="text-h4 mb-4">{{ t('invitations.invite.title') }}</h1>
 
     <v-alert v-if="error" type="error" class="mb-4">
       {{ error }}
     </v-alert>
 
     <v-alert v-if="success" type="success" class="mb-4">
-      Invitation envoyée avec succès!
+      {{ t('invitations.invite.success') }}
     </v-alert>
 
     <v-form @submit.prevent="handleInvite">
       <v-text-field
         v-model="email"
         type="email"
-        label="Email"
-        placeholder="nom@exemple.com"
+        :label="t('invitations.invite.email')"
+        :placeholder="t('invitations.invite.emailPlaceholder')"
         outlined
         class="mb-4"
         required
@@ -65,7 +67,7 @@ const handleInvite = async () => {
         :loading="loading"
         :disabled="!email"
       >
-        Envoyer l'invitation
+        {{ t('invitations.invite.submit') }}
       </v-btn>
     </v-form>
 
@@ -73,7 +75,7 @@ const handleInvite = async () => {
 
     <router-link to="/household" class="text-decoration-none">
       <v-btn variant="text" block>
-        Retour au ménage
+        {{ t('invitations.invite.back') }}
       </v-btn>
     </router-link>
   </v-container>

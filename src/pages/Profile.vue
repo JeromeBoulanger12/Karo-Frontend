@@ -6,7 +6,7 @@ import client from '../api/client'
 import { userSettingsApi, listTimeZones } from '../api/userSettings'
 import '../styles/dashboard.css'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const { user, clearLocalSession } = useAuth()
 
 // Account deletion
@@ -128,7 +128,7 @@ const downloadMyData = async () => {
     const url = URL.createObjectURL(new Blob([response.data], { type: 'application/json' }))
     const link = document.createElement('a')
     link.href = url
-    link.download = 'karo-mes-donnees.json'
+    link.download = t('profilePage.data.exportFileName')
     link.click()
     URL.revokeObjectURL(url)
   } catch (err) {
@@ -280,7 +280,7 @@ const confirmDeleteAccount = async () => {
       <div class="card">
         <div class="card-header">
           <i class="mdi mdi-star"></i>
-          <h2>{{ t('profile.subscription') || 'Abonnement' }}</h2>
+          <h2>{{ t('profile.subscription') }}</h2>
         </div>
 
         <div class="card-body">
@@ -291,29 +291,29 @@ const confirmDeleteAccount = async () => {
 
           <div v-else-if="subscriptions.length > 0" class="subscription-list">
             <div v-for="sub in subscriptions" :key="sub.id" class="subscription-item">
-              <div class="subscription-name">{{ sub.tier || sub.planName || 'Plan' }}</div>
+              <div class="subscription-name">{{ sub.tier || sub.planName || t('profilePage.subscription.planFallback') }}</div>
               <div class="subscription-details">
                 <div class="detail-row">
-                  <strong>{{ t('common.status') || 'Statut' }}:</strong>
+                  <strong>{{ t('common.status') }}:</strong>
                   <v-chip
                     :color="sub.status === 'active' ? 'success' : 'warning'"
                     label
                     small
                   >
-                    {{ sub.status || 'active' }}
+                    {{ sub.status || t('profilePage.subscription.statusFallback') }}
                   </v-chip>
                 </div>
                 <div v-if="sub.amount" class="detail-row">
-                  <strong>{{ t('common.amount') || 'Montant' }}:</strong>
-                  <span>{{ sub.amount }}{{ sub.currency || 'CAD' }} / {{ sub.billingPeriod || 'month' }}</span>
+                  <strong>{{ t('profile.amount') }}:</strong>
+                  <span>{{ sub.amount }}{{ sub.currency || 'CAD' }} / {{ sub.billingPeriod || t('profilePage.subscription.billingPeriodFallback') }}</span>
                 </div>
                 <div v-if="sub.renewalDate" class="detail-row">
-                  <strong>{{ t('profile.renewal') || 'Renouvellement' }}:</strong>
-                  <span>{{ new Date(sub.renewalDate).toLocaleDateString('fr-CA') }}</span>
+                  <strong>{{ t('profile.renewal') }}:</strong>
+                  <span>{{ new Date(sub.renewalDate).toLocaleDateString(locale) }}</span>
                 </div>
                 <div v-if="sub.startDate" class="detail-row">
-                  <strong>{{ t('profile.startDate') || 'Date de début' }}:</strong>
-                  <span>{{ new Date(sub.startDate).toLocaleDateString('fr-CA') }}</span>
+                  <strong>{{ t('profile.startDate') }}:</strong>
+                  <span>{{ new Date(sub.startDate).toLocaleDateString(locale) }}</span>
                 </div>
               </div>
             </div>
@@ -321,8 +321,8 @@ const confirmDeleteAccount = async () => {
 
           <div v-else class="empty-placeholder">
             <i class="mdi mdi-inbox-outline"></i>
-            <p>{{ t('profile.noSubscriptions') || 'Pas d\'abonnement actif' }}</p>
-            <small style="display: block; margin-top: 0.5rem; color: var(--text-muted);">Vous êtes sur le plan gratuit</small>
+            <p>{{ t('profile.noSubscriptions') }}</p>
+            <small style="display: block; margin-top: 0.5rem; color: var(--text-muted);">{{ t('profilePage.subscription.freePlanNote') }}</small>
           </div>
         </div>
       </div>
@@ -332,7 +332,7 @@ const confirmDeleteAccount = async () => {
     <section class="section">
       <h2 class="section-title">
         <i class="mdi mdi-history"></i>
-        {{ t('profile.purchases') || 'Historique d\'achats' }}
+        {{ t('profile.purchases') }}
       </h2>
 
       <div v-if="loadingSubscriptions" class="loading-state">
@@ -343,15 +343,15 @@ const confirmDeleteAccount = async () => {
         <table class="modern-table">
           <thead>
             <tr>
-              <th>{{ t('profile.date') || 'Date' }}</th>
-              <th>{{ t('profile.description') || 'Description' }}</th>
-              <th>{{ t('profile.amount') || 'Montant' }}</th>
-              <th>{{ t('profile.status') || 'Statut' }}</th>
+              <th>{{ t('profile.date') }}</th>
+              <th>{{ t('profile.description') }}</th>
+              <th>{{ t('profile.amount') }}</th>
+              <th>{{ t('profile.status') }}</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="order in orders" :key="order.id">
-              <td>{{ new Date(order.createdAt).toLocaleDateString('fr-CA') }}</td>
+              <td>{{ new Date(order.createdAt).toLocaleDateString(locale) }}</td>
               <td>{{ order.planName || order.description }}</td>
               <td class="amount">{{ order.amount }}{{ order.currency || 'CAD' }}</td>
               <td>
@@ -370,7 +370,7 @@ const confirmDeleteAccount = async () => {
 
       <div v-else class="empty-placeholder">
         <i class="mdi mdi-inbox-outline"></i>
-        <p>{{ t('profile.noPurchases') || 'Pas de transactions' }}</p>
+        <p>{{ t('profile.noPurchases') }}</p>
       </div>
     </section>
 
