@@ -1187,10 +1187,18 @@ onMounted(() => {
   font-size: 1.25rem;
 }
 
+/* Two columns on wide screens; each card keeps its own height when expanded */
 .accounts-list {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
   gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .accounts-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 /* Jobs Grid */

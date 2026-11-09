@@ -220,12 +220,14 @@ const toggleExpand = () => {
             </div>
           </div>
         </div>
-        <button class="btn-adjust-balance" @click.stop="emit('edit-balance', account)">
-          {{ t('dashboard.account.adjustBalance') }}
-        </button>
-        <button v-if="canShowHistory" class="btn-adjust-balance" @click.stop="emit('view-history', account)">
-          {{ t('dashboard.account.history') }}
-        </button>
+        <div class="balance-actions">
+          <button class="btn-adjust-balance" @click.stop="emit('edit-balance', account)">
+            {{ t('dashboard.account.adjustBalance') }}
+          </button>
+          <button v-if="canShowHistory" class="btn-adjust-balance" @click.stop="emit('view-history', account)">
+            {{ t('dashboard.account.history') }}
+          </button>
+        </div>
       </div>
       <button class="expand-toggle" :class="{ rotated: isExpanded }" @click.stop="toggleExpand">
         <i class="mdi mdi-chevron-up"></i>
@@ -510,6 +512,12 @@ const toggleExpand = () => {
 
 .account-balance-amount.is-debt {
   color: var(--danger);
+}
+
+.balance-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
 }
 
 .btn-adjust-balance {
