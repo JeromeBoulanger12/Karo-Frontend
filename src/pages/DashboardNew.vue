@@ -760,6 +760,8 @@ onMounted(() => {
         </button>
       </nav>
 
+      <!-- Accounts (3/4 of the width) beside the paychecks (1/4) -->
+      <div class="comptes-paie-row">
       <!-- Accounts Section -->
       <section id="section-comptes" class="section">
         <div class="section-header">
@@ -840,6 +842,7 @@ onMounted(() => {
           </div>
         </div>
       </section>
+      </div>
     </div>
 
     <!-- Modals -->
@@ -1187,6 +1190,23 @@ onMounted(() => {
   font-size: 1.25rem;
 }
 
+/* Accounts take 3/4 of the width and paychecks 1/4; stacked on narrow screens */
+.comptes-paie-row {
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.comptes-paie-row > .section {
+  min-width: 0;
+}
+
+/* The paycheck column is narrow, so its job cards stack */
+.comptes-paie-row .jobs-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 /* Two columns on wide screens; each card keeps its own height when expanded */
 .accounts-list {
   display: grid;
@@ -1196,6 +1216,10 @@ onMounted(() => {
 }
 
 @media (max-width: 768px) {
+  .comptes-paie-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .accounts-list {
     grid-template-columns: minmax(0, 1fr);
   }
