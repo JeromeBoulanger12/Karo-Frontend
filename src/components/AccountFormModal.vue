@@ -99,8 +99,9 @@ const handleSubmit = () => {
       validationError.value = 'Le taux d\'intérêt annuel est requis'
       return
     }
-    if (isMissing(debt?.minimumPayment) || Number(debt?.minimumPayment) < 0) {
-      validationError.value = 'Le paiement minimum est requis'
+    // The minimum payment is optional: left empty it is saved as 0
+    if (!isMissing(debt?.minimumPayment) && Number(debt?.minimumPayment) < 0) {
+      validationError.value = 'Le paiement minimum ne peut pas être négatif'
       return
     }
   }
@@ -204,7 +205,7 @@ const currencies = [
           </div>
 
           <div class="form-group">
-            <label>Paiement minimum</label>
+            <label>Paiement minimum (facultatif)</label>
             <input v-model.number="formData.debt.minimumPayment" type="number" min="0" step="0.01" placeholder="Ex: 75" />
           </div>
 
