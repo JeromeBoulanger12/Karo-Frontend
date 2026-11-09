@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { isCreditAccount } from '../utils/accounts'
+import { accountTypeKey, isCreditAccount } from '../utils/accounts'
 import type { DebtTermsForm } from '../api/accounts'
 
 interface Account {
@@ -121,11 +121,12 @@ const handleClose = () => {
   }
 }
 
+// Labels come from the translations (enums.accountTypes), so they follow the user's language
 const accountTypes = [
-  { value: 'checking', label: 'Compte chèques' },
-  { value: 'savings', label: 'Compte épargne' },
-  { value: 'credit', label: 'Carte de crédit' },
-  { value: 'investment', label: 'Investissement' }
+  { value: 'checking' },
+  { value: 'savings' },
+  { value: 'credit' },
+  { value: 'investment' }
 ]
 
 const currencies = [
@@ -162,7 +163,7 @@ const currencies = [
               {{ formData.type }}
             </option>
             <option v-for="type in accountTypes" :key="type.value" :value="type.value">
-              {{ type.label }}
+              {{ t(`enums.accountTypes.${accountTypeKey(type.value)}`) }}
             </option>
           </select>
         </div>

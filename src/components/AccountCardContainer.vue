@@ -6,7 +6,7 @@ import AccountBalanceChart from './AccountBalanceChart.vue'
 import AccountSparkline from './AccountSparkline.vue'
 import { useI18n } from 'vue-i18n'
 import type { EnvelopeSummary } from '../utils/envelopes'
-import { isCreditAccount } from '../utils/accounts'
+import { accountTypeKey, isCreditAccount } from '../utils/accounts'
 
 interface Account {
   id: string
@@ -111,6 +111,12 @@ const accountBalance = computed(() => {
 // A credit card's balance is what is owed: shown in red, and no surplus
 const isCredit = computed(() => isCreditAccount(props.account.type))
 
+// The account type in the user's language; an unknown type is shown as it is
+const typeLabel = computed(() => {
+  const key = accountTypeKey(props.account.type)
+  return key ? t(`enums.accountTypes.${key}`) : props.account.type
+})
+
 // Credit utilisation: the amount owed against the credit limit. Below 30% is good, 30% to 50% is a
 // warning and 50% or more is high, the usual guideline for a card's standing.
 const creditLimit = computed(() => props.account.creditLimit?.amount ?? null)
@@ -192,7 +198,7 @@ const toggleExpand = () => {
           <div class="account-name">{{ account.name }}</div>
           <div class="account-meta">
             <span><i class="mdi mdi-globe" style="font-size: 0.75rem;"></i> {{ account.currency || 'CAD' }}</span>
-            <span>{{ account.type }}</span>
+            <span>{{ typeLabel }}</span>
           </div>
         </div>
       </div>
