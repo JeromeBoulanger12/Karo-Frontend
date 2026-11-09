@@ -96,12 +96,12 @@ const handleSubmit = () => {
     // v-model.number leaves an empty field as '' rather than a number
     const isMissing = (value: unknown) => value === undefined || value === null || value === ''
     if (isMissing(debt?.interestRate) || Number(debt?.interestRate) < 0) {
-      validationError.value = 'Le taux d\'intérêt annuel est requis'
+      validationError.value = t('debtTerms.errors.interestRequired')
       return
     }
     // The minimum payment is optional: left empty it is saved as 0
     if (!isMissing(debt?.minimumPayment) && Number(debt?.minimumPayment) < 0) {
-      validationError.value = 'Le paiement minimum ne peut pas être négatif'
+      validationError.value = t('debtTerms.errors.minimumNegative')
       return
     }
   }
@@ -181,38 +181,38 @@ const currencies = [
         </div>
 
         <template v-if="isCredit && formData.debt">
-          <h3 class="debt-title">Conditions de la carte</h3>
+          <h3 class="debt-title">{{ t('debtTerms.title') }}</h3>
 
           <div class="form-group">
-            <label>Taux d'intérêt annuel (%)</label>
-            <input v-model.number="formData.debt.interestRate" type="number" min="0" step="0.01" placeholder="Ex: 19.99" />
+            <label>{{ t('debtTerms.interestRate') }}</label>
+            <input v-model.number="formData.debt.interestRate" type="number" min="0" step="0.01" :placeholder="t('debtTerms.interestRatePlaceholder')" />
           </div>
 
           <div class="form-group">
-            <label>Type de taux</label>
+            <label>{{ t('debtTerms.rateType') }}</label>
             <select v-model="formData.debt.rateType">
-              <option value="Variable">Variable</option>
-              <option value="Fixed">Fixe</option>
+              <option value="Variable">{{ t('debtTerms.rateTypes.Variable') }}</option>
+              <option value="Fixed">{{ t('debtTerms.rateTypes.Fixed') }}</option>
             </select>
           </div>
 
           <div class="form-group">
-            <label>Capitalisation des intérêts</label>
+            <label>{{ t('debtTerms.compounding') }}</label>
             <select v-model="formData.debt.compoundingFrequency">
-              <option value="Daily">Quotidienne</option>
-              <option value="Monthly">Mensuelle</option>
-              <option value="Annually">Annuelle</option>
+              <option value="Daily">{{ t('debtTerms.compoundings.Daily') }}</option>
+              <option value="Monthly">{{ t('debtTerms.compoundings.Monthly') }}</option>
+              <option value="Annually">{{ t('debtTerms.compoundings.Annually') }}</option>
             </select>
           </div>
 
           <div class="form-group">
-            <label>Paiement minimum (facultatif)</label>
-            <input v-model.number="formData.debt.minimumPayment" type="number" min="0" step="0.01" placeholder="Ex: 75" />
+            <label>{{ t('debtTerms.minimumPayment') }}</label>
+            <input v-model.number="formData.debt.minimumPayment" type="number" min="0" step="0.01" :placeholder="t('debtTerms.minimumPaymentPlaceholder')" />
           </div>
 
           <div class="form-group">
-            <label>Limite de crédit (facultatif)</label>
-            <input v-model.number="formData.debt.creditLimit" type="number" min="0" step="0.01" placeholder="Ex: 3000" />
+            <label>{{ t('debtTerms.creditLimit') }}</label>
+            <input v-model.number="formData.debt.creditLimit" type="number" min="0" step="0.01" :placeholder="t('debtTerms.creditLimitPlaceholder')" />
           </div>
         </template>
       </div>

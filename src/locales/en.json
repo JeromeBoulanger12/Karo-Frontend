@@ -974,5 +974,31 @@
         "answer": "Turn on the \"shareable\" option on the envelope. Other household members can then see it and link it to their own envelope."
       }
     }
+  },
+  "debtTerms": {
+    "title": "Card terms",
+    "interestRate": "Annual interest rate (%)",
+    "interestRatePlaceholder": "E.g.: 19.99",
+    "rateType": "Rate type",
+    "rateTypes": {
+      "Variable": "Variable",
+      "Fixed": "Fixed"
+    },
+    "compounding": "Interest compounding",
+    "compoundings": {
+      "Daily": "Daily",
+      "Monthly": "Monthly",
+      "Annually": "Annually"
+    },
+    "minimumPayment": "Minimum payment (optional)",
+    "minimumPaymentPlaceholder": "E.g.: 75",
+    "creditLimit": "Credit limit (optional)",
+    "creditLimitPlaceholder": "E.g.: 3000",
+    "creditLimitMissing": "Credit limit not set",
+    "usage": "{amount} of {limit}",
+    "errors": {
+      "interestRequired": "The annual interest rate is required",
+      "minimumNegative": "The minimum payment cannot be negative"
+    }
   }
 }

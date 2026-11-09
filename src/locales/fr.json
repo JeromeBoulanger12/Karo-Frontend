@@ -1058,5 +1058,31 @@
         "answer": "Activez l'option « partageable » sur l'enveloppe. Les autres membres du ménage peuvent alors la voir et la lier à leur propre enveloppe."
       }
     }
+  },
+  "debtTerms": {
+    "title": "Conditions de la carte",
+    "interestRate": "Taux d’intérêt annuel (%)",
+    "interestRatePlaceholder": "Ex. : 19,99",
+    "rateType": "Type de taux",
+    "rateTypes": {
+      "Variable": "Variable",
+      "Fixed": "Fixe"
+    },
+    "compounding": "Capitalisation des intérêts",
+    "compoundings": {
+      "Daily": "Quotidienne",
+      "Monthly": "Mensuelle",
+      "Annually": "Annuelle"
+    },
+    "minimumPayment": "Paiement minimum (facultatif)",
+    "minimumPaymentPlaceholder": "Ex. : 75",
+    "creditLimit": "Limite de crédit (facultative)",
+    "creditLimitPlaceholder": "Ex. : 3000",
+    "creditLimitMissing": "Limite de crédit non renseignée",
+    "usage": "{amount} sur {limit}",
+    "errors": {
+      "interestRequired": "Le taux d’intérêt annuel est requis",
+      "minimumNegative": "Le paiement minimum ne peut pas être négatif"
+    }
   }
 }

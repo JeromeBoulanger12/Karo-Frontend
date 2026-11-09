@@ -17,7 +17,7 @@ import {
 } from 'chart.js'
 import { accountsApi } from '../api/accounts'
 import { averageSurplusAt, movingAverageSeries, surplusStats, type SurplusPoint } from '../utils/surplus'
-import { isCreditAccount } from '../utils/accounts'
+import { showsSurplus } from '../utils/accounts'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Legend, Tooltip)
 
@@ -257,7 +257,7 @@ const formatDelta = (delta: number | null) => {
         <p v-else-if="rows.length === 0" class="hint">{{ t('dashboard.balanceHistory.empty') }}</p>
 
         <template v-else>
-          <section v-if="!isCreditAccount(account.type)" class="surplus-section">
+          <section v-if="showsSurplus(account.type)" class="surplus-section">
             <div class="trend-header">
               <h3>{{ t('dashboard.balanceHistory.trendTitle') }}</h3>
               <select v-model.number="trendDays" class="trend-period" :aria-label="t('dashboard.balanceHistory.period')">

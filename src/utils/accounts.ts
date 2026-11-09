@@ -18,3 +18,9 @@ const ACCOUNT_TYPE_KEYS: Record<string, string> = {
 export function accountTypeKey(type: string | null | undefined): string | null {
   return ACCOUNT_TYPE_KEYS[(type ?? '').toLowerCase()] ?? null
 }
+
+// The surplus (balance minus envelopes) means something for a chequing or investment account only
+export function showsSurplus(type: string | null | undefined): boolean {
+  if (isCreditAccount(type)) return false
+  return !['Savings', 'LineOfCredit'].includes(accountTypeKey(type) ?? '')
+}

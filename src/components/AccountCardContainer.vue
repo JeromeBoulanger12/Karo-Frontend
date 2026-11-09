@@ -6,7 +6,7 @@ import AccountBalanceChart from './AccountBalanceChart.vue'
 import AccountSparkline from './AccountSparkline.vue'
 import { useI18n } from 'vue-i18n'
 import type { EnvelopeSummary } from '../utils/envelopes'
-import { accountTypeKey, isCreditAccount } from '../utils/accounts'
+import { accountTypeKey, isCreditAccount, showsSurplus } from '../utils/accounts'
 
 interface Account {
   id: string
@@ -111,10 +111,7 @@ const accountBalance = computed(() => {
 // A credit card's balance is what is owed: shown in red, and no surplus
 const isCredit = computed(() => isCreditAccount(props.account.type))
 
-// The surplus box is not shown for savings or lines of credit, nor for credit cards
-const showSurplus = computed(() =>
-  !isCredit.value && !['Savings', 'LineOfCredit'].includes(accountTypeKey(props.account.type) ?? '')
-)
+const showSurplus = computed(() => showsSurplus(props.account.type))
 
 // The account type in the user's language; an unknown type is shown as it is
 const typeLabel = computed(() => {
@@ -214,14 +211,14 @@ const toggleExpand = () => {
           <div class="account-balance-amount" :class="{ 'is-debt': isCredit }">{{ formatCurrency(accountBalance) }}</div>
           <div v-if="creditUsage !== null" class="credit-usage" :class="`is-${creditUsageLevel}`">
             <div class="credit-usage-text">
-              <span>{{ formatCurrency(accountBalance) }} sur {{ formatCurrency(creditLimit ?? 0) }}</span>
+              <span>{{ t('debtTerms.usage', { amount: formatCurrency(accountBalance), limit: formatCurrency(creditLimit ?? 0) }) }}</span>
               <span class="credit-usage-percent">{{ Math.round(creditUsage) }} %</span>
             </div>
             <div class="credit-usage-track">
               <div class="credit-usage-fill" :style="{ width: `${Math.min(creditUsage, 100)}%` }"></div>
             </div>
           </div>
-          <div v-else-if="isCredit" class="credit-usage-missing">Limite de crédit non renseignée</div>
+          <div v-else-if="isCredit" class="credit-usage-missing">{{ t('debtTerms.creditLimitMissing') }}</div>
           <div class="balance-freshness" :class="{ 'is-stale': isBalanceStale }">{{ balanceFreshnessLabel }}</div>
           <div v-if="surplus !== null && showSurplus" class="surplus-box" :class="surplus < 0 ? 'is-deficit' : 'is-surplus'">
             <i class="mdi" :class="surplus < 0 ? 'mdi-alert-circle' : 'mdi-check-circle'"></i>
