@@ -1207,20 +1207,14 @@ onMounted(() => {
   grid-template-columns: minmax(0, 1fr);
 }
 
-/* Two columns on wide screens; each card keeps its own height when expanded */
 .accounts-list {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-items: start;
+  display: flex;
+  flex-direction: column;
   gap: 1.5rem;
 }
 
 @media (max-width: 768px) {
   .comptes-paie-row {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .accounts-list {
     grid-template-columns: minmax(0, 1fr);
   }
 }
