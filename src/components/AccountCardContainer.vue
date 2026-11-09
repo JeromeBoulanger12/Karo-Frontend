@@ -164,8 +164,13 @@ const toggleExpand = () => {
     <!-- Account Header -->
     <div class="account-header-main" :class="{ expanded: isExpanded }" @click="toggleExpand">
       <div class="account-info">
-        <div class="account-icon" :style="{ background: getIconBackground(account.type), color: getIconColor(account.type) }">
-          <i :class="`mdi ${getAccountIcon(account.type)}`"></i>
+        <div class="account-leading">
+          <button class="btn-edit-account" :title="t('dashboard.account.editAccount')" :aria-label="t('dashboard.account.editAccount')" @click.stop="emit('edit-account', account)">
+            <i class="mdi mdi-pencil"></i>
+          </button>
+          <div class="account-icon" :style="{ background: getIconBackground(account.type), color: getIconColor(account.type) }">
+            <i :class="`mdi ${getAccountIcon(account.type)}`"></i>
+          </div>
         </div>
         <div class="account-info-text">
           <div class="account-name">{{ account.name }}</div>
@@ -239,10 +244,6 @@ const toggleExpand = () => {
           <i class="mdi mdi-plus"></i>
           {{ t('dashboard.account.addEnvelope') }}
         </button>
-        <button class="btn btn-secondary-sm" @click="emit('edit-account', account)">
-          <i class="mdi mdi-pencil"></i>
-          {{ t('dashboard.account.editAccount') }}
-        </button>
       </div>
     </div>
   </div>
@@ -290,6 +291,29 @@ const toggleExpand = () => {
   align-items: center;
   flex: 1;
   min-width: 0;
+}
+
+.account-leading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.btn-edit-account {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 1.125rem;
+  padding: 0.25rem;
+  border-radius: 6px;
+  line-height: 1;
+}
+
+.btn-edit-account:hover {
+  color: var(--primary);
+  background: var(--surface);
 }
 
 .account-icon {
