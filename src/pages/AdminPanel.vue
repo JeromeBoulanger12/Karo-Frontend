@@ -88,6 +88,15 @@
           <i class="mdi mdi-email-edit-outline"></i>
           <span>{{ t('adminEmail.templatesTitle') }}</span>
         </router-link>
+
+        <router-link
+          to="/admin/privacy-incidents"
+          class="nav-item"
+          :class="{ active: isActive('privacy-incidents') }"
+        >
+          <i class="mdi mdi-shield-alert-outline"></i>
+          <span>Incidents de confidentialité</span>
+        </router-link>
       </nav>
 
       <div class="admin-footer">
