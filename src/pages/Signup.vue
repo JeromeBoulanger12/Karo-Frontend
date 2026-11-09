@@ -7,7 +7,7 @@ import { resetRedirectFlag } from '../api/client'
 import { savePendingProfile } from '../composables/pendingProfile'
 import { LEGAL_VERSION } from '../legal/version'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const router = useRouter()
 const { signup, loading, error } = useAuth()
 
@@ -30,6 +30,9 @@ const handleSignup = async () => {
     return
   }
 
+  // The language the user reads the app in: it sets the language of their emails
+  const language = locale.value === 'en' ? 'en' : 'fr'
+
   // Store profile info for later (after email confirmation)
   localStorage.setItem('pendingFirstName', firstName.value)
   localStorage.setItem('pendingLastName', lastName.value)
@@ -37,6 +40,7 @@ const handleSignup = async () => {
     // The browser's zone is a good first guess; the profile page can change it
     timeZoneId: Intl.DateTimeFormat().resolvedOptions().timeZone,
     consentVersion: LEGAL_VERSION,
+    language,
     address: {
       street: street.value,
       city: city.value,
@@ -46,7 +50,7 @@ const handleSignup = async () => {
     }
   })
 
-  await signup(email.value, password.value)
+  await signup(email.value, password.value, language)
 }
 
 const goToLogin = () => {

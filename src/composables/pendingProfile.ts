@@ -8,6 +8,8 @@ export interface PendingProfile {
   address?: PostalAddress
   // Set when the user ticked the consent box at sign-up
   consentVersion?: string
+  // The language the user signed up in (fr or en)
+  language?: string
 }
 
 export function savePendingProfile(profile: PendingProfile) {
@@ -22,7 +24,7 @@ export async function applyPendingProfile() {
   try {
     const profile = JSON.parse(raw) as PendingProfile
     if (profile.timeZoneId) {
-      await userSettingsApi.updatePreferences(profile.timeZoneId, true)
+      await userSettingsApi.updatePreferences(profile.timeZoneId, true, profile.language)
     }
     if (profile.address) {
       await userSettingsApi.updateAddress(profile.address)

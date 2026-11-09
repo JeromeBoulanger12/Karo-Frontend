@@ -89,14 +89,16 @@ export const useAuth = () => {
     }
   }
 
-  const signup = async (email: string, password: string) => {
+  // The language is kept in the account metadata, so the backend knows it on the first sign-in
+  const signup = async (email: string, password: string, language?: string) => {
     loading.value = true
     error.value = null
 
     try {
       const { data, error: signUpError } = await supabase.auth.signUp({
         email,
-        password
+        password,
+        options: language ? { data: { language } } : undefined
       })
 
       if (signUpError) throw signUpError

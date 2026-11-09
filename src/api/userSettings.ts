@@ -26,8 +26,9 @@ export const userSettingsApi = {
   updateName(firstName: string, lastName: string) {
     return client.put('/auth/profile', { firstName, lastName })
   },
-  updatePreferences(timeZoneId: string, notificationsEnabled: boolean) {
-    return client.put('/auth/preferences', { timeZoneId, notificationsEnabled })
+  // The language is left out when not given, so the stored one is kept
+  updatePreferences(timeZoneId: string, notificationsEnabled: boolean, language?: string) {
+    return client.put('/auth/preferences', { timeZoneId, notificationsEnabled, language })
   },
   updateAddress(address: PostalAddress) {
     return client.put('/auth/address', address)
