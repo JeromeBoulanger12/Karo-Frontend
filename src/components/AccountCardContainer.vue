@@ -111,6 +111,11 @@ const accountBalance = computed(() => {
 // A credit card's balance is what is owed: shown in red, and no surplus
 const isCredit = computed(() => isCreditAccount(props.account.type))
 
+// The surplus box is not shown for savings or lines of credit, nor for credit cards
+const showSurplus = computed(() =>
+  props.surplus !== null && !isCredit.value && !['Savings', 'LineOfCredit'].includes(accountTypeKey(props.account.type) ?? '')
+)
+
 // The account type in the user's language; an unknown type is shown as it is
 const typeLabel = computed(() => {
   const key = accountTypeKey(props.account.type)
@@ -218,7 +223,7 @@ const toggleExpand = () => {
           </div>
           <div v-else-if="isCredit" class="credit-usage-missing">Limite de crédit non renseignée</div>
           <div class="balance-freshness" :class="{ 'is-stale': isBalanceStale }">{{ balanceFreshnessLabel }}</div>
-          <div v-if="surplus !== null && !isCredit" class="surplus-box" :class="surplus < 0 ? 'is-deficit' : 'is-surplus'">
+          <div v-if="showSurplus" class="surplus-box" :class="surplus < 0 ? 'is-deficit' : 'is-surplus'">
             <i class="mdi" :class="surplus < 0 ? 'mdi-alert-circle' : 'mdi-check-circle'"></i>
             <div class="surplus-text">
               <span class="surplus-label">{{ surplus < 0 ? t('dashboard.stats.deficit') : t('dashboard.stats.surplus') }}</span>
