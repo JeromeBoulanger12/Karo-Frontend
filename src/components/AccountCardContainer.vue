@@ -15,6 +15,7 @@ interface Account {
   currency: string
   latestBalance?: { amount?: number }
   latestSnapshot?: { amount?: { amount?: number } }
+  creditLimit?: { amount: number; currency?: string } | null
 }
 
 const { t } = useI18n()
@@ -110,6 +111,21 @@ const accountBalance = computed(() => {
 // A credit card's balance is what is owed: shown in red, and no surplus
 const isCredit = computed(() => isCreditAccount(props.account.type))
 
+// Credit utilisation: the amount owed against the credit limit. Below 30% is good, 30% to 50% is a
+// warning and 50% or more is high, the usual guideline for a card's standing.
+const creditLimit = computed(() => props.account.creditLimit?.amount ?? null)
+const creditUsage = computed(() => {
+  if (!isCredit.value || !creditLimit.value || creditLimit.value <= 0) return null
+  return (accountBalance.value / creditLimit.value) * 100
+})
+const creditUsageLevel = computed(() => {
+  const percent = creditUsage.value
+  if (percent === null) return null
+  if (percent < 30) return 'good'
+  if (percent < 50) return 'warning'
+  return 'danger'
+})
+
 const envelopesCount = computed(() => {
   return props.envelopes.length
 })
@@ -185,6 +201,16 @@ const toggleExpand = () => {
         <div class="account-balance">
           <div class="account-balance-label">{{ t('dashboard.account.balance') }}</div>
           <div class="account-balance-amount" :class="{ 'is-debt': isCredit }">{{ formatCurrency(accountBalance) }}</div>
+          <div v-if="creditUsage !== null" class="credit-usage" :class="`is-${creditUsageLevel}`">
+            <div class="credit-usage-text">
+              <span>{{ formatCurrency(accountBalance) }} sur {{ formatCurrency(creditLimit ?? 0) }}</span>
+              <span class="credit-usage-percent">{{ Math.round(creditUsage) }} %</span>
+            </div>
+            <div class="credit-usage-track">
+              <div class="credit-usage-fill" :style="{ width: `${Math.min(creditUsage, 100)}%` }"></div>
+            </div>
+          </div>
+          <div v-else-if="isCredit" class="credit-usage-missing">Limite de crédit non renseignée</div>
           <div class="balance-freshness" :class="{ 'is-stale': isBalanceStale }">{{ balanceFreshnessLabel }}</div>
           <div v-if="surplus !== null && !isCredit" class="surplus-box" :class="surplus < 0 ? 'is-deficit' : 'is-surplus'">
             <i class="mdi" :class="surplus < 0 ? 'mdi-alert-circle' : 'mdi-check-circle'"></i>
@@ -291,6 +317,56 @@ const toggleExpand = () => {
   align-items: center;
   flex: 1;
   min-width: 0;
+}
+
+.credit-usage {
+  --usage-color: #16a34a;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+  min-width: 220px;
+}
+
+.credit-usage.is-warning {
+  --usage-color: #ca8a04;
+}
+
+.credit-usage.is-danger {
+  --usage-color: #dc2626;
+}
+
+.credit-usage-text {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.credit-usage-percent {
+  font-weight: 700;
+  color: var(--usage-color);
+}
+
+.credit-usage-track {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.credit-usage-fill {
+  height: 100%;
+  background: var(--usage-color);
+  transition: width 0.3s ease;
+}
+
+.credit-usage-missing {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-style: italic;
 }
 
 .account-leading {
