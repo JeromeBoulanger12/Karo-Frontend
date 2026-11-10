@@ -1213,7 +1213,8 @@ onMounted(() => {
   gap: 1.5rem;
 }
 
-@media (max-width: 768px) {
+/* Below 1024px (tablets, unfolded foldables) the paycheck column is too narrow beside accounts */
+@media (max-width: 1024px) {
   .comptes-paie-row {
     grid-template-columns: minmax(0, 1fr);
   }

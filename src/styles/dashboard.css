@@ -650,10 +650,6 @@
     font-size: var(--font-size-2xl);
   }
 
-  .stats-row {
-    grid-template-columns: 1fr;
-  }
-
   .account-header-main {
     grid-template-columns: 1fr;
     padding: var(--space-md);
@@ -678,14 +674,6 @@
     padding: var(--space-md);
   }
 
-  .envelopes-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .jobs-grid {
-    grid-template-columns: 1fr;
-  }
-
   .account-actions {
     flex-direction: column;
   }
@@ -695,7 +683,20 @@
   }
 }
 
+/* Phones only: the unfolded Galaxy Fold (~700-850px) keeps its multi-column grids */
 @media (max-width: 640px) {
+  .stats-row {
+    grid-template-columns: 1fr;
+  }
+
+  .envelopes-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .jobs-grid {
+    grid-template-columns: 1fr;
+  }
+
   .dashboard-container {
     padding: var(--space-md);
   }
