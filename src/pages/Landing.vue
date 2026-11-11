@@ -60,42 +60,36 @@
       </div>
     </section>
 
-    <!-- Hero Section -->
-    <section class="hero">
-      <div class="hero-content">
-        <h1 class="hero-title">{{ t('landing.hero_title') }}</h1>
-        <p class="hero-subtitle">{{ t('landing.hero_subtitle') }}</p>
-        <div class="hero-buttons">
-          <router-link to="/signup" class="btn btn-primary-lg">
-            {{ t('landing.get_started') }}
-          </router-link>
-          <a href="#pricing" class="btn btn-secondary-lg">
-            {{ t('landing.view_pricing') }}
-          </a>
+    <!-- Hero: full-width colored band -->
+    <div class="hero-band">
+      <section class="hero">
+        <div class="hero-content">
+          <h1 class="hero-title">{{ t('landing.hero_title') }}</h1>
+          <p class="hero-subtitle">{{ t('landing.hero_subtitle') }}</p>
+          <div class="hero-buttons">
+            <router-link to="/signup" class="btn btn-primary-lg">
+              {{ t('landing.get_started') }}
+            </router-link>
+            <a href="#pricing" class="btn btn-secondary-lg">
+              {{ t('landing.view_pricing') }}
+            </a>
+          </div>
         </div>
-      </div>
-      <div class="hero-visual">
-        <div class="hero-card">
-          <i class="mdi mdi-chart-line"></i>
-          <span>{{ t('landing.budget_tracking') }}</span>
+        <div class="hero-visual">
+          <div v-for="card in heroCards" :key="card.icon" class="hero-card">
+            <i :class="card.icon"></i>
+            <span>{{ card.label }}</span>
+          </div>
         </div>
-        <div class="hero-card">
-          <i class="mdi mdi-account-multiple"></i>
-          <span>{{ t('landing.family_sharing') }}</span>
-        </div>
-        <div class="hero-card">
-          <i class="mdi mdi-lock"></i>
-          <span>{{ t('landing.secure') }}</span>
-        </div>
-      </div>
-    </section>
+      </section>
+    </div>
 
     <!-- Features Section -->
     <section id="features" class="features">
       <h2 class="section-title">{{ t('landing.why_karo') }}</h2>
       <div class="features-grid">
         <div v-for="feature in features" :key="feature.id" class="feature-card">
-          <div class="feature-icon" :style="{ backgroundColor: feature.color }">
+          <div class="feature-icon">
             <i :class="feature.icon"></i>
           </div>
           <h3>{{ feature.title }}</h3>
@@ -160,19 +154,12 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(feature, idx) in comparisonFeatures" :key="idx">
-                <td class="feature-name">{{ feature.name }}</td>
-                <td>
-                  <i v-if="feature.free" class="mdi mdi-check"></i>
-                  <span v-else class="dash">—</span>
-                </td>
-                <td>
-                  <i v-if="feature.pro" class="mdi mdi-check"></i>
-                  <span v-else class="dash">—</span>
-                </td>
-                <td>
-                  <i v-if="feature.family" class="mdi mdi-check"></i>
-                  <span v-else class="dash">—</span>
+              <tr v-for="(row, idx) in comparisonFeatures" :key="idx">
+                <td class="feature-name">{{ row.name }}</td>
+                <td v-for="plan in ['free', 'pro', 'family']" :key="plan" class="cmp-cell">
+                  <i v-if="row[plan] === true" class="mdi mdi-check"></i>
+                  <span v-else-if="row[plan] === false" class="dash">—</span>
+                  <span v-else class="cmp-text">{{ row[plan] }}</span>
                 </td>
               </tr>
             </tbody>
@@ -281,46 +268,49 @@ const promoCode = ref('')
 const promoMessage = ref('')
 const promoSuccess = ref(false)
 
+// Hero: the four things a visitor sees first
+const heroCards = [
+  { icon: 'mdi mdi-email-outline', label: t('landing.hero_envelopes') },
+  { icon: 'mdi mdi-cash-multiple', label: t('landing.hero_paychecks') },
+  { icon: 'mdi mdi-calendar-alert', label: t('landing.hero_bills') },
+  { icon: 'mdi mdi-account-multiple', label: t('landing.hero_sharing') }
+]
+
+// "Pourquoi choisir Karo" : the current features, one icon theme
 const features = [
   {
     id: 1,
-    icon: 'mdi mdi-chart-pie',
-    color: '#3b82f6',
+    icon: 'mdi mdi-email-outline',
     title: t('landing.feature_budget_title'),
     description: t('landing.feature_budget_desc')
   },
   {
     id: 2,
-    icon: 'mdi mdi-account-multiple-plus',
-    color: '#10b981',
-    title: t('landing.feature_sharing_title'),
-    description: t('landing.feature_sharing_desc')
+    icon: 'mdi mdi-cash-multiple',
+    title: t('landing.feature_sync_title'),
+    description: t('landing.feature_sync_desc')
   },
   {
     id: 3,
-    icon: 'mdi mdi-shield-check',
-    color: '#f59e0b',
+    icon: 'mdi mdi-calendar-alert',
     title: t('landing.feature_secure_title'),
     description: t('landing.feature_secure_desc')
   },
   {
     id: 4,
-    icon: 'mdi mdi-sync',
-    color: '#8b5cf6',
-    title: t('landing.feature_sync_title'),
-    description: t('landing.feature_sync_desc')
+    icon: 'mdi mdi-account-multiple',
+    title: t('landing.feature_sharing_title'),
+    description: t('landing.feature_sharing_desc')
   },
   {
     id: 5,
-    icon: 'mdi mdi-smartphone',
-    color: '#ec4899',
+    icon: 'mdi mdi-credit-card-outline',
     title: t('landing.feature_mobile_title'),
     description: t('landing.feature_mobile_desc')
   },
   {
     id: 6,
-    icon: 'mdi mdi-lightbulb-on',
-    color: '#06b6d4',
+    icon: 'mdi mdi-calendar-month',
     title: t('landing.feature_insights_title'),
     description: t('landing.feature_insights_desc')
   }
@@ -416,10 +406,10 @@ const pricingTiers = [
     price: 0,
     description: t('landing.free_desc'),
     features: [
-      t('landing.feature_1_account'),
-      t('landing.feature_basic_envelope'),
-      t('landing.feature_household'),
-      t('landing.feature_basic_analytics')
+      t('landing.test_banner.free_1'),
+      t('landing.test_banner.free_2'),
+      t('landing.test_banner.free_3'),
+      t('landing.test_banner.free_4')
     ],
     buttonText: t('landing.get_started'),
     buttonLink: '/signup',
@@ -431,11 +421,12 @@ const pricingTiers = [
     price: 9.99,
     description: t('landing.pro_desc'),
     features: [
-      t('landing.feature_unlimited_accounts'),
-      t('landing.feature_advanced_envelope'),
-      t('landing.feature_household'),
-      t('landing.feature_advanced_analytics'),
-      t('landing.feature_priority_support')
+      t('landing.test_banner.pro_1'),
+      t('landing.test_banner.pro_2'),
+      t('landing.test_banner.pro_3'),
+      t('landing.test_banner.pro_4'),
+      t('landing.test_banner.pro_5'),
+      t('landing.test_banner.pro_6')
     ],
     buttonText: t('landing.choose_pro'),
     buttonLink: '/checkout?plan=Pro',
@@ -448,12 +439,11 @@ const pricingTiers = [
     price: 19.99,
     description: t('landing.family_desc'),
     features: [
-      t('landing.feature_multiple_households'),
-      t('landing.feature_team_collab'),
-      t('landing.feature_api_access'),
-      t('landing.feature_premium_analytics'),
-      t('landing.feature_24_7_support'),
-      t('landing.feature_custom_reports')
+      t('landing.test_banner.family_1'),
+      t('landing.test_banner.family_2'),
+      t('landing.test_banner.family_3'),
+      t('landing.test_banner.family_4'),
+      t('landing.test_banner.family_5')
     ],
     buttonText: t('landing.choose_family'),
     buttonLink: '/checkout?plan=Family',
@@ -461,16 +451,21 @@ const pricingTiers = [
   }
 ]
 
+// Same items as the test-app notice. A string is a limit, true a feature included, false a feature missing
 const comparisonFeatures = [
-  { name: t('landing.comp_basic_accounts'), free: true, pro: true, family: true },
-  { name: t('landing.comp_accounts'), free: false, pro: true, family: true },
-  { name: t('landing.comp_households'), free: false, pro: false, family: true },
-  { name: t('landing.comp_members'), free: false, pro: false, family: true },
-  { name: t('landing.comp_analytics'), free: false, pro: true, family: true },
-  { name: t('landing.comp_advanced_analytics'), free: false, pro: false, family: true },
-  { name: t('landing.comp_api'), free: false, pro: false, family: true },
-  { name: t('landing.comp_support'), free: false, pro: true, family: true },
-  { name: t('landing.comp_priority_support'), free: false, pro: false, family: true }
+  { name: t('landing.cmp_accounts'), free: '1', pro: '5', family: t('landing.unlimited') },
+  { name: t('landing.cmp_envelopes'), free: '5', pro: '20', family: t('landing.unlimited') },
+  { name: t('landing.cmp_jobs'), free: t('landing.unlimited'), pro: '3', family: t('landing.unlimited') },
+  {
+    name: t('landing.cmp_sharing'),
+    free: t('landing.cmp_sharing_none'),
+    pro: t('landing.cmp_sharing_pro'),
+    family: t('landing.cmp_sharing_family')
+  },
+  { name: t('landing.cmp_members'), free: false, pro: false, family: true },
+  { name: t('landing.cmp_advanced'), free: false, pro: true, family: true },
+  { name: t('landing.cmp_planning'), free: false, pro: true, family: true },
+  { name: t('landing.cmp_priority'), free: false, pro: false, family: true }
 ]
 
 const applyPromoCode = () => {
@@ -569,6 +564,84 @@ const applyPromoCode = () => {
 
 .btn-primary-sm:hover {
   background-color: #2563eb;
+}
+
+/* Hero band: a full-width colored background behind the hero */
+.hero-band {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #0ea5e9 100%);
+  color: #ffffff;
+}
+
+/* Decorative circles, so the band reads as a banner rather than a flat color */
+.hero-band::before,
+.hero-band::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+}
+
+.hero-band::before {
+  width: 520px;
+  height: 520px;
+  top: -220px;
+  right: -140px;
+}
+
+.hero-band::after {
+  width: 360px;
+  height: 360px;
+  bottom: -180px;
+  left: -100px;
+}
+
+.hero-band .hero {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-band .hero-title {
+  color: #ffffff;
+}
+
+.hero-band .hero-subtitle {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.hero-band .btn-primary-lg {
+  background-color: #ffffff;
+  color: #1d4ed8;
+}
+
+.hero-band .btn-primary-lg:hover {
+  background-color: #eff6ff;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+}
+
+.hero-band .btn-secondary-lg {
+  background-color: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.hero-band .btn-secondary-lg:hover {
+  background-color: rgba(255, 255, 255, 0.22);
+  border-color: #ffffff;
+}
+
+.hero-band .hero-card {
+  background: #ffffff;
+  border: none;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.25);
+  color: #1e3a8a;
+  font-weight: 600;
+}
+
+.hero-band .hero-card i {
+  color: #2563eb;
 }
 
 /* Hero Section */
@@ -721,7 +794,9 @@ const applyPromoCode = () => {
   align-items: center;
   justify-content: center;
   margin: 0 auto 1rem;
-  color: white;
+  background: #eff6ff;
+  border: 2px solid #bfdbfe;
+  color: #2563eb;
   font-size: 1.5rem;
 }
 
@@ -890,6 +965,19 @@ table td i {
 .dash {
   color: #cbd5e1;
   font-weight: 700;
+}
+
+.cmp-cell {
+  text-align: center;
+}
+
+.cmp-text {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.cmp-cell i {
+  color: #2563eb;
 }
 
 /* Promo Code Section */
