@@ -16,6 +16,50 @@
       </div>
     </nav>
 
+    <!-- Test application notice: what the app is, its features, free vs paid -->
+    <section class="test-banner-section">
+      <div class="test-banner">
+        <div class="test-banner-header">
+          <i class="mdi mdi-flask-outline"></i>
+          <div>
+            <h2>{{ t('landing.test_banner.title') }}</h2>
+            <p>{{ t('landing.test_banner.intro') }}</p>
+          </div>
+        </div>
+
+        <div class="test-banner-notice">
+          <i class="mdi mdi-cash-remove"></i>
+          <p>{{ t('landing.test_banner.no_payment') }}</p>
+        </div>
+
+        <h3 class="test-banner-title">{{ t('landing.test_banner.features_title') }}</h3>
+        <div class="test-features-grid">
+          <div v-for="item in testFeatures" :key="item.icon" class="test-feature">
+            <i :class="item.icon"></i>
+            <div>
+              <h4>{{ item.title }}</h4>
+              <p>{{ item.description }}</p>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="test-banner-title">{{ t('landing.test_banner.plans_title') }}</h3>
+        <p class="test-banner-text">{{ t('landing.test_banner.plans_intro') }}</p>
+        <div class="test-plans-grid">
+          <div v-for="plan in testPlans" :key="plan.name" class="test-plan" :class="{ paid: plan.paid }">
+            <h4>{{ plan.name }}</h4>
+            <ul>
+              <li v-for="(item, idx) in plan.items" :key="idx">
+                <i :class="plan.paid ? 'mdi mdi-star-circle' : 'mdi mdi-check'"></i>
+                {{ item }}
+              </li>
+            </ul>
+          </div>
+        </div>
+        <p class="test-banner-footnote">{{ t('landing.test_banner.plans_footnote') }}</p>
+      </div>
+    </section>
+
     <!-- Hero Section -->
     <section class="hero">
       <div class="hero-content">
@@ -279,6 +323,89 @@ const features = [
     color: '#06b6d4',
     title: t('landing.feature_insights_title'),
     description: t('landing.feature_insights_desc')
+  }
+]
+
+// Test-app notice: features explained in detail
+const testFeatures = [
+  {
+    icon: 'mdi mdi-bank',
+    title: t('landing.test_banner.accounts_title'),
+    description: t('landing.test_banner.accounts_desc')
+  },
+  {
+    icon: 'mdi mdi-email-outline',
+    title: t('landing.test_banner.envelopes_title'),
+    description: t('landing.test_banner.envelopes_desc')
+  },
+  {
+    icon: 'mdi mdi-cash-multiple',
+    title: t('landing.test_banner.paychecks_title'),
+    description: t('landing.test_banner.paychecks_desc')
+  },
+  {
+    icon: 'mdi mdi-calendar-alert',
+    title: t('landing.test_banner.bills_title'),
+    description: t('landing.test_banner.bills_desc')
+  },
+  {
+    icon: 'mdi mdi-account-multiple',
+    title: t('landing.test_banner.sharing_title'),
+    description: t('landing.test_banner.sharing_desc')
+  },
+  {
+    icon: 'mdi mdi-calendar-month',
+    title: t('landing.test_banner.planning_title'),
+    description: t('landing.test_banner.planning_desc')
+  },
+  {
+    icon: 'mdi mdi-chart-bar',
+    title: t('landing.test_banner.reports_title'),
+    description: t('landing.test_banner.reports_desc')
+  },
+  {
+    icon: 'mdi mdi-shield-lock',
+    title: t('landing.test_banner.privacy_title'),
+    description: t('landing.test_banner.privacy_desc')
+  }
+]
+
+// Free vs paid plans, as explained in the test-app notice
+const testPlans = [
+  {
+    name: t('landing.free'),
+    paid: false,
+    items: [
+      t('landing.test_banner.free_1'),
+      t('landing.test_banner.free_2'),
+      t('landing.test_banner.free_3'),
+      t('landing.test_banner.free_4'),
+      t('landing.test_banner.free_5'),
+      t('landing.test_banner.free_6')
+    ]
+  },
+  {
+    name: 'Pro',
+    paid: true,
+    items: [
+      t('landing.test_banner.pro_1'),
+      t('landing.test_banner.pro_2'),
+      t('landing.test_banner.pro_3'),
+      t('landing.test_banner.pro_4'),
+      t('landing.test_banner.pro_5'),
+      t('landing.test_banner.pro_6')
+    ]
+  },
+  {
+    name: t('landing.family'),
+    paid: true,
+    items: [
+      t('landing.test_banner.family_1'),
+      t('landing.test_banner.family_2'),
+      t('landing.test_banner.family_3'),
+      t('landing.test_banner.family_4'),
+      t('landing.test_banner.family_5')
+    ]
   }
 ]
 
@@ -929,6 +1056,186 @@ table td i {
   padding-top: 2rem;
   text-align: center;
   color: #94a3b8;
+}
+
+/* Test-app notice: a bordered box so it stands out at the top */
+.test-banner-section {
+  max-width: 1200px;
+  margin: 2rem auto 0;
+  padding: 0 2rem;
+}
+
+.test-banner {
+  background: #fffbeb;
+  border: 4px solid #f59e0b;
+  border-radius: 12px;
+  padding: 2.5rem;
+  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.25);
+  color: #1e293b;
+}
+
+.test-banner-header {
+  display: flex;
+  gap: 1.25rem;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.test-banner-header > i {
+  font-size: 3rem;
+  color: #d97706;
+  flex-shrink: 0;
+}
+
+.test-banner-header h2 {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #92400e;
+  margin-bottom: 0.5rem;
+}
+
+.test-banner-header p,
+.test-banner-text {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: #451a03;
+}
+
+.test-banner-notice {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  background: #ffffff;
+  border: 2px solid #f59e0b;
+  border-radius: 8px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.test-banner-notice > i {
+  font-size: 1.75rem;
+  color: #d97706;
+  flex-shrink: 0;
+}
+
+.test-banner-notice p {
+  line-height: 1.6;
+  font-weight: 500;
+}
+
+.test-banner-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #92400e;
+  margin: 2rem 0 1rem;
+}
+
+.test-features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.test-feature {
+  display: flex;
+  gap: 0.9rem;
+  background: #ffffff;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  padding: 1.25rem;
+}
+
+.test-feature > i {
+  font-size: 1.75rem;
+  color: #3b82f6;
+  flex-shrink: 0;
+}
+
+.test-feature h4 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+}
+
+.test-feature p {
+  color: #475569;
+  line-height: 1.55;
+  font-size: 0.95rem;
+}
+
+.test-plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.test-plan {
+  background: #ffffff;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.test-plan.paid {
+  border-color: #3b82f6;
+}
+
+.test-plan h4 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  color: #0f172a;
+}
+
+.test-plan ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.test-plan li {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+  color: #334155;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.test-plan li i {
+  color: #10b981;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.test-plan.paid li i {
+  color: #3b82f6;
+}
+
+.test-banner-footnote {
+  margin-top: 1.25rem;
+  font-size: 0.85rem;
+  color: #78350f;
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .test-banner-section {
+    padding: 0 1rem;
+  }
+
+  .test-banner {
+    padding: 1.5rem;
+  }
+
+  .test-banner-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .test-banner-header > i {
+    font-size: 2.25rem;
+  }
 }
 
 /* Responsive */
