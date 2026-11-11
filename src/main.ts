@@ -17,6 +17,7 @@ import Login from './pages/Login.vue'
 import Signup from './pages/Signup.vue'
 import CheckoutPage from './pages/CheckoutPage.vue'
 import Profile from './pages/Profile.vue'
+import Feedback from './pages/Feedback.vue'
 import Household from './pages/Household.vue'
 import InviteUser from './pages/InviteUser.vue'
 import PendingInvitations from './pages/PendingInvitations.vue'
@@ -34,6 +35,7 @@ import AdminTaxRates from './pages/AdminTaxRates.vue'
 import AdminEmailSettings from './pages/AdminEmailSettings.vue'
 import AdminEmailTemplates from './pages/AdminEmailTemplates.vue'
 import AdminPrivacyIncidents from './pages/AdminPrivacyIncidents.vue'
+import AdminFeedback from './pages/AdminFeedback.vue'
 import AdminSubscriptionTierConfigurations from './pages/AdminSubscriptionTierConfigurations.vue'
 import MembersList from './pages/MembersList.vue'
 import { useAuth } from './composables/useAuth'
@@ -53,6 +55,7 @@ const routes = [
   { path: '/onboarding', component: Onboarding },
   { path: '/faq', component: Faq },
   { path: '/profile', component: Profile },
+  { path: '/feedback', component: Feedback },
   { path: '/household', component: Household },
   { path: '/household/invite', component: InviteUser },
   { path: '/invitations/pending', component: PendingInvitations },
@@ -87,6 +90,7 @@ const routes = [
       { path: 'email-settings', component: AdminEmailSettings },
       { path: 'email-templates', component: AdminEmailTemplates },
       { path: 'privacy-incidents', component: AdminPrivacyIncidents },
+      { path: 'feedback', component: AdminFeedback },
       { path: 'tier-configurations', component: AdminSubscriptionTierConfigurations }
     ]
   }

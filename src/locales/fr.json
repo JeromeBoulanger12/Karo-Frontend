@@ -49,6 +49,7 @@
     "profile": "Profil",
     "household": "Ménage",
     "setting": "Paramètres",
+    "feedback": "Commentaires",
     "firstName": "Prénom",
     "lastName": "Nom de famille",
     "name": "Nom",
@@ -59,6 +60,29 @@
     "inactive": "Inactif",
     "status": "Statut",
     "retry": "Réessayer"
+  },
+  "feedback": {
+    "title": "Commentaires",
+    "intro": "Vos commentaires, suggestions ou problèmes rencontrés nous aident à améliorer Karo. Ils sont lus par l'équipe, qui peut vous répondre à votre adresse courriel.",
+    "placeholder": "Écrivez votre commentaire ici…",
+    "counter": "{count} / {max} caractères",
+    "send": "Envoyer",
+    "sent": "Merci ! Votre commentaire a bien été envoyé.",
+    "another": "Écrire un autre commentaire",
+    "error": "Impossible d'envoyer le commentaire. Réessayez plus tard.",
+    "admin": {
+      "title": "Commentaires des utilisateurs",
+      "subtitle": "Commentaires envoyés depuis la page Commentaires de l'application.",
+      "filterAll": "Tous",
+      "filterUnread": "Non lus",
+      "empty": "Aucun commentaire pour l'instant.",
+      "from": "De",
+      "sentAt": "Envoyé le",
+      "unread": "Non lu",
+      "read": "Lu",
+      "markRead": "Marquer comme lu",
+      "loadError": "Impossible de charger les commentaires."
+    }
   },
   "landing": {
     "test_banner": {
@@ -1151,7 +1175,8 @@
   },
   "adminPanel": {
     "tierConfigurations": "Tier Configurations",
-    "privacyIncidents": "Incidents de confidentialité"
+    "privacyIncidents": "Incidents de confidentialité",
+    "feedback": "Commentaires"
   },
   "dashboardPage": {
     "loading": "Chargement...",

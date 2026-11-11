@@ -49,6 +49,7 @@
     "profile": "Profile",
     "household": "Household",
     "setting": "Settings",
+    "feedback": "Feedback",
     "firstName": "First Name",
     "lastName": "Last Name",
     "name": "Name",
@@ -59,6 +60,29 @@
     "inactive": "Inactive",
     "status": "Status",
     "retry": "Retry"
+  },
+  "feedback": {
+    "title": "Feedback",
+    "intro": "Your comments, suggestions or problems help us improve Karo. The team reads them and can reply to your email address.",
+    "placeholder": "Write your comment here…",
+    "counter": "{count} / {max} characters",
+    "send": "Send",
+    "sent": "Thank you! Your comment has been sent.",
+    "another": "Write another comment",
+    "error": "Could not send your comment. Please try again later.",
+    "admin": {
+      "title": "User comments",
+      "subtitle": "Comments sent from the Feedback page of the application.",
+      "filterAll": "All",
+      "filterUnread": "Unread",
+      "empty": "No comments yet.",
+      "from": "From",
+      "sentAt": "Sent on",
+      "unread": "Unread",
+      "read": "Read",
+      "markRead": "Mark as read",
+      "loadError": "Could not load the comments."
+    }
   },
   "landing": {
     "test_banner": {
@@ -1067,7 +1091,8 @@
   },
   "adminPanel": {
     "tierConfigurations": "Tier Configurations",
-    "privacyIncidents": "Privacy incidents"
+    "privacyIncidents": "Privacy incidents",
+    "feedback": "Feedback"
   },
   "dashboardPage": {
     "loading": "Loading...",

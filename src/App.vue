@@ -265,6 +265,16 @@ const notificationIcon = (item) => ({
         </v-btn>
 
         <v-btn
+          to="/feedback"
+          :active="route.path === '/feedback'"
+          variant="text"
+          prepend-icon="mdi-comment-text-outline"
+          class="nav-btn"
+        >
+          {{ t('common.feedback') }}
+        </v-btn>
+
+        <v-btn
           to="/profile"
           :active="route.path === '/profile'"
           variant="text"
@@ -379,6 +389,12 @@ const notificationIcon = (item) => ({
               <v-icon>mdi-home-group</v-icon>
             </template>
             <v-list-item-title>{{ t('common.household') }}</v-list-item-title>
+          </v-list-item>
+          <v-list-item to="/feedback" @click="drawer = false">
+            <template #prepend>
+              <v-icon>mdi-comment-text-outline</v-icon>
+            </template>
+            <v-list-item-title>{{ t('common.feedback') }}</v-list-item-title>
           </v-list-item>
           <v-list-item to="/profile" @click="drawer = false">
             <template #prepend>

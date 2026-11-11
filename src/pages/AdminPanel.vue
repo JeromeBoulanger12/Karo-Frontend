@@ -97,6 +97,15 @@
           <i class="mdi mdi-shield-alert-outline"></i>
           <span>{{ t('adminPanel.privacyIncidents') }}</span>
         </router-link>
+
+        <router-link
+          to="/admin/feedback"
+          class="nav-item"
+          :class="{ active: isActive('feedback') }"
+        >
+          <i class="mdi mdi-comment-text-multiple-outline"></i>
+          <span>{{ t('adminPanel.feedback') }}</span>
+        </router-link>
       </nav>
 
       <div class="admin-footer">
