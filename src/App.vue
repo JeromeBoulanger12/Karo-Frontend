@@ -36,6 +36,9 @@ const loadUserPreferences = async () => {
 
 const isAdmin = computed(() => userRole.value === 'Owner' || userRole.value === 'Admin')
 
+// The landing page (guests) has its own navbar, so the app bar is hidden there to avoid two stacked bars
+const showAppBar = computed(() => !!user.value || route.path !== '/')
+
 const loadFeatures = async () => {
   try {
     const response = await client.get('/subscriptions/my-features')
@@ -219,7 +222,7 @@ const notificationIcon = (item) => ({
 
 <template>
   <v-app>
-    <v-app-bar elevation="1" color="surface" class="navbar-custom">
+    <v-app-bar v-if="showAppBar" elevation="1" color="surface" class="navbar-custom">
       <!-- Logo -->
       <v-toolbar-title
         style="cursor: pointer; min-width: 120px; display: flex; align-items: center; gap: 0.5rem"

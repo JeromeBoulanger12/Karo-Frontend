@@ -8,10 +8,14 @@
           <span>Karo</span>
         </div>
         <div class="nav-links">
-          <a href="#features" class="nav-link">{{ t('landing.features') }}</a>
-          <a href="#pricing" class="nav-link">{{ t('landing.pricing') }}</a>
+          <a href="#features" class="nav-link nav-anchor">{{ t('landing.features') }}</a>
+          <a href="#pricing" class="nav-link nav-anchor">{{ t('landing.pricing') }}</a>
           <router-link to="/login" class="nav-link">{{ t('auth.login') }}</router-link>
           <router-link to="/signup" class="btn btn-primary-sm">{{ t('auth.signup') }}</router-link>
+          <div class="lang-switch" role="group" aria-label="Language">
+            <button type="button" :class="{ active: locale === 'fr' }" @click="setLang('fr')">FR</button>
+            <button type="button" :class="{ active: locale === 'en' }" @click="setLang('en')">EN</button>
+          </div>
         </div>
       </div>
     </nav>
@@ -252,7 +256,13 @@
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
+
+// The landing has no app bar, so it carries its own language switch
+const setLang = (lang: 'fr' | 'en') => {
+  locale.value = lang
+  localStorage.setItem('language', lang)
+}
 
 // Questions from the shared FAQ texts (faq.items.*) that explain the basics
 const FAQ_ITEMS = [
@@ -497,7 +507,27 @@ const applyPromoCode = () => {
   background: #ffffff;
   color: #1e293b;
   overflow-x: hidden;
-  padding-top: 64px;
+}
+
+.lang-switch {
+  display: flex;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.lang-switch button {
+  background: #ffffff;
+  border: none;
+  padding: 0.4rem 0.7rem;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+}
+
+.lang-switch button.active {
+  background: #3b82f6;
+  color: #ffffff;
 }
 
 /* Navbar */
@@ -1364,6 +1394,109 @@ table td i {
 
   .promo-input {
     min-width: 100%;
+  }
+}
+
+/* Phones: the navbar keeps only the login, sign-up and language buttons */
+@media (max-width: 640px) {
+  .navbar-content {
+    padding: 0 1rem;
+  }
+
+  .logo {
+    font-size: 1.25rem;
+  }
+
+  .logo i {
+    font-size: 1.6rem;
+  }
+
+  .nav-links {
+    gap: 0.5rem;
+  }
+
+  .nav-anchor {
+    display: none;
+  }
+
+  .hero {
+    padding: 2.5rem 1rem;
+    gap: 2rem;
+  }
+
+  .hero-title {
+    font-size: 2rem;
+  }
+
+  .hero-buttons .btn {
+    width: 100%;
+  }
+
+  .hero-visual {
+    gap: 0.75rem;
+  }
+
+  .hero-card {
+    padding: 1.25rem 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  .hero-card i {
+    font-size: 2rem;
+  }
+
+  .hero-band::before,
+  .hero-band::after {
+    width: 280px;
+    height: 280px;
+  }
+
+  .test-banner-section {
+    padding: 0 0.75rem;
+  }
+
+  .test-banner {
+    padding: 1.25rem;
+  }
+
+  .features,
+  .pricing,
+  .landing-faq {
+    padding: 3rem 1rem;
+  }
+
+  .section-title {
+    font-size: 1.6rem;
+  }
+
+  .comparison-section {
+    padding: 1rem;
+  }
+
+  .comparison-table table {
+    min-width: 460px;
+  }
+
+  table th,
+  table td {
+    padding: 0.5rem 0.4rem;
+    font-size: 0.8rem;
+  }
+
+  .feature-name {
+    white-space: normal;
+  }
+
+  .cta {
+    padding: 3rem 1rem;
+  }
+
+  .cta h2 {
+    font-size: 1.8rem;
+  }
+
+  .footer-content {
+    grid-template-columns: 1fr 1fr;
   }
 }
 </style>
