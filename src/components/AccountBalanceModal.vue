@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 interface Account {
@@ -30,9 +30,25 @@ const formData = ref<{ balance: number }>({
 })
 const note = ref('')
 
+// 'set' types the new balance; 'adjust' adds or removes an amount from the current balance
+const mode = ref<'set' | 'adjust'>('set')
+const adjustment = ref<number>(0)
+
+const currentBalance = computed(() => props.account?.balance || 0)
+const newBalance = computed(() => {
+  const value = mode.value === 'set' ? formData.value.balance : currentBalance.value + (adjustment.value || 0)
+  return Math.round((value || 0) * 100) / 100
+})
+
+// Setting the balance to 0 is often a typing mistake: it must be confirmed once before saving
+const needsZeroConfirmation = computed(() => newBalance.value === 0 && currentBalance.value !== 0)
+const zeroConfirmed = ref(false)
+watch(newBalance, () => { zeroConfirmed.value = false })
+
 watch(() => props.account, (newAccount) => {
   if (newAccount) {
     formData.value.balance = newAccount.balance || 0
+    adjustment.value = 0
   }
 }, { deep: true, immediate: true })
 
@@ -42,7 +58,11 @@ watch(() => props.isOpen, (open) => {
 })
 
 const handleSubmit = () => {
-  emit('save', { balance: formData.value.balance, note: note.value.trim() || undefined })
+  if (needsZeroConfirmation.value && !zeroConfirmed.value) {
+    zeroConfirmed.value = true
+    return
+  }
+  emit('save', { balance: newBalance.value, note: note.value.trim() || undefined })
 }
 
 const handleClose = () => {
@@ -75,15 +95,34 @@ const formatCurrency = (value: number) => {
           </p>
         </div>
 
-        <div class="form-group">
+        <div class="mode-switch">
+          <button type="button" :class="{ active: mode === 'set' }" @click="mode = 'set'">
+            {{ t('accountBalance.modeSet') }}
+          </button>
+          <button type="button" :class="{ active: mode === 'adjust' }" @click="mode = 'adjust'">
+            {{ t('accountBalance.modeAdjust') }}
+          </button>
+        </div>
+
+        <div v-if="mode === 'set'" class="form-group">
           <label>{{ t('accountBalance.newBalanceLabel') }}</label>
           <input v-model.number="formData.balance" type="number" step="0.01" placeholder="0.00" />
         </div>
 
+        <div v-else class="form-group">
+          <label>{{ t('accountBalance.adjustLabel') }}</label>
+          <input v-model.number="adjustment" type="number" step="0.01" placeholder="0.00" />
+          <small class="form-hint">{{ t('accountBalance.adjustHint') }}</small>
+        </div>
+
         <div class="balance-preview">
           <span class="preview-label">{{ t('accountBalance.previewLabel') }}</span>
-          <span class="preview-value">{{ formatCurrency(formData.balance) }}</span>
+          <span class="preview-value">{{ formatCurrency(newBalance) }}</span>
         </div>
+
+        <p v-if="needsZeroConfirmation && zeroConfirmed" class="zero-warning">
+          {{ t('accountBalance.zeroWarning') }}
+        </p>
 
         <div class="form-group">
           <label>{{ t('accountBalance.noteLabel') }}</label>
@@ -95,7 +134,9 @@ const formatCurrency = (value: number) => {
 
       <div class="modal-footer">
         <button class="btn-secondary" @click="handleClose">{{ t('common.cancel') }}</button>
-        <button class="btn-primary" @click="handleSubmit">{{ t('common.save') }}</button>
+        <button class="btn-primary" @click="handleSubmit">
+          {{ needsZeroConfirmation && zeroConfirmed ? t('accountBalance.confirmZero') : t('common.save') }}
+        </button>
       </div>
     </div>
   </div>
@@ -219,6 +260,34 @@ const formatCurrency = (value: number) => {
   outline: none;
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.mode-switch {
+  display: flex;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.mode-switch button {
+  flex: 1;
+  padding: var(--space-sm);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.mode-switch button.active {
+  border-color: var(--primary);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.zero-warning {
+  color: var(--danger);
+  font-size: var(--font-size-sm);
+  margin: var(--space-sm) 0 0;
 }
 
 .balance-preview {

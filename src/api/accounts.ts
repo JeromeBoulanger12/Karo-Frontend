@@ -78,6 +78,15 @@ export const accountsApi = {
     return client.delete(`/accounts/${id}`)
   },
 
+  // Corrects a balance entered by mistake (manual balances only)
+  correctBalanceSnapshot(id: string, snapshotId: string, body: { amount: number; capturedAt: string; note?: string }) {
+    return client.put(`/accounts/${id}/balance-snapshots/${snapshotId}`, body)
+  },
+
+  deleteBalanceSnapshot(id: string, snapshotId: string) {
+    return client.delete(`/accounts/${id}/balance-snapshots/${snapshotId}`)
+  },
+
   getAccountBalanceHistory(id: string, days: number = 7) {
     return client.get(`/accounts/${id}/balance-history`, {
       params: { days }

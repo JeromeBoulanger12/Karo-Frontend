@@ -34,6 +34,8 @@ interface Snapshot {
   amount: { amount: number; currency: string }
   capturedAt: string
   note?: string | null
+  // 'Manual' balances can be corrected or deleted; the others are written by the app
+  source?: string
 }
 
 interface Row extends Snapshot {
@@ -51,6 +53,8 @@ const props = withDefaults(defineProps<{
 
 const emit = defineEmits<{
   close: []
+  // A balance was corrected or deleted: the parent reloads the account's balance
+  changed: []
 }>()
 
 // How many of the biggest movements to flag as peaks
@@ -229,6 +233,99 @@ watch(trendDays, () => {
   loadTrend()
 })
 
+// Correcting or deleting a balance entered by mistake
+const editingId = ref<string | null>(null)
+const editOriginal = ref<Snapshot | null>(null)
+const editForm = ref({ date: '', amount: 0, note: '' })
+const zeroConfirmed = ref(false)
+const confirmDeleteId = ref<string | null>(null)
+const saving = ref(false)
+const actionError = ref('')
+
+const isManual = (row: Row) => row.source === 'Manual'
+
+const toDateInput = (iso: string) => {
+  const d = new Date(iso)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+// Setting a balance to 0 is often a typing mistake: it must be confirmed once before saving
+const needsZeroConfirmation = computed(() =>
+  editForm.value.amount === 0 && (editOriginal.value?.amount.amount ?? 0) !== 0
+)
+watch(() => editForm.value.amount, () => { zeroConfirmed.value = false })
+
+const startEdit = (row: Row) => {
+  confirmDeleteId.value = null
+  zeroConfirmed.value = false
+  actionError.value = ''
+  editOriginal.value = row
+  editingId.value = row.id
+  editForm.value = { date: toDateInput(row.capturedAt), amount: row.amount.amount, note: row.note ?? '' }
+}
+
+const cancelEdit = () => {
+  editingId.value = null
+  editOriginal.value = null
+  zeroConfirmed.value = false
+}
+
+// Keeps the original time when the day is unchanged; a new day is saved at noon, local time
+const capturedAtFor = (row: Snapshot, date: string) => {
+  if (date === toDateInput(row.capturedAt)) return row.capturedAt
+  const [year, month, day] = date.split('-').map(Number)
+  return new Date(year, month - 1, day, 12).toISOString()
+}
+
+const saveEdit = async (row: Row) => {
+  if (needsZeroConfirmation.value && !zeroConfirmed.value) {
+    zeroConfirmed.value = true
+    return
+  }
+  if (!props.account?.id) return
+
+  saving.value = true
+  actionError.value = ''
+  try {
+    await accountsApi.correctBalanceSnapshot(props.account.id, row.id, {
+      amount: editForm.value.amount,
+      capturedAt: capturedAtFor(row, editForm.value.date),
+      note: editForm.value.note.trim() || undefined
+    })
+    cancelEdit()
+    await loadHistory()
+    emit('changed')
+  } catch (err) {
+    console.error('Error correcting balance:', err)
+    actionError.value = t('dashboard.balanceHistory.saveError')
+  } finally {
+    saving.value = false
+  }
+}
+
+const deleteRow = async (row: Row) => {
+  // First click asks for confirmation in the row, second click deletes
+  if (confirmDeleteId.value !== row.id) {
+    confirmDeleteId.value = row.id
+    return
+  }
+  if (!props.account?.id) return
+
+  saving.value = true
+  actionError.value = ''
+  try {
+    await accountsApi.deleteBalanceSnapshot(props.account.id, row.id)
+    confirmDeleteId.value = null
+    await loadHistory()
+    emit('changed')
+  } catch (err) {
+    console.error('Error deleting balance:', err)
+    actionError.value = t('dashboard.balanceHistory.saveError')
+  } finally {
+    saving.value = false
+  }
+}
+
 const deltaClass = (delta: number | null) => {
   if (delta === null || delta === 0) return ''
   return delta > 0 ? 'delta-up' : 'delta-down'
@@ -294,6 +391,8 @@ const formatDelta = (delta: number | null) => {
             <p v-else class="hint">{{ t('dashboard.balanceHistory.surplusEmpty') }}</p>
           </section>
 
+        <p v-if="actionError" class="error-text">{{ actionError }}</p>
+
         <table class="history-table">
           <thead>
             <tr>
@@ -301,18 +400,60 @@ const formatDelta = (delta: number | null) => {
               <th class="num">{{ t('dashboard.balanceHistory.balance') }}</th>
               <th class="num">{{ t('dashboard.balanceHistory.change') }}</th>
               <th>{{ t('dashboard.balanceHistory.note') }}</th>
+              <th class="actions"></th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="row in rows" :key="row.id" :class="{ 'is-peak': row.isPeak }">
-              <td>{{ formatDate(row.capturedAt) }}</td>
-              <td class="num">{{ formatCurrency(row.amount.amount) }}</td>
-              <td class="num" :class="deltaClass(row.delta)">
-                {{ formatDelta(row.delta) }}
-                <span v-if="row.isPeak" class="peak-badge">{{ t('dashboard.balanceHistory.peak') }}</span>
-              </td>
-              <td class="note">{{ row.note || '' }}</td>
-            </tr>
+            <template v-for="row in rows" :key="row.id">
+              <tr v-if="editingId !== row.id" :class="{ 'is-peak': row.isPeak }">
+                <td>{{ formatDate(row.capturedAt) }}</td>
+                <td class="num">{{ formatCurrency(row.amount.amount) }}</td>
+                <td class="num" :class="deltaClass(row.delta)">
+                  {{ formatDelta(row.delta) }}
+                  <span v-if="row.isPeak" class="peak-badge">{{ t('dashboard.balanceHistory.peak') }}</span>
+                </td>
+                <td class="note">{{ row.note || '' }}</td>
+                <td class="actions">
+                  <template v-if="isManual(row)">
+                    <template v-if="confirmDeleteId === row.id">
+                      <button type="button" class="row-action danger" :disabled="saving" @click="deleteRow(row)">
+                        {{ t('dashboard.balanceHistory.yes') }}
+                      </button>
+                      <button type="button" class="row-action" @click="confirmDeleteId = null">
+                        {{ t('dashboard.balanceHistory.no') }}
+                      </button>
+                    </template>
+                    <template v-else>
+                      <button type="button" class="row-action" :title="t('dashboard.balanceHistory.edit')" @click="startEdit(row)">
+                        <i class="mdi mdi-pencil-outline"></i>
+                      </button>
+                      <button type="button" class="row-action danger" :title="t('dashboard.balanceHistory.delete')" @click="deleteRow(row)">
+                        <i class="mdi mdi-trash-can-outline"></i>
+                      </button>
+                    </template>
+                  </template>
+                </td>
+              </tr>
+
+              <tr v-else class="edit-row">
+                <td colspan="5">
+                  <div class="edit-fields">
+                    <input v-model="editForm.date" type="date" :aria-label="t('dashboard.balanceHistory.date')" />
+                    <input v-model.number="editForm.amount" type="number" step="0.01" :aria-label="t('dashboard.balanceHistory.balance')" />
+                    <input v-model="editForm.note" type="text" maxlength="500" :placeholder="t('accountBalance.notePlaceholder')" />
+                  </div>
+                  <p v-if="needsZeroConfirmation && zeroConfirmed" class="zero-warning">
+                    {{ t('accountBalance.zeroWarning') }}
+                  </p>
+                  <div class="edit-actions">
+                    <button type="button" class="btn-secondary" @click="cancelEdit">{{ t('common.cancel') }}</button>
+                    <button type="button" class="btn-primary" :disabled="saving" @click="saveEdit(row)">
+                      {{ needsZeroConfirmation && zeroConfirmed ? t('accountBalance.confirmZero') : t('common.save') }}
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </template>
           </tbody>
         </table>
         </template>
@@ -431,6 +572,61 @@ const formatDelta = (delta: number | null) => {
 .num {
   text-align: right;
   white-space: nowrap;
+}
+
+.history-table .actions {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.row-action {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.25rem 0.4rem;
+  font-size: 1rem;
+}
+
+.row-action:hover {
+  color: var(--text-primary);
+}
+
+.row-action.danger:hover {
+  color: var(--danger);
+}
+
+.edit-row td {
+  background: var(--surface);
+}
+
+.edit-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.edit-fields input {
+  flex: 1;
+  min-width: 120px;
+  padding: 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg);
+  color: var(--text-primary);
+}
+
+.edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+}
+
+.zero-warning {
+  color: var(--danger);
+  font-size: 0.875rem;
+  margin: var(--space-sm) 0 0;
 }
 
 .note {

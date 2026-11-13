@@ -633,6 +633,11 @@
       "estimate": "Estimation : les paies à venir sont réparties sur les jours restants du mois."
     },
     "balanceHistory": {
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "yes": "Oui",
+      "no": "Non",
+      "saveError": "Impossible d'enregistrer le solde. Réessaie.",
       "title": "Historique du solde — {name}",
       "loading": "Chargement de l'historique…",
       "empty": "Aucun solde enregistré pour ce compte.",
@@ -1172,6 +1177,12 @@
     "title": "Ajuster le solde",
     "currentBalance": "Solde actuel:",
     "newBalanceLabel": "Nouveau solde",
+    "modeSet": "Définir le solde",
+    "modeAdjust": "Ajouter ou retirer",
+    "adjustLabel": "Montant à ajouter (négatif pour retirer)",
+    "adjustHint": "Le montant est ajouté au solde actuel. Mets un signe moins pour retirer.",
+    "zeroWarning": "Le solde sera à 0 $. Confirme seulement si c'est voulu.",
+    "confirmZero": "Oui, mettre à 0",
     "previewLabel": "Nouveau solde:",
     "noteLabel": "Note (optionnel)",
     "notePlaceholder": "ex. Achat imprévu : pneus"

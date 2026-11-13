@@ -640,6 +640,11 @@
       "estimate": "Estimate: upcoming pay is spread over the remaining days of the month."
     },
     "balanceHistory": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "yes": "Yes",
+      "no": "No",
+      "saveError": "Could not save the balance. Please try again.",
       "title": "Balance history — {name}",
       "loading": "Loading history…",
       "empty": "No balance recorded for this account.",
@@ -1088,6 +1093,12 @@
     "title": "Adjust balance",
     "currentBalance": "Current balance:",
     "newBalanceLabel": "New balance",
+    "modeSet": "Set the balance",
+    "modeAdjust": "Add or subtract",
+    "adjustLabel": "Amount to add (negative to subtract)",
+    "adjustHint": "The amount is added to the current balance. Use a minus sign to subtract.",
+    "zeroWarning": "The balance will be 0 $. Confirm only if this is intended.",
+    "confirmZero": "Yes, set to 0",
     "previewLabel": "New balance:",
     "noteLabel": "Note (optional)",
     "notePlaceholder": "e.g. Unexpected expense: tires"

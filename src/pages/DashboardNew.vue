@@ -901,6 +901,7 @@ onMounted(() => {
       :isOpen="showAccountHistoryModal"
       :account="selectedHistoryAccount"
       @close="showAccountHistoryModal = false"
+      @changed="loadDashboard"
     />
 
     <EnvelopeActionModal
