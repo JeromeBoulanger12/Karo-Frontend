@@ -394,6 +394,7 @@
     "withdrawModal": {
       "title": "Retirer de l'enveloppe",
       "from": "{name} — disponible : {amount}",
+      "percentOfBalance": "{percent} %",
       "amount": "Montant",
       "payee": "Bénéficiaire (optionnel)",
       "memo": "Note (optionnel)",
@@ -1496,6 +1497,12 @@
       "rules": {
         "header": "Répartition prévue",
         "empty": "Aucune règle pour cette source : la paie sera enregistrée sans allocation aux enveloppes."
+      },
+      "upcoming": {
+        "header": "Factures avant la prochaine paie",
+        "empty": "Aucune facture à payer avant la prochaine paie.",
+        "paid": "Payée",
+        "unpaid": "À payer"
       },
       "amount": "Montant déposé",
       "accountBalance": "Solde du compte chèques (après paie)",

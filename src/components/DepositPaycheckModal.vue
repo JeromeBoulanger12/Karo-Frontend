@@ -18,24 +18,43 @@ interface DepositData {
   date?: string
 }
 
+// A bill due before the plan's next paycheck (from GET /jobs/plans/{id}/upcoming-bills)
+interface UpcomingBill {
+  envelopeId: string
+  name: string
+  dueDate: string
+  amount?: { amount: number; currency: string } | null
+  isPaid: boolean
+}
+
 const props = withDefaults(defineProps<{
   isOpen: boolean
   submitError?: string
   job?: Job | null
   jobs?: Job[]
+  upcomingBills?: UpcomingBill[]
 }>(), {
   isOpen: false,
   submitError: '',
   job: null,
-  jobs: () => []
+  jobs: () => [],
+  upcomingBills: () => []
 })
 
 const emit = defineEmits<{
   close: []
   save: [data: DepositData]
+  'job-change': [jobId: string]
 }>()
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
+
+const formatBillAmount = (amount: { amount: number; currency: string }) =>
+  new Intl.NumberFormat(locale.value, { style: 'currency', currency: amount.currency }).format(amount.amount)
+
+// Due dates come as yyyy-mm-dd: read them as local dates so they don't shift by a day
+const formatDueDate = (value: string) =>
+  new Date(`${value}T00:00:00`).toLocaleDateString(locale.value, { month: 'short', day: 'numeric' })
 
 // Find the main job if available, otherwise use the pre-selected job
 const defaultJobId = computed(() => {
@@ -65,6 +84,11 @@ watch(() => defaultJobId.value, (newJobId) => {
   if (!formData.value.jobId && newJobId) {
     formData.value.jobId = newJobId
   }
+})
+
+// The parent loads the bills due before this source's next paycheck
+watch(() => formData.value.jobId, (jobId) => {
+  if (props.isOpen && jobId) emit('job-change', jobId)
 })
 
 const handleSubmit = () => {
@@ -121,6 +145,23 @@ const handleClose = () => {
               {{ t('paycheck.deposit.rules.empty') }}
             </p>
           </div>
+        </div>
+
+        <!-- Bills due before the next paycheck, paid or not -->
+        <div v-if="formData.jobId" class="upcoming-bills">
+          <div class="rules-header">{{ t('paycheck.deposit.upcoming.header') }}</div>
+          <ul v-if="upcomingBills.length" class="rules-list">
+            <li v-for="bill in upcomingBills" :key="`${bill.envelopeId}-${bill.dueDate}`" class="rule-row">
+              <span class="rule-envelope">{{ bill.name }} · {{ formatDueDate(bill.dueDate) }}</span>
+              <span class="rule-amount">
+                <template v-if="bill.amount">{{ formatBillAmount(bill.amount) }}</template>
+                <span :class="bill.isPaid ? 'bill-paid' : 'bill-unpaid'">
+                  {{ bill.isPaid ? t('paycheck.deposit.upcoming.paid') : t('paycheck.deposit.upcoming.unpaid') }}
+                </span>
+              </span>
+            </li>
+          </ul>
+          <p v-else class="rules-empty">{{ t('paycheck.deposit.upcoming.empty') }}</p>
         </div>
 
         <!-- Amount Input -->
@@ -422,5 +463,29 @@ const handleClose = () => {
   margin: 0;
   color: var(--danger);
   font-size: 0.875rem;
+}
+.upcoming-bills {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.bill-paid,
+.bill-unpaid {
+  margin-left: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+}
+
+.bill-paid {
+  background: var(--success-bg, #e6f6ec);
+  color: var(--success, #1f7a3f);
+}
+
+.bill-unpaid {
+  background: var(--warning-bg, #fdf1e0);
+  color: var(--warning, #9a5b00);
 }
 </style>

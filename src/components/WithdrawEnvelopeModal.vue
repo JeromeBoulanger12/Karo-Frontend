@@ -30,6 +30,9 @@ const emit = defineEmits<{
   withdraw: [payload: { amount: number; payee?: string; memo?: string }]
 }>()
 
+// Quick amounts: withdraw this share of the envelope's current balance
+const PERCENT_STEPS = [25, 50, 75, 100]
+
 const amount = ref<number | null>(null)
 const payee = ref('')
 const memo = ref('')
@@ -37,6 +40,14 @@ const error = ref('')
 
 const balance = computed(() => props.source?.balance?.amount ?? 0)
 const currency = computed(() => props.source?.balance?.currency ?? 'CAD')
+
+// Share of the balance, rounded to the cent (never negative)
+const amountOfPercent = (percent: number) => Math.max(0, Math.round(balance.value * percent) / 100)
+
+const selectPercent = (percent: number) => {
+  amount.value = amountOfPercent(percent)
+  error.value = ''
+}
 
 const remainingAfterWithdrawal = computed(() => {
   if (amount.value === null || Number.isNaN(amount.value)) return balance.value
@@ -88,6 +99,18 @@ const handleSubmit = () => {
           {{ t('envelopes.withdrawModal.from', { name: source?.name, amount: formatCurrency(balance) }) }}
         </p>
         <p class="hint">{{ t('envelopes.withdrawModal.hint') }}</p>
+
+        <div v-if="balance > 0" class="percent-choices">
+          <button
+            v-for="percent in PERCENT_STEPS"
+            :key="percent"
+            type="button"
+            class="percent-choice"
+            @click="selectPercent(percent)"
+          >
+            {{ t('envelopes.withdrawModal.percentOfBalance', { percent }) }}
+          </button>
+        </div>
 
         <div class="form-group">
           <label>{{ t('envelopes.withdrawModal.amount') }}</label>
@@ -175,6 +198,28 @@ const handleSubmit = () => {
   gap: var(--space-sm);
   padding: var(--space-lg);
   border-top: 1px solid var(--border);
+}
+
+.percent-choices {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+}
+
+.percent-choice {
+  padding: 0.5rem 0.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.percent-choice:hover {
+  border-color: var(--primary);
+  color: var(--primary);
 }
 
 .form-group {

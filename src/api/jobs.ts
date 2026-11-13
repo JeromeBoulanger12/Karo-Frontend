@@ -82,6 +82,11 @@ export const jobsApi = {
     return client.put(`/jobs/plans/${id}/fixed-pay`, { amount })
   },
 
+  // Bills due before the plan's next paycheck, each with whether that due date is already paid
+  upcomingBills(id: string) {
+    return client.get(`/jobs/plans/${id}/upcoming-bills`)
+  },
+
   // Corrects an automatic paycheck to the amount actually received
   adjustAutomaticPaycheck(planId: string, eventId: string, actualAmount: number) {
     return client.post(`/jobs/plans/${planId}/events/${eventId}/adjust`, { actualAmount })

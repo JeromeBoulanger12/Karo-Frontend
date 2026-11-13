@@ -404,6 +404,7 @@
     "withdrawModal": {
       "title": "Withdraw from the envelope",
       "from": "{name} — available: {amount}",
+      "percentOfBalance": "{percent}%",
       "amount": "Amount",
       "payee": "Payee (optional)",
       "memo": "Note (optional)",
@@ -1412,6 +1413,12 @@
       "rules": {
         "header": "Planned allocation",
         "empty": "No rule for this source: the paycheck will be recorded without any allocation to envelopes."
+      },
+      "upcoming": {
+        "header": "Bills due before the next paycheck",
+        "empty": "No bill due before the next paycheck.",
+        "paid": "Paid",
+        "unpaid": "To pay"
       },
       "amount": "Amount deposited",
       "accountBalance": "Checking account balance (after paycheck)",

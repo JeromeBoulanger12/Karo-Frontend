@@ -629,10 +629,26 @@ const handleJobEdit = (job: any) => {
 }
 
 // Modal handlers - Deposit Paycheck
+// Bills due before the source's next paycheck, with whether each due date is paid
+const upcomingBills = ref<any[]>([])
+const loadUpcomingBills = async (jobId: string) => {
+  try {
+    const { data } = await jobsApi.upcomingBills(jobId)
+    upcomingBills.value = data as any[]
+  } catch (err) {
+    console.error('Error loading upcoming bills:', err)
+    upcomingBills.value = []
+  }
+}
+
 const openDepositPaycheckModal = (job?: any) => {
   submitError.value = ''
   selectedJobForDeposit.value = job || null
   showDepositModal.value = true
+
+  // Without a pre-selected source, the modal starts on the main job
+  const jobId = job?.id ?? jobs.value.find((j: any) => j.isMainJob)?.id
+  if (jobId) loadUpcomingBills(jobId)
 }
 
 const handleDepositPaycheck = async (depositData: any) => {
@@ -949,7 +965,9 @@ onMounted(() => {
       :submitError="submitError"
       :job="selectedJobForDeposit"
       :jobs="jobs"
+      :upcomingBills="upcomingBills"
       @close="showDepositModal = false"
+      @job-change="loadUpcomingBills"
       @save="handleDepositPaycheck"
     />
   </div>
