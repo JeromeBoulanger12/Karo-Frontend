@@ -1226,6 +1226,12 @@
     }
   },
   "envelopeForm": {
+    "groups": {
+      "identity": "Identité",
+      "schedule": "Montant et échéance",
+      "funding": "Alimentation et prélèvements",
+      "sharing": "Partage"
+    },
     "title": {
       "add": "Ajouter Enveloppe",
       "edit": "Éditer Enveloppe"
@@ -1296,9 +1302,9 @@
       "dueDate": "Échéance"
     },
     "withdrawal": {
-      "enable": "Activer le prélèvement automatique",
-      "frequency": "Fréquence de prélèvement *",
-      "linkedEnvelope": "Enveloppe liée",
+      "enable": "Prélèvement à chaque paie : retire le montant cible de l'enveloppe",
+      "frequency": "Fréquence du prélèvement *",
+      "linkedEnvelope": "Envoyer le montant vers cette enveloppe (facultatif)",
       "linkedNone": "-- Aucune --"
     },
     "withdrawalFrequencies": {
@@ -1310,8 +1316,8 @@
       "Annual": "Annuel"
     },
     "autoPay": {
-      "label": "Payer automatiquement à l'échéance",
-      "hint": "À la date d'échéance, le paiement est fait à partir de l'enveloppe si le solde couvre le montant cible. Sinon, rien n'est payé et un courriel t'avertit."
+      "label": "Paiement automatique de la facture à l'échéance",
+      "hint": "À l'échéance, la facture est payée à partir de cette enveloppe si son solde couvre le montant cible. Sinon, rien n'est payé et un courriel t'avertit. Aucun montant n'est retiré avant l'échéance."
     },
     "plan": {
       "add": "Ajouter à un plan de distribution",

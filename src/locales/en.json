@@ -1142,6 +1142,12 @@
     }
   },
   "envelopeForm": {
+    "groups": {
+      "identity": "Identity",
+      "schedule": "Amount and schedule",
+      "funding": "Funding and withdrawals",
+      "sharing": "Sharing"
+    },
     "title": {
       "add": "Add envelope",
       "edit": "Edit envelope"
@@ -1209,9 +1215,9 @@
       "dueDate": "Due date"
     },
     "withdrawal": {
-      "enable": "Enable automatic withdrawal",
+      "enable": "Automatic withdrawal at each paycheck: takes the target amount out of this envelope",
       "frequency": "Withdrawal frequency *",
-      "linkedEnvelope": "Linked envelope",
+      "linkedEnvelope": "Send the amount to this envelope (optional)",
       "linkedNone": "-- None --"
     },
     "withdrawalFrequencies": {
@@ -1223,8 +1229,8 @@
       "Annual": "Annual"
     },
     "autoPay": {
-      "label": "Pay automatically on the due date",
-      "hint": "On the due date, the payment is made from the envelope when its balance covers the target amount. Otherwise nothing is paid and an email alerts you."
+      "label": "Automatic payment of the bill on its due date",
+      "hint": "On the due date, the bill is paid from this envelope if its balance covers the target amount. Otherwise nothing is paid and an email alerts you. Nothing is taken before the due date."
     },
     "plan": {
       "add": "Add to a distribution plan",

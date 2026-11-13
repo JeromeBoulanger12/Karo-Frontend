@@ -352,7 +352,10 @@ const withdrawalFrequencies = [
           {{ validationError }}
         </div>
 
-        <!-- Basic Info -->
+        <!-- 1. Identity: what the envelope is -->
+        <div class="section-divider">
+          <h3>{{ t('envelopeForm.groups.identity') }}</h3>
+
         <div class="form-group">
           <label>{{ t('envelopeForm.name.label') }}</label>
           <input v-model="formData.name" type="text" :placeholder="t('envelopeForm.name.placeholder')" />
@@ -391,6 +394,12 @@ const withdrawalFrequencies = [
           </select>
         </div>
 
+        </div>
+
+        <!-- 2. Amount and schedule: how much, and when it is due -->
+        <div class="section-divider">
+          <h3>{{ t('envelopeForm.groups.schedule') }}</h3>
+
         <!-- Debt envelopes: paying one takes the money from this envelope and from the account it is funded from -->
         <div v-if="isDebtPurpose" class="form-group">
           <label>{{ t('envelopeForm.debtCard.label') }}</label>
@@ -404,8 +413,7 @@ const withdrawalFrequencies = [
         </div>
 
         <!-- For Bills: Payment Schedule -->
-        <div v-if="hasBillSchedule" class="section-divider">
-          <h3>{{ t('envelopeForm.sections.bill') }}</h3>
+        <div v-if="hasBillSchedule">
 
           <div class="form-group">
             <label>{{ t('envelopeForm.bill.amount') }}</label>
@@ -445,11 +453,19 @@ const withdrawalFrequencies = [
               <button type="button" class="btn-add" @click="addPaymentDate">{{ t('envelopeForm.bill.addPaymentDate') }}</button>
             </div>
           </div>
+
+          <!-- Automatic payment of a bill on its due date: paid plans only, as the server checks too -->
+          <div v-if="canCustomize" class="form-group">
+            <label>
+              <input v-model="formData.billAutoPay" type="checkbox" />
+              {{ t('envelopeForm.autoPay.label') }}
+            </label>
+            <small class="form-hint">{{ t('envelopeForm.autoPay.hint') }}</small>
+          </div>
         </div>
 
         <!-- For Non-Bills: Target Amount & Date -->
-        <div v-if="!hasBillSchedule" class="section-divider">
-          <h3>{{ isDebtPurpose ? t('envelopeForm.sections.debt') : t('envelopeForm.sections.goal') }}</h3>
+        <div v-if="!hasBillSchedule">
 
           <div class="form-group">
             <label>{{ isDebtPurpose ? t('envelopeForm.debt.amount') : t('envelopeForm.goal.targetAmount') }}</label>
@@ -462,9 +478,11 @@ const withdrawalFrequencies = [
           </div>
         </div>
 
-        <!-- Automatic Withdrawal Section (a debt has no automatic withdrawal: it is paid by hand) -->
+        </div>
+
+        <!-- 3. Funding: where the money comes from. A debt has no automatic withdrawal: it is paid by hand -->
         <div class="section-divider">
-          <h3>{{ isDebtPurpose ? t('envelopeForm.sections.distribution') : t('envelopeForm.sections.withdrawal') }}</h3>
+          <h3>{{ t('envelopeForm.groups.funding') }}</h3>
 
           <template v-if="!isDebtPurpose">
             <div class="form-group">
@@ -494,15 +512,6 @@ const withdrawalFrequencies = [
               </select>
             </div>
           </template>
-
-          <!-- Automatic payment of a bill on its due date: paid plans only, as the server checks too -->
-          <div v-if="hasBillSchedule && canCustomize" class="form-group">
-            <label>
-              <input v-model="formData.billAutoPay" type="checkbox" />
-              {{ t('envelopeForm.autoPay.label') }}
-            </label>
-            <small class="form-hint">{{ t('envelopeForm.autoPay.hint') }}</small>
-          </div>
 
           <!-- Rules from distribution plans: each plan's paycheck adds its share to this envelope once saved -->
           <template v-for="(line, index) in formData.planRules" :key="index">
@@ -543,8 +552,10 @@ const withdrawalFrequencies = [
           </button>
         </div>
 
-        <!-- Sharing: only with the Family plan -->
+        <!-- 4. Sharing: only with the Family plan -->
         <div v-if="canShareWithMembers" class="section-divider">
+          <h3>{{ t('envelopeForm.groups.sharing') }}</h3>
+
           <div class="form-group">
             <label>
               <input v-model="formData.isShared" type="checkbox" />
