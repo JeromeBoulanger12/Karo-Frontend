@@ -1238,6 +1238,7 @@
       "nameRequired": "Le nom est requis",
       "billScheduleRequired": "Le type de calendrier est requis pour une facture",
       "annualDatesRequired": "Au moins une date de paiement est requise pour un calendrier annuel",
+      "biWeeklyDateRequired": "Une première date de paiement est requise pour un calendrier aux 2 semaines",
       "debtCardRequired": "La carte à rembourser est requise pour une enveloppe de dette",
       "withdrawalFrequencyRequired": "La fréquence de prélèvement est requise"
     },
@@ -1275,12 +1276,14 @@
       "amount": "Montant de la facture",
       "schedule": "Calendrier de paiement *",
       "dayOfMonth": "Jour du mois où la facture est due (1-31)",
+      "firstPaymentDate": "Première date de paiement",
       "paymentDates": "Dates de paiement dans l'année",
       "paymentDatePlaceholder": "Sélectionner une date",
       "addPaymentDate": "Ajouter"
     },
     "scheduleTypes": {
       "Monthly": "Mensuel",
+      "BiWeekly": "Aux 2 semaines",
       "AnnualScheduled": "Annuel (dates spécifiques)"
     },
     "selectPlaceholder": "-- Sélectionner --",

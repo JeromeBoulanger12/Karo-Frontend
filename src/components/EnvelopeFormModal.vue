@@ -168,6 +168,12 @@ const debtAccounts = computed(() =>
   props.availableAccounts.filter(a => isCreditAccount(a.type) && a.id !== formData.value.homeAccountId)
 )
 const isAnnualSchedule = computed(() => formData.value.scheduleType === 'AnnualScheduled')
+const isBiWeeklySchedule = computed(() => formData.value.scheduleType === 'BiWeekly')
+// A bi-weekly bill has one first payment date; the others follow every 14 days
+const firstPaymentDate = computed({
+  get: () => formData.value.paymentDates?.[0] ?? '',
+  set: (value: string) => { formData.value.paymentDates = value ? [value] : [] }
+})
 
 // Allocation types that fit this envelope: proration is for bills, automatic only with an automatic withdrawal
 // (never for a debt, which is paid by hand)
@@ -205,6 +211,11 @@ const handleSubmit = () => {
 
   if (hasBillSchedule.value && !formData.value.scheduleType) {
     validationError.value = t('envelopeForm.errors.billScheduleRequired')
+    return
+  }
+
+  if (hasBillSchedule.value && isBiWeeklySchedule.value && !firstPaymentDate.value) {
+    validationError.value = t('envelopeForm.errors.biWeeklyDateRequired')
     return
   }
 
@@ -312,6 +323,7 @@ const purposes = [
 
 const billScheduleTypes = [
   { value: 'Monthly', label: 'envelopeForm.scheduleTypes.Monthly' },
+  { value: 'BiWeekly', label: 'envelopeForm.scheduleTypes.BiWeekly' },
   { value: 'AnnualScheduled', label: 'envelopeForm.scheduleTypes.AnnualScheduled' }
 ]
 
@@ -413,6 +425,11 @@ const withdrawalFrequencies = [
           <div v-if="formData.scheduleType === 'Monthly'" class="form-group">
             <label>{{ t('envelopeForm.bill.dayOfMonth') }}</label>
             <input v-model.number="formData.dayOfMonth" type="number" min="1" max="31" placeholder="15" />
+          </div>
+
+          <div v-if="isBiWeeklySchedule" class="form-group">
+            <label>{{ t('envelopeForm.bill.firstPaymentDate') }}</label>
+            <input v-model="firstPaymentDate" type="date" />
           </div>
 
           <div v-if="isAnnualSchedule" class="form-group">

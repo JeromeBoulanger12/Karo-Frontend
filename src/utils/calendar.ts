@@ -24,11 +24,11 @@ export interface JobInput {
 
 const startOfDay = (date: Date) => new Date(date.getFullYear(), date.getMonth(), date.getDate())
 
-// Due dates of a bill inside [from, to]. Supports the two schedules the app creates: a fixed day of
-// the month, and an explicit list of dates
+// Due dates of a bill inside [from, to]. Supports the schedules the app creates: a fixed day of
+// the month, an explicit list of dates, and every 14 days from a first payment date
 export function billOccurrences(bill: BillInput, from: Date, to: Date): CalendarEvent[] {
   if (!bill.scheduleJson) return []
-  let schedule: { scheduleType?: string; dayOfMonth?: number; paymentDates?: string[] }
+  let schedule: { scheduleType?: string; dayOfMonth?: number; paymentDates?: string[]; anchorDate?: string }
   try {
     schedule = JSON.parse(bill.scheduleJson)
   } catch {
@@ -53,6 +53,19 @@ export function billOccurrences(bill: BillInput, from: Date, to: Date): Calendar
       const date = new Date(cursor.getFullYear(), cursor.getMonth(), Math.min(schedule.dayOfMonth, daysInMonth))
       if (date >= from && date <= to) events.push(make(date))
       cursor.setMonth(cursor.getMonth() + 1)
+    }
+    return events
+  }
+
+  if (schedule.scheduleType === 'BiWeekly' && schedule.anchorDate) {
+    const anchor = parseDateOnly(schedule.anchorDate)
+    if (!anchor) return []
+    const events: CalendarEvent[] = []
+    // Every 14 days from the first payment, until the end of the window
+    for (let step = 0; ; step++) {
+      const date = new Date(anchor.getFullYear(), anchor.getMonth(), anchor.getDate() + 14 * step)
+      if (date > to) break
+      if (date >= from) events.push(make(date))
     }
     return events
   }

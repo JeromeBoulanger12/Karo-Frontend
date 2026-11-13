@@ -1151,6 +1151,7 @@
       "nameRequired": "Name is required",
       "billScheduleRequired": "A payment schedule is required for a bill",
       "annualDatesRequired": "At least one payment date is required for an annual schedule",
+      "biWeeklyDateRequired": "A first payment date is required for a bi-weekly schedule",
       "debtCardRequired": "The card to repay is required for a debt envelope",
       "withdrawalFrequencyRequired": "The withdrawal frequency is required"
     },
@@ -1188,12 +1189,14 @@
       "amount": "Bill amount",
       "schedule": "Payment schedule *",
       "dayOfMonth": "Day of the month the bill is due (1-31)",
+      "firstPaymentDate": "First payment date",
       "paymentDates": "Payment dates in the year",
       "paymentDatePlaceholder": "Select a date",
       "addPaymentDate": "Add"
     },
     "scheduleTypes": {
       "Monthly": "Monthly",
+      "BiWeekly": "Every two weeks",
       "AnnualScheduled": "Annual (specific dates)"
     },
     "selectPlaceholder": "-- Select --",

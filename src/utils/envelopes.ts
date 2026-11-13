@@ -49,7 +49,7 @@ function startOfToday(): Date {
 // Next due date of a bill, from the schedule JSON written by the backend
 export function nextPaymentDate(scheduleJson?: string | null, from: Date = startOfToday()): Date | null {
   if (!scheduleJson) return null
-  let schedule: { scheduleType?: string; dayOfMonth?: number; paymentDates?: string[] }
+  let schedule: { scheduleType?: string; dayOfMonth?: number; paymentDates?: string[]; anchorDate?: string }
   try {
     schedule = JSON.parse(scheduleJson)
   } catch {
@@ -76,8 +76,19 @@ export function nextPaymentDate(scheduleJson?: string | null, from: Date = start
     return upcoming[0] ?? null
   }
 
+  if (schedule.scheduleType === 'BiWeekly' && schedule.anchorDate) {
+    const anchor = parseDateOnly(schedule.anchorDate)
+    if (!anchor) return null
+    // Whole days from the first payment to today; the next payment is the first 14-day step not yet past
+    const elapsedDays = Math.round((new Date(from.getFullYear(), from.getMonth(), from.getDate()).getTime() - anchor.getTime()) / DAY_MS)
+    const steps = Math.max(0, Math.ceil(elapsedDays / 14))
+    return new Date(anchor.getFullYear(), anchor.getMonth(), anchor.getDate() + 14 * steps)
+  }
+
   return null
 }
+
+const DAY_MS = 24 * 60 * 60 * 1000
 
 export function daysUntil(date: Date): number {
   const msPerDay = 24 * 60 * 60 * 1000
