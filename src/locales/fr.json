@@ -1418,6 +1418,14 @@
       "header": "Répartition",
       "empty": "Aucune règle : cette paie n'alloue rien aux enveloppes."
     },
+    "preview": {
+      "total": "Total prélevé par paie",
+      "surplus": "Surplus disponible",
+      "deficit": "Manque",
+      "basis": "Sur une paie de {amount}, prochaine paie le {date}.",
+      "noPaycheck": "Le surplus apparaîtra après la première paie (ou avec une paie fixe).",
+      "paidHint": "Le total prélevé et le surplus par paie sont offerts avec un abonnement payant."
+    },
     "deposit": "Déposer une paie",
     "adjust": "Ajuster la dernière paie"
   },

@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, inject, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { formatRuleAmount, type DistributionRule } from '../utils/distributionRules'
+import { jobsApi } from '../api/jobs'
+import { formatRuleAmount, type DistributionRule, type PaycheckPreview } from '../utils/distributionRules'
 
 interface Money {
   amount: number
@@ -42,6 +43,33 @@ const emit = defineEmits<{
 }>()
 
 const { t, locale } = useI18n()
+
+// The total taken by the rules and the surplus left on each paycheck are a paid-tier feature
+const subscriptionFeatures = inject('subscriptionFeatures', ref({ allowPlanning: false }))
+const canPlan = computed(() => !!subscriptionFeatures.value.allowPlanning)
+
+// Amounts come from the backend: bill and goal shares depend on the envelopes and the next payday.
+// The dashboard rebuilds the job object on each reload, so a new object means the amounts may have changed.
+const preview = ref<PaycheckPreview | null>(null)
+watch([() => props.job, canPlan], async ([job, allowed]) => {
+  if (!allowed || !job?.id) {
+    preview.value = null
+    return
+  }
+  try {
+    const { data } = await jobsApi.paycheckPreview(job.id)
+    preview.value = data
+  } catch (err) {
+    console.error('Error loading paycheck preview:', err)
+    preview.value = null
+  }
+}, { immediate: true })
+
+// The rule's amount on the next paycheck when known, else its setting (fixed amount, percentage, automatic)
+const ruleAmount = (rule: DistributionRule, index: number) => {
+  const line = preview.value?.lines[index]
+  return line && line.envelopeId === rule.envelopeId ? formatCurrency(line.amount) : formatRuleAmount(rule)
+}
 
 const frequencyLabel = computed(() => {
   const freqMap: Record<string, string> = {
@@ -153,9 +181,31 @@ const formatDate = (dateString: string | undefined) => {
       <ul v-if="job.rules?.length" class="job-rules-list">
         <li v-for="(rule, index) in job.rules" :key="index" class="job-rule-row">
           <span>{{ rule.envelopeName }}</span>
-          <strong>{{ formatRuleAmount(rule) }}</strong>
+          <strong>{{ ruleAmount(rule, index) }}</strong>
         </li>
       </ul>
+
+      <!-- Paid plans: what the rules take from the next paycheck, and what is left over -->
+      <div v-if="preview && job.rules?.length" class="job-preview">
+        <div class="job-rule-row job-preview-total">
+          <span>{{ t('jobCard.preview.total') }}</span>
+          <strong>{{ formatCurrency(preview.total) }}</strong>
+        </div>
+        <div
+          v-if="preview.surplus"
+          class="job-rule-row job-preview-surplus"
+          :class="preview.surplus.amount < 0 ? 'is-deficit' : 'is-surplus'"
+        >
+          <span>{{ preview.surplus.amount < 0 ? t('jobCard.preview.deficit') : t('jobCard.preview.surplus') }}</span>
+          <strong>{{ formatCurrency({ ...preview.surplus, amount: Math.abs(preview.surplus.amount) }) }}</strong>
+        </div>
+        <p class="job-preview-hint">
+          {{ preview.paycheckAmount
+            ? t('jobCard.preview.basis', { amount: formatCurrency(preview.paycheckAmount), date: formatPayday(preview.payDate) })
+            : t('jobCard.preview.noPaycheck') }}
+        </p>
+      </div>
+      <p v-else-if="!canPlan && job.rules?.length" class="job-preview-hint">{{ t('jobCard.preview.paidHint') }}</p>
       <p v-else class="job-rules-empty">
         <i class="mdi mdi-alert-outline"></i>
         {{ t('jobCard.rules.empty') }}
@@ -353,6 +403,36 @@ const formatDate = (dateString: string | undefined) => {
 .job-rule-row strong {
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+}
+
+.job-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed var(--border);
+}
+
+.job-preview-total strong {
+  color: var(--text-primary);
+}
+
+.job-preview-surplus.is-surplus strong {
+  color: var(--success);
+}
+
+.job-preview-surplus.is-deficit strong {
+  color: var(--danger, #dc2626);
+}
+
+.job-preview-surplus.is-deficit strong::before {
+  content: '−';
+}
+
+.job-preview-hint {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
 }
 
 .job-rules-empty {

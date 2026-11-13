@@ -7,6 +7,18 @@ export interface DistributionRule {
   percentageValue?: number | null
 }
 
+type Money = { amount: number; currency: string }
+
+// GET /jobs/plans/{id}/paycheck-preview: what the next paycheck puts in each envelope (one line per rule,
+// in the plan's rule order), the total taken and what is left. Paid plans only.
+export interface PaycheckPreview {
+  payDate: string
+  paycheckAmount: Money | null
+  lines: { envelopeId: string; envelopeName: string; allocationType: DistributionRule['allocationType']; amount: Money }[]
+  total: Money
+  surplus: Money | null
+}
+
 export const formatRuleAmount = (rule: DistributionRule) => {
   switch (rule.allocationType) {
     case 'FixedAmount':

@@ -1334,6 +1334,14 @@
       "header": "Allocation",
       "empty": "No rule: this paycheck allocates nothing to envelopes."
     },
+    "preview": {
+      "total": "Total taken per paycheck",
+      "surplus": "Surplus available",
+      "deficit": "Shortfall",
+      "basis": "On a paycheck of {amount}, next payday {date}.",
+      "noPaycheck": "The surplus will appear after the first paycheck (or with a fixed pay).",
+      "paidHint": "The total taken and the surplus per paycheck come with a paid plan."
+    },
     "deposit": "Deposit a paycheck",
     "adjust": "Adjust last paycheck"
   },

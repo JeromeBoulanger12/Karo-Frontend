@@ -87,6 +87,11 @@ export const jobsApi = {
     return client.get(`/jobs/plans/${id}/upcoming-bills`)
   },
 
+  // What the next paycheck puts in each envelope, the total taken and the surplus left (paid plans only)
+  paycheckPreview(id: string) {
+    return client.get(`/jobs/plans/${id}/paycheck-preview`)
+  },
+
   // Corrects an automatic paycheck to the amount actually received
   adjustAutomaticPaycheck(planId: string, eventId: string, actualAmount: number) {
     return client.post(`/jobs/plans/${planId}/events/${eventId}/adjust`, { actualAmount })
