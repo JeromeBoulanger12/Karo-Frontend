@@ -11,7 +11,7 @@ const canCustomize = computed(() => !!subscriptionFeatures.value.allowPlanning)
 const canShareWithMembers = computed(() => !!subscriptionFeatures.value.allowMembers)
 const colorChoices = ['#1F7A4D', '#2563EB', '#D97706', '#DC2626', '#7C3AED', '#DB2777', '#0891B2', '#64748B']
 
-type PlanAllocationType = 'BillProrated' | 'Automatic' | 'FixedAmount' | 'Percentage'
+type PlanAllocationType = 'BillProrated' | 'GoalProrated' | 'Automatic' | 'FixedAmount' | 'Percentage'
 
 // A rule this envelope gets from a plan: each paycheck of that plan adds its share
 interface PlanRuleLine {
@@ -163,6 +163,10 @@ const removePlanRule = (index: number) => {
 const isEditing = computed(() => !!props.envelope?.id)
 const hasBillSchedule = computed(() => isBillPurpose(formData.value.purpose))
 const isDebtPurpose = computed(() => formData.value.purpose === 'DebtPayment')
+const isSavingsGoal = computed(() => formData.value.purpose === 'SavingsGoal')
+// Irregular pay has no paydays to count before the goal's date
+const isIrregularPlan = (planId: string | null) =>
+  props.plans.find((plan: any) => plan.id === planId)?.recurrencePattern?.frequency === 'Irregular'
 // Only credit cards other than the account the money comes from can be paid down
 const debtAccounts = computed(() =>
   props.availableAccounts.filter(a => isCreditAccount(a.type) && a.id !== formData.value.homeAccountId)
@@ -175,12 +179,13 @@ const firstPaymentDate = computed({
   set: (value: string) => { formData.value.paymentDates = value ? [value] : [] }
 })
 
-// Allocation types that fit this envelope: proration is for bills, automatic only with an automatic withdrawal
-// (never for a debt, which is paid by hand)
+// Allocation types that fit this envelope: proration is for bills and savings goals, automatic only with an
+// automatic withdrawal (never for a debt, which is paid by hand)
 const allocationTypes = computed(() => {
   const hasAutomaticLine = formData.value.planRules.some(line => line.allocationType === 'Automatic')
   return [
     ...(hasBillSchedule.value ? [{ value: 'BillProrated', label: t('envelopes.form.billProrated') }] : []),
+    ...(isSavingsGoal.value ? [{ value: 'GoalProrated', label: t('envelopes.form.goalProrated') }] : []),
     ...((formData.value.isAutomaticWithdrawal && !isDebtPurpose.value) || hasAutomaticLine
       ? [{ value: 'Automatic', label: t('envelopes.form.automatic') }]
       : []),
@@ -195,7 +200,7 @@ watch(isDebtPurpose, (isDebt) => {
   formData.value.isAutomaticWithdrawal = false
   formData.value.linkedEnvelopeId = undefined
   formData.value.planRules.forEach((line) => {
-    if (line.allocationType === 'BillProrated' || line.allocationType === 'Automatic') {
+    if (line.allocationType === 'BillProrated' || line.allocationType === 'GoalProrated' || line.allocationType === 'Automatic') {
       line.allocationType = 'FixedAmount'
     }
   })
@@ -243,8 +248,9 @@ const handleSubmit = () => {
     validationError.value = t('envelopeForm.errors.duplicatePlan')
     return
   }
-  // A bill share or automatic withdrawal is computed from the whole target: it cannot share the envelope
-  const isExclusive = (line: PlanRuleLine) => line.allocationType === 'BillProrated' || line.allocationType === 'Automatic'
+  // A bill share, goal share or automatic withdrawal is computed from the whole target: it cannot share the envelope
+  const isExclusive = (line: PlanRuleLine) =>
+    line.allocationType === 'BillProrated' || line.allocationType === 'GoalProrated' || line.allocationType === 'Automatic'
   if (lines.some(isExclusive) && lines.length > 1) {
     validationError.value = t('envelopeForm.errors.exclusivePlan')
     return
@@ -253,6 +259,20 @@ const handleSubmit = () => {
     if (line.allocationType === 'BillProrated' && !hasBillSchedule.value) {
       validationError.value = t('envelopes.form.errorBillOnly')
       return
+    }
+    if (line.allocationType === 'GoalProrated') {
+      if (!isSavingsGoal.value) {
+        validationError.value = t('envelopes.form.errorGoalOnly')
+        return
+      }
+      if (!(formData.value.targetAmount && formData.value.targetAmount > 0) || !formData.value.targetDate) {
+        validationError.value = t('envelopes.form.errorGoalNeedsTarget')
+        return
+      }
+      if (isIrregularPlan(line.planId)) {
+        validationError.value = t('envelopes.form.errorGoalIrregular')
+        return
+      }
     }
     if (line.allocationType === 'Automatic' && !formData.value.isAutomaticWithdrawal) {
       validationError.value = t('envelopes.form.errorAutomaticNeedsOption')
@@ -530,6 +550,7 @@ const withdrawalFrequencies = [
               <select v-model="line.allocationType">
                 <option v-for="type in allocationTypes" :key="type.value" :value="type.value">{{ type.label }}</option>
               </select>
+              <small v-if="line.allocationType === 'GoalProrated'" class="form-hint">{{ t('envelopes.form.goalProratedHint') }}</small>
             </div>
 
             <div v-if="line.allocationType === 'FixedAmount'" class="form-group">

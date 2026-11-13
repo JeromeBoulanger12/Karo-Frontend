@@ -417,12 +417,17 @@
     "form": {
       "allocationType": "Allocation type",
       "billProrated": "Bill: share of the bill each paycheck",
+      "goalProrated": "Goal: share of the goal each paycheck",
+      "goalProratedHint": "Each paycheck adds what is still missing to reach the target amount, divided by the paychecks left until the target date. Recalculated on each paycheck.",
       "automatic": "Automatic withdrawal: envelope amount each paycheck",
       "fixedAmount": "Fixed amount each paycheck",
       "percentage": "Percentage of the paycheck",
       "fixedAmountLabel": "Amount per paycheck",
       "percentageLabel": "Percentage of the paycheck",
       "errorBillOnly": "The « Bill » allocation only applies to a Bill envelope",
+      "errorGoalOnly": "The « Goal » allocation only applies to a Savings goal envelope",
+      "errorGoalNeedsTarget": "The « Goal » allocation needs a target amount and a target date",
+      "errorGoalIrregular": "The « Goal » allocation needs a job with a regular pay frequency",
       "errorAutomaticNeedsOption": "The « Automatic withdrawal » allocation requires the option to be enabled",
       "errorFixedPositive": "The amount per paycheck must be greater than 0",
       "errorPercentageRange": "The percentage must be between 0 and 100"
@@ -546,6 +551,7 @@
       "FixedAmount": "Fixed Amount",
       "Percentage": "Percentage",
       "BillProrated": "Auto-Calculated from Bill",
+      "GoalProrated": "Auto-Calculated from Goal",
       "Automatic": "Automatic Withdrawal"
     },
     "rulePriorities": {
@@ -1043,7 +1049,7 @@
       },
       "allocation": {
         "question": "How do I split my pay across envelopes?",
-        "answer": "When you create an envelope, choose a pay plan and an allocation type: bill (a share of the bill each paycheck), automatic withdrawal, fixed amount per paycheck, or percentage of the paycheck."
+        "answer": "When you create an envelope, choose a pay plan and an allocation type: bill (a share of the bill each paycheck), savings goal (a share of the goal each paycheck, until the target date), automatic withdrawal, fixed amount per paycheck, or percentage of the paycheck."
       },
       "paid": {
         "question": "What happens when I click \"Paid\"?",

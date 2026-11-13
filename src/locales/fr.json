@@ -407,12 +407,17 @@
     "form": {
       "allocationType": "Type de répartition",
       "billProrated": "Facture : part de la facture à chaque paie",
+      "goalProrated": "Objectif : part de l'objectif à chaque paie",
+      "goalProratedHint": "Chaque paie dépose ce qui manque pour atteindre le montant cible, divisé par le nombre de paies restantes d'ici la date cible. Recalculé à chaque paie.",
       "automatic": "Prélèvement automatique : montant de l'enveloppe à chaque paie",
       "fixedAmount": "Montant fixe à chaque paie",
       "percentage": "Pourcentage de la paie",
       "fixedAmountLabel": "Montant par paie",
       "percentageLabel": "Pourcentage de la paie",
       "errorBillOnly": "La répartition « Facture » ne s'applique qu'à une enveloppe de type Facture",
+      "errorGoalOnly": "La répartition « Objectif » ne s'applique qu'à une enveloppe de type Objectif d'épargne",
+      "errorGoalNeedsTarget": "La répartition « Objectif » exige un montant cible et une date cible",
+      "errorGoalIrregular": "La répartition « Objectif » exige un emploi avec une fréquence de paie régulière",
       "errorAutomaticNeedsOption": "La répartition « Prélèvement automatique » exige que l'option soit activée",
       "errorFixedPositive": "Le montant par paie doit être supérieur à 0",
       "errorPercentageRange": "Le pourcentage doit être entre 0 et 100"
@@ -539,6 +544,7 @@
       "FixedAmount": "Montant fixe",
       "Percentage": "Pourcentage",
       "BillProrated": "Calculé automatiquement à partir de la facture",
+      "GoalProrated": "Calculé automatiquement à partir de l'objectif",
       "Automatic": "Prélèvement automatique"
     },
     "rulePriorities": {
@@ -1127,7 +1133,7 @@
       },
       "allocation": {
         "question": "Comment répartir ma paie dans les enveloppes ?",
-        "answer": "Lors de la création d'une enveloppe, choisissez un plan de paie et un type de répartition : facture (une part de la facture à chaque paie), prélèvement automatique, montant fixe par paie ou pourcentage de la paie."
+        "answer": "Lors de la création d'une enveloppe, choisissez un plan de paie et un type de répartition : facture (une part de la facture à chaque paie), objectif d'épargne (une part de l'objectif à chaque paie, d'ici la date cible), prélèvement automatique, montant fixe par paie ou pourcentage de la paie."
       },
       "paid": {
         "question": "Que se passe-t-il quand je clique sur « Payé » ?",

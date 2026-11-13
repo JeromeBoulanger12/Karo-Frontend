@@ -2,7 +2,7 @@
 export interface DistributionRule {
   envelopeId: string
   envelopeName: string
-  allocationType: 'FixedAmount' | 'Percentage' | 'BillProrated' | 'Automatic'
+  allocationType: 'FixedAmount' | 'Percentage' | 'BillProrated' | 'GoalProrated' | 'Automatic'
   fixedAmount?: { amount: number; currency: string } | null
   percentageValue?: number | null
 }
