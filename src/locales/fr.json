@@ -1308,7 +1308,7 @@
     },
     "autoPay": {
       "label": "Payer automatiquement à l'échéance",
-      "hint": "À la date d'échéance, la facture est payée à partir de l'enveloppe si le solde couvre le montant cible. Sinon, rien n'est payé et un courriel t'avertit."
+      "hint": "À la date d'échéance, le paiement est fait à partir de l'enveloppe si le solde couvre le montant cible. Sinon, rien n'est payé et un courriel t'avertit."
     },
     "plan": {
       "add": "Ajouter à un plan de distribution",

@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import type { EnvelopeSummary } from '../utils/envelopes'
 import { useI18n } from 'vue-i18n'
-import { formatMoney } from '../utils/envelopes'
+import { formatMoney, isBillPurpose } from '../utils/envelopes'
 
 const { t } = useI18n()
 
@@ -24,7 +24,7 @@ const emit = defineEmits<{
 
 const balance = computed(() => props.envelope?.balance?.amount ?? 0)
 const currency = computed(() => props.envelope?.balance?.currency ?? 'CAD')
-const isBill = computed(() => props.envelope?.purpose === 'Bill')
+const isBill = computed(() => isBillPurpose(props.envelope?.purpose))
 const isDebt = computed(() => props.envelope?.purpose === 'DebtPayment')
 
 // Same rules as the backend: only bills and debts can be paid, debts can't be withdrawn from

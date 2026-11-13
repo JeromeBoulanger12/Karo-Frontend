@@ -7,7 +7,8 @@ import {
   nextPaymentDate,
   daysUntil,
   formatShortDate,
-  formatMoney
+  formatMoney,
+  isBillPurpose
 } from '../utils/envelopes'
 
 const props = defineProps<{
@@ -26,7 +27,7 @@ const currency = computed(() => props.envelope.balance?.currency ?? 'CAD')
 const target = computed(() => props.envelope.targetAmount?.amount ?? 0)
 const percentage = computed(() => (target.value > 0 ? Math.min((balance.value / target.value) * 100, 100) : 0))
 
-const isBill = computed(() => props.envelope.purpose === 'Bill')
+const isBill = computed(() => isBillPurpose(props.envelope.purpose))
 const purposeLabel = computed(() => t(`enums.envelopePurposes.${props.envelope.purpose}`))
 
 // Status line: next due date for bills, last payment, automatic withdrawal or target date

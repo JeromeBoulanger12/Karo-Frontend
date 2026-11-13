@@ -2,6 +2,7 @@
 import { ref, computed, watch, inject } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { isCreditAccount } from '../utils/accounts'
+import { isBillPurpose } from '../utils/envelopes'
 
 // Colour and arrangement of envelopes are paid features: the palette is locked on the free plan
 const subscriptionFeatures = inject('subscriptionFeatures', ref({ allowPlanning: false, allowMembers: false }))
@@ -160,7 +161,7 @@ const removePlanRule = (index: number) => {
 }
 
 const isEditing = computed(() => !!props.envelope?.id)
-const isBillPurpose = computed(() => formData.value.purpose === 'Bill')
+const hasBillSchedule = computed(() => isBillPurpose(formData.value.purpose))
 const isDebtPurpose = computed(() => formData.value.purpose === 'DebtPayment')
 // Only credit cards other than the account the money comes from can be paid down
 const debtAccounts = computed(() =>
@@ -173,7 +174,7 @@ const isAnnualSchedule = computed(() => formData.value.scheduleType === 'AnnualS
 const allocationTypes = computed(() => {
   const hasAutomaticLine = formData.value.planRules.some(line => line.allocationType === 'Automatic')
   return [
-    ...(isBillPurpose.value ? [{ value: 'BillProrated', label: t('envelopes.form.billProrated') }] : []),
+    ...(hasBillSchedule.value ? [{ value: 'BillProrated', label: t('envelopes.form.billProrated') }] : []),
     ...((formData.value.isAutomaticWithdrawal && !isDebtPurpose.value) || hasAutomaticLine
       ? [{ value: 'Automatic', label: t('envelopes.form.automatic') }]
       : []),
@@ -202,12 +203,12 @@ const handleSubmit = () => {
     return
   }
 
-  if (isBillPurpose.value && !formData.value.scheduleType) {
+  if (hasBillSchedule.value && !formData.value.scheduleType) {
     validationError.value = t('envelopeForm.errors.billScheduleRequired')
     return
   }
 
-  if (isBillPurpose.value && isAnnualSchedule.value && formData.value.paymentDates?.length === 0) {
+  if (hasBillSchedule.value && isAnnualSchedule.value && formData.value.paymentDates?.length === 0) {
     validationError.value = t('envelopeForm.errors.annualDatesRequired')
     return
   }
@@ -238,7 +239,7 @@ const handleSubmit = () => {
     return
   }
   for (const line of lines) {
-    if (line.allocationType === 'BillProrated' && !isBillPurpose.value) {
+    if (line.allocationType === 'BillProrated' && !hasBillSchedule.value) {
       validationError.value = t('envelopes.form.errorBillOnly')
       return
     }
@@ -391,7 +392,7 @@ const withdrawalFrequencies = [
         </div>
 
         <!-- For Bills: Payment Schedule -->
-        <div v-if="isBillPurpose" class="section-divider">
+        <div v-if="hasBillSchedule" class="section-divider">
           <h3>{{ t('envelopeForm.sections.bill') }}</h3>
 
           <div class="form-group">
@@ -430,7 +431,7 @@ const withdrawalFrequencies = [
         </div>
 
         <!-- For Non-Bills: Target Amount & Date -->
-        <div v-if="!isBillPurpose" class="section-divider">
+        <div v-if="!hasBillSchedule" class="section-divider">
           <h3>{{ isDebtPurpose ? t('envelopeForm.sections.debt') : t('envelopeForm.sections.goal') }}</h3>
 
           <div class="form-group">
@@ -478,7 +479,7 @@ const withdrawalFrequencies = [
           </template>
 
           <!-- Automatic payment of a bill on its due date: paid plans only, as the server checks too -->
-          <div v-if="isBillPurpose && canCustomize" class="form-group">
+          <div v-if="hasBillSchedule && canCustomize" class="form-group">
             <label>
               <input v-model="formData.billAutoPay" type="checkbox" />
               {{ t('envelopeForm.autoPay.label') }}

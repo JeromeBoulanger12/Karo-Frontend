@@ -91,3 +91,8 @@ export function formatShortDate(date: Date): string {
 export function formatMoney(amount: number, currency = 'CAD'): string {
   return new Intl.NumberFormat('fr-CA', { style: 'currency', currency }).format(amount)
 }
+
+// Bills and mortgages are paid on a schedule: both carry a payment schedule and can be paid automatically
+export function isBillPurpose(purpose?: string | null): boolean {
+  return purpose === 'Bill' || purpose === 'Mortgage'
+}

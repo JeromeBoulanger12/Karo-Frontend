@@ -1221,7 +1221,7 @@
     },
     "autoPay": {
       "label": "Pay automatically on the due date",
-      "hint": "On the due date, the bill is paid from the envelope when its balance covers the target amount. Otherwise nothing is paid and an email alerts you."
+      "hint": "On the due date, the payment is made from the envelope when its balance covers the target amount. Otherwise nothing is paid and an email alerts you."
     },
     "plan": {
       "add": "Add to a distribution plan",

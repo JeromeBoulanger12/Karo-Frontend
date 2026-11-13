@@ -22,7 +22,7 @@ import { accountsApi, toDebtProfileInput, fromDebtProfileDto } from '../api/acco
 import { envelopesApi } from '../api/envelopes'
 import { jobsApi } from '../api/jobs'
 import { dashboardAPI } from '../api/dashboard'
-import { paychecksPerMonth, nextPaymentDate } from '../utils/envelopes'
+import { paychecksPerMonth, nextPaymentDate, isBillPurpose } from '../utils/envelopes'
 import { isCreditAccount } from '../utils/accounts'
 import { monthEndProjection, type BillCoverage } from '../utils/monthEnd'
 import { payOccurrences } from '../utils/calendar'
@@ -110,7 +110,7 @@ const canPlan = computed(() => !!subscriptionFeatures.value.allowPlanning)
 // Inputs for the calendar: bills with their schedule, and jobs with their last paycheck
 const calendarBills = computed(() =>
   envelopes.value
-    .filter(env => env.purpose === 'Bill' && env.billPaymentScheduleJson)
+    .filter(env => isBillPurpose(env.purpose) && env.billPaymentScheduleJson)
     .map(env => ({
       name: env.name,
       amount: env.targetAmount?.amount ?? 0,
@@ -132,7 +132,7 @@ const calendarJobs = computed(() =>
 // before month end that their envelopes don't fully cover
 const monthEnd = computed(() => {
   const bills = envelopes.value
-    .filter(env => env.purpose === 'Bill' && env.billPaymentScheduleJson)
+    .filter(env => isBillPurpose(env.purpose) && env.billPaymentScheduleJson)
     .map(env => {
       const dueDate = nextPaymentDate(env.billPaymentScheduleJson)
       if (!dueDate) return null
