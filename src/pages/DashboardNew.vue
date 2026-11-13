@@ -295,7 +295,7 @@ const openEditEnvelopeModal = (envelope: any) => {
 }
 
 const handleEnvelopeSave = async (envelopeData: any) => {
-  const { selectedPlanId, planAllocationType, planFixedAmount, planPercentage, color, ...payload } = envelopeData
+  const { planRules, color, billAutoPay, ...payload } = envelopeData
   showEnvelopeModal.value = false
   try {
     let envelopeId: string
@@ -314,29 +314,47 @@ const handleEnvelopeSave = async (envelopeData: any) => {
       await envelopesApi.setColor(envelopeId, color ?? null)
     }
 
-    // The envelope has at most one rule, in the plan chosen in the form. Rules it has elsewhere, or an
-    // outdated rule in the same plan, are removed first; then the rule for the chosen plan is added.
-    const sameRule = (rule: any) =>
-      rule.allocationType === planAllocationType &&
-      (planAllocationType !== 'FixedAmount' || Number(rule.fixedAmount?.amount ?? 0) === Number(planFixedAmount ?? 0)) &&
-      (planAllocationType !== 'Percentage' || Number(rule.percentageValue ?? 0) === Number(planPercentage ?? 0))
+    // Automatic payment has its own endpoint (paid plans only), sent only for a bill whose setting changed
+    if (billAutoPay !== undefined && billAutoPay !== (selectedEnvelope.value?.billAutoPay ?? false)) {
+      await envelopesApi.setBillAutoPay(envelopeId, billAutoPay)
+    }
+
+    // Each form line is one rule in one plan. Rules the form no longer lists are removed, rules it still lists
+    // are kept, and the new lines are added. Removals go first, so a bill share can replace another rule.
+    const wanted: any[] = (planRules ?? []).map((line: any) => ({
+      planId: line.planId as string,
+      allocationType: line.allocationType as string,
+      fixedAmount: line.allocationType === 'FixedAmount' ? line.fixedAmount : null,
+      percentageValue: line.allocationType === 'Percentage' ? line.percentage : null
+    }))
+    const sameRule = (rule: any, want: any) =>
+      rule.allocationType === want.allocationType &&
+      (want.allocationType !== 'FixedAmount' || Number(rule.fixedAmount?.amount ?? 0) === Number(want.fixedAmount ?? 0)) &&
+      (want.allocationType !== 'Percentage' || Number(rule.percentageValue ?? 0) === Number(want.percentageValue ?? 0))
+
     const existingRules = jobs.value.flatMap(job =>
       (job.rules ?? [])
         .map((rule: any, index: number) => ({ planId: job.id, index, rule }))
         .filter((entry: any) => entry.rule.envelopeId === envelopeId)
     )
-    const kept = existingRules.find(entry => entry.planId === selectedPlanId && sameRule(entry.rule))
+    const matched = new Set<any>()
+    const toRemove: any[] = []
+    for (const entry of existingRules) {
+      const want = wanted.find(w => !matched.has(w) && w.planId === entry.planId && sameRule(entry.rule, w))
+      if (want) matched.add(want)
+      else toRemove.push(entry)
+    }
     // Highest index first, so the indexes still to remove stay valid within their plan
-    const toRemove = existingRules.filter(entry => entry !== kept).sort((a, b) => b.index - a.index)
+    toRemove.sort((a, b) => b.index - a.index)
     for (const entry of toRemove) {
       await jobsApi.deleteRule(entry.planId, entry.index)
     }
-    if (selectedPlanId && !kept) {
-      await jobsApi.addRule(selectedPlanId, {
+    for (const want of wanted.filter(w => !matched.has(w))) {
+      await jobsApi.addRule(want.planId, {
         envelopeId,
-        allocationType: planAllocationType,
-        fixedAmount: planAllocationType === 'FixedAmount' ? planFixedAmount : null,
-        percentageValue: planAllocationType === 'Percentage' ? planPercentage : null,
+        allocationType: want.allocationType,
+        fixedAmount: want.fixedAmount,
+        percentageValue: want.percentageValue,
         priority: 'Medium'
       })
     }

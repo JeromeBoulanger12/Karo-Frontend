@@ -1219,8 +1219,14 @@
       "SemiAnnual": "Semi-annual",
       "Annual": "Annual"
     },
+    "autoPay": {
+      "label": "Pay automatically on the due date",
+      "hint": "On the due date, the bill is paid from the envelope when its balance covers the target amount. Otherwise nothing is paid and an email alerts you."
+    },
     "plan": {
       "add": "Add to a distribution plan",
+      "addSource": "+ Add another paycheck source",
+      "remove": "Remove this source",
       "none": "-- None --"
     },
     "share": {
@@ -1231,6 +1237,9 @@
   },
   "householdPage": {
     "errors": {
+      "planRequired": "Choose the plan of each paycheck source, or remove the source.",
+      "duplicatePlan": "A plan can feed the same envelope only once.",
+      "exclusivePlan": "A bill share or automatic withdrawal must be the only source of the envelope.",
       "householdNotFound": "Household not found",
       "loadMembersFailed": "Failed to load members",
       "acceptInvitationFailed": "Failed to accept invitation",

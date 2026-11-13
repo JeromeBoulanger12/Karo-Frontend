@@ -54,6 +54,11 @@ export const envelopesApi = {
     return client.put(`/envelopes/${id}/color`, { color })
   },
 
+  // Paid plans only: pays the bill from its envelope on its due date when the balance covers the target
+  setBillAutoPay(id: string, enabled: boolean) {
+    return client.put(`/envelopes/${id}/auto-pay`, { enabled })
+  },
+
   // envelopeIds must name every envelope of the account, in their new order
   reorderEnvelopes(accountId: string, envelopeIds: string[]) {
     return client.put('/envelopes/reorder', { accountId, envelopeIds })

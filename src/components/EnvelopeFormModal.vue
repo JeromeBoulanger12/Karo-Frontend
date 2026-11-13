@@ -4,9 +4,21 @@ import { useI18n } from 'vue-i18n'
 import { isCreditAccount } from '../utils/accounts'
 
 // Colour and arrangement of envelopes are paid features: the palette is locked on the free plan
-const subscriptionFeatures = inject('subscriptionFeatures', ref({ allowPlanning: false }))
+const subscriptionFeatures = inject('subscriptionFeatures', ref({ allowPlanning: false, allowMembers: false }))
 const canCustomize = computed(() => !!subscriptionFeatures.value.allowPlanning)
+// Sharing with household members needs the Family plan (members); without it the option is not offered
+const canShareWithMembers = computed(() => !!subscriptionFeatures.value.allowMembers)
 const colorChoices = ['#1F7A4D', '#2563EB', '#D97706', '#DC2626', '#7C3AED', '#DB2777', '#0891B2', '#64748B']
+
+type PlanAllocationType = 'BillProrated' | 'Automatic' | 'FixedAmount' | 'Percentage'
+
+// A rule this envelope gets from a plan: each paycheck of that plan adds its share
+interface PlanRuleLine {
+  planId: string | null
+  allocationType: PlanAllocationType
+  fixedAmount: number | null
+  percentage: number | null
+}
 
 interface FormData {
   name: string
@@ -24,10 +36,10 @@ interface FormData {
   targetAccountId?: string
   sharedPercentage?: number
   isShared?: boolean
-  selectedPlanId?: string | null
-  planAllocationType?: 'BillProrated' | 'Automatic' | 'FixedAmount' | 'Percentage'
-  planFixedAmount?: number | null
-  planPercentage?: number | null
+  // One line per distribution plan that feeds this envelope
+  planRules: PlanRuleLine[]
+  // Bills: paid from the envelope on the due date when its balance covers the target
+  billAutoPay?: boolean
   color?: string | null
 }
 
@@ -71,10 +83,8 @@ const formData = ref<FormData>({
   targetAccountId: props.envelope?.targetAccountId,
   sharedPercentage: props.envelope?.sharedPercentage,
   isShared: props.envelope?.isShared || false,
-  selectedPlanId: null,
-  planAllocationType: 'FixedAmount',
-  planFixedAmount: null,
-  planPercentage: null,
+  planRules: [],
+  billAutoPay: props.envelope?.billAutoPay || false,
   color: props.envelope?.color ?? null
 })
 
@@ -96,22 +106,25 @@ const parseBillSchedule = (envelope: any) => {
   }
 }
 
-// The rule this envelope already has in a distribution plan, if any: its plan opens selected, with its allocation
-const currentRule = computed(() => {
+// The rules this envelope already has, one per plan that feeds it
+const ruleLinesFromPlans = (): PlanRuleLine[] => {
   const envelopeId = props.envelope?.id
-  if (!envelopeId) return null
-  for (const plan of props.plans) {
-    const rule = plan.rules?.find((r: any) => r.envelopeId === envelopeId)
-    if (rule) return { planId: plan.id as string, rule }
-  }
-  return null
-})
-const originalPlanId = ref<string | null>(null)
+  if (!envelopeId) return []
+  return props.plans.flatMap((plan: any) =>
+    (plan.rules ?? [])
+      .filter((r: any) => r.envelopeId === envelopeId)
+      .map((r: any) => ({
+        planId: plan.id as string,
+        allocationType: r.allocationType as PlanAllocationType,
+        fixedAmount: r.fixedAmount?.amount ?? null,
+        percentage: r.percentageValue ?? null
+      }))
+  )
+}
 
 const loadFormFromEnvelope = () => {
   const envelope = props.envelope
   const schedule = parseBillSchedule(envelope)
-  originalPlanId.value = currentRule.value?.planId ?? null
   formData.value = {
     name: envelope?.name || '',
     homeAccountId: envelope?.homeAccountId || props.accountId,
@@ -128,10 +141,8 @@ const loadFormFromEnvelope = () => {
     targetAccountId: envelope?.targetAccountId,
     sharedPercentage: envelope?.sharedPercentage,
     isShared: envelope?.isShared || false,
-    selectedPlanId: originalPlanId.value,
-    planAllocationType: currentRule.value?.rule.allocationType ?? 'FixedAmount',
-    planFixedAmount: currentRule.value?.rule.fixedAmount?.amount ?? null,
-    planPercentage: currentRule.value?.rule.percentageValue ?? null
+    billAutoPay: envelope?.billAutoPay || false,
+    planRules: ruleLinesFromPlans()
   }
 }
 
@@ -139,14 +150,14 @@ watch(() => props.isOpen, (open) => {
   if (open && !props.submitError) loadFormFromEnvelope()
 })
 
-// Suggest the allocation type that fits the envelope once a different plan is picked; the user can change it.
-// The envelope's own plan keeps the allocation it already has (loaded with the form).
-watch(() => formData.value.selectedPlanId, (planId) => {
-  if (!planId || planId === originalPlanId.value) return
-  if (isBillPurpose.value) formData.value.planAllocationType = 'BillProrated'
-  else if (formData.value.isAutomaticWithdrawal) formData.value.planAllocationType = 'Automatic'
-  else formData.value.planAllocationType = 'FixedAmount'
-})
+// A new line starts as a fixed amount: it is the only allocation that can sit beside other plans' rules
+const addPlanRule = () => {
+  formData.value.planRules.push({ planId: null, allocationType: 'FixedAmount', fixedAmount: null, percentage: null })
+}
+
+const removePlanRule = (index: number) => {
+  formData.value.planRules.splice(index, 1)
+}
 
 const isEditing = computed(() => !!props.envelope?.id)
 const isBillPurpose = computed(() => formData.value.purpose === 'Bill')
@@ -159,23 +170,28 @@ const isAnnualSchedule = computed(() => formData.value.scheduleType === 'AnnualS
 
 // Allocation types that fit this envelope: proration is for bills, automatic only with an automatic withdrawal
 // (never for a debt, which is paid by hand)
-const allocationTypes = computed(() => [
-  ...(isBillPurpose.value ? [{ value: 'BillProrated', label: t('envelopes.form.billProrated') }] : []),
-  ...((formData.value.isAutomaticWithdrawal && !isDebtPurpose.value) || formData.value.planAllocationType === 'Automatic'
-    ? [{ value: 'Automatic', label: t('envelopes.form.automatic') }]
-    : []),
-  { value: 'FixedAmount', label: t('envelopes.form.fixedAmount') },
-  { value: 'Percentage', label: t('envelopes.form.percentage') }
-])
+const allocationTypes = computed(() => {
+  const hasAutomaticLine = formData.value.planRules.some(line => line.allocationType === 'Automatic')
+  return [
+    ...(isBillPurpose.value ? [{ value: 'BillProrated', label: t('envelopes.form.billProrated') }] : []),
+    ...((formData.value.isAutomaticWithdrawal && !isDebtPurpose.value) || hasAutomaticLine
+      ? [{ value: 'Automatic', label: t('envelopes.form.automatic') }]
+      : []),
+    { value: 'FixedAmount', label: t('envelopes.form.fixedAmount') },
+    { value: 'Percentage', label: t('envelopes.form.percentage') }
+  ]
+})
 
 // A debt envelope is paid with the pay button, so the options that move money on their own do not apply
 watch(isDebtPurpose, (isDebt) => {
   if (!isDebt) return
   formData.value.isAutomaticWithdrawal = false
   formData.value.linkedEnvelopeId = undefined
-  if (formData.value.planAllocationType === 'BillProrated' || formData.value.planAllocationType === 'Automatic') {
-    formData.value.planAllocationType = 'FixedAmount'
-  }
+  formData.value.planRules.forEach((line) => {
+    if (line.allocationType === 'BillProrated' || line.allocationType === 'Automatic') {
+      line.allocationType = 'FixedAmount'
+    }
+  })
 })
 
 const handleSubmit = () => {
@@ -206,21 +222,35 @@ const handleSubmit = () => {
     return
   }
 
-  if (formData.value.selectedPlanId) {
-    const type = formData.value.planAllocationType
-    if (type === 'BillProrated' && !isBillPurpose.value) {
+  const lines = formData.value.planRules
+  if (lines.some(line => !line.planId)) {
+    validationError.value = t('envelopeForm.errors.planRequired')
+    return
+  }
+  if (new Set(lines.map(line => line.planId)).size !== lines.length) {
+    validationError.value = t('envelopeForm.errors.duplicatePlan')
+    return
+  }
+  // A bill share or automatic withdrawal is computed from the whole target: it cannot share the envelope
+  const isExclusive = (line: PlanRuleLine) => line.allocationType === 'BillProrated' || line.allocationType === 'Automatic'
+  if (lines.some(isExclusive) && lines.length > 1) {
+    validationError.value = t('envelopeForm.errors.exclusivePlan')
+    return
+  }
+  for (const line of lines) {
+    if (line.allocationType === 'BillProrated' && !isBillPurpose.value) {
       validationError.value = t('envelopes.form.errorBillOnly')
       return
     }
-    if (type === 'Automatic' && !formData.value.isAutomaticWithdrawal) {
+    if (line.allocationType === 'Automatic' && !formData.value.isAutomaticWithdrawal) {
       validationError.value = t('envelopes.form.errorAutomaticNeedsOption')
       return
     }
-    if (type === 'FixedAmount' && !(formData.value.planFixedAmount && formData.value.planFixedAmount > 0)) {
+    if (line.allocationType === 'FixedAmount' && !(line.fixedAmount && line.fixedAmount > 0)) {
       validationError.value = t('envelopes.form.errorFixedPositive')
       return
     }
-    if (type === 'Percentage' && !(formData.value.planPercentage && formData.value.planPercentage > 0 && formData.value.planPercentage <= 100)) {
+    if (line.allocationType === 'Percentage' && !(line.percentage && line.percentage > 0 && line.percentage <= 100)) {
       validationError.value = t('envelopes.form.errorPercentageRange')
       return
     }
@@ -249,7 +279,9 @@ const handleClose = () => {
     homeAccountId: props.accountId,
     purpose: 'SavingsGoal',
     isAutomaticWithdrawal: false,
-    isShared: false
+    isShared: false,
+    billAutoPay: false,
+    planRules: []
   }
 }
 
@@ -445,39 +477,56 @@ const withdrawalFrequencies = [
             </div>
           </template>
 
-          <!-- Adds a rule on the chosen distribution plan once the envelope is saved -->
-          <div class="form-group">
-            <label>{{ t('envelopeForm.plan.add') }}</label>
-            <select v-model="formData.selectedPlanId">
-              <option :value="null">{{ t('envelopeForm.plan.none') }}</option>
-              <option v-for="plan in plans" :key="plan.id" :value="plan.id">
-                {{ plan.name }}
-              </option>
-            </select>
+          <!-- Automatic payment of a bill on its due date: paid plans only, as the server checks too -->
+          <div v-if="isBillPurpose && canCustomize" class="form-group">
+            <label>
+              <input v-model="formData.billAutoPay" type="checkbox" />
+              {{ t('envelopeForm.autoPay.label') }}
+            </label>
+            <small class="form-hint">{{ t('envelopeForm.autoPay.hint') }}</small>
           </div>
 
-          <template v-if="formData.selectedPlanId">
+          <!-- Rules from distribution plans: each plan's paycheck adds its share to this envelope once saved -->
+          <template v-for="(line, index) in formData.planRules" :key="index">
+            <div class="form-group">
+              <label>{{ t('envelopeForm.plan.add') }}</label>
+              <select v-model="line.planId">
+                <option :value="null">{{ t('envelopeForm.plan.none') }}</option>
+                <option v-for="plan in plans" :key="plan.id" :value="plan.id">
+                  {{ plan.name }}
+                </option>
+              </select>
+            </div>
+
             <div class="form-group">
               <label>{{ t('envelopes.form.allocationType') }}</label>
-              <select v-model="formData.planAllocationType">
+              <select v-model="line.allocationType">
                 <option v-for="type in allocationTypes" :key="type.value" :value="type.value">{{ type.label }}</option>
               </select>
             </div>
 
-            <div v-if="formData.planAllocationType === 'FixedAmount'" class="form-group">
+            <div v-if="line.allocationType === 'FixedAmount'" class="form-group">
               <label>{{ t('envelopes.form.fixedAmountLabel') }}</label>
-              <input v-model.number="formData.planFixedAmount" type="number" step="0.01" min="0" placeholder="0.00" />
+              <input v-model.number="line.fixedAmount" type="number" step="0.01" min="0" placeholder="0.00" />
             </div>
 
-            <div v-if="formData.planAllocationType === 'Percentage'" class="form-group">
+            <div v-if="line.allocationType === 'Percentage'" class="form-group">
               <label>{{ t('envelopes.form.percentageLabel') }}</label>
-              <input v-model.number="formData.planPercentage" type="number" step="0.01" min="0" max="100" placeholder="0" />
+              <input v-model.number="line.percentage" type="number" step="0.01" min="0" max="100" placeholder="0" />
             </div>
+
+            <button type="button" class="btn-secondary" @click="removePlanRule(index)">
+              {{ t('envelopeForm.plan.remove') }}
+            </button>
           </template>
+
+          <button type="button" class="btn-secondary" @click="addPlanRule">
+            {{ t('envelopeForm.plan.addSource') }}
+          </button>
         </div>
 
-        <!-- Sharing -->
-        <div class="section-divider">
+        <!-- Sharing: only with the Family plan -->
+        <div v-if="canShareWithMembers" class="section-divider">
           <div class="form-group">
             <label>
               <input v-model="formData.isShared" type="checkbox" />

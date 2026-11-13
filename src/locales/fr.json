@@ -1232,6 +1232,9 @@
     },
     "confirmDelete": "Supprimer l'enveloppe « {name} » ? Elle sera aussi retirée des règles de distribution.",
     "errors": {
+      "planRequired": "Choisissez le plan de chaque source de paie, ou retirez la source.",
+      "duplicatePlan": "Un plan ne peut alimenter une même enveloppe qu'une seule fois.",
+      "exclusivePlan": "Une facture répartie ou un retrait automatique doit être la seule source de l'enveloppe.",
       "nameRequired": "Le nom est requis",
       "billScheduleRequired": "Le type de calendrier est requis pour une facture",
       "annualDatesRequired": "Au moins une date de paiement est requise pour un calendrier annuel",
@@ -1303,8 +1306,14 @@
       "SemiAnnual": "Semestriel",
       "Annual": "Annuel"
     },
+    "autoPay": {
+      "label": "Payer automatiquement à l'échéance",
+      "hint": "À la date d'échéance, la facture est payée à partir de l'enveloppe si le solde couvre le montant cible. Sinon, rien n'est payé et un courriel t'avertit."
+    },
     "plan": {
       "add": "Ajouter à un plan de distribution",
+      "addSource": "+ Ajouter une autre source de paie",
+      "remove": "Retirer cette source",
       "none": "-- Aucun --"
     },
     "share": {
