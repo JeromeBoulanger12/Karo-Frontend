@@ -83,6 +83,11 @@ export const accountsApi = {
     return client.put(`/accounts/${id}/balance-snapshots/${snapshotId}`, body)
   },
 
+  // Moves money from this account to another (chequing, savings or investment only)
+  transfer(id: string, body: { toAccountId: string; amount: number; note?: string }) {
+    return client.post(`/accounts/${id}/transfer`, body)
+  },
+
   deleteBalanceSnapshot(id: string, snapshotId: string) {
     return client.delete(`/accounts/${id}/balance-snapshots/${snapshotId}`)
   },

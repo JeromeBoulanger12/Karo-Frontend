@@ -6,7 +6,7 @@ import AccountBalanceChart from './AccountBalanceChart.vue'
 import AccountSparkline from './AccountSparkline.vue'
 import { useI18n } from 'vue-i18n'
 import type { EnvelopeSummary } from '../utils/envelopes'
-import { accountTypeKey, isCreditAccount, showsSurplus } from '../utils/accounts'
+import { accountTypeKey, canTransferBetween, isCreditAccount, showsSurplus } from '../utils/accounts'
 
 interface Account {
   id: string
@@ -51,6 +51,7 @@ const emit = defineEmits<{
   'withdraw-envelope': [envelope: EnvelopeSummary]
   'edit-account': [account: Account]
   'edit-balance': [account: Account]
+  'transfer-account': [account: Account]
   'view-history': [account: Account]
   'reorder-envelopes': [accountId: string, envelopeIds: string[]]
 }>()
@@ -112,6 +113,9 @@ const accountBalance = computed(() => {
 const isCredit = computed(() => isCreditAccount(props.account.type))
 
 const showSurplus = computed(() => showsSurplus(props.account.type))
+
+// No transfer for a credit card or another debt account
+const canTransfer = computed(() => canTransferBetween(props.account.type))
 
 // The account type in the user's language; an unknown type is shown as it is
 const typeLabel = computed(() => {
@@ -231,6 +235,9 @@ const toggleExpand = () => {
         <div class="balance-actions">
           <button class="btn-adjust-balance" @click.stop="emit('edit-balance', account)">
             {{ t('dashboard.account.adjustBalance') }}
+          </button>
+          <button v-if="canTransfer" class="btn-adjust-balance" @click.stop="emit('transfer-account', account)">
+            {{ t('dashboard.account.transfer') }}
           </button>
           <button v-if="canShowHistory" class="btn-adjust-balance" @click.stop="emit('view-history', account)">
             {{ t('dashboard.account.history') }}

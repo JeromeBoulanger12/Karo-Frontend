@@ -675,6 +675,7 @@
     "account": {
       "balance": "Solde",
       "adjustBalance": "Ajuster le solde",
+      "transfer": "Transférer",
       "balanceToday": "Solde mis à jour aujourd'hui",
       "balanceDaysAgo": "Solde mis à jour il y a {days} j",
       "balanceNone": "Aucun solde enregistré",
@@ -1177,6 +1178,24 @@
     "errors": {
       "interestRequired": "Le taux d’intérêt annuel est requis",
       "minimumNegative": "Le paiement minimum ne peut pas être négatif"
+    }
+  },
+  "accountTransfer": {
+    "title": "Transférer vers un autre compte",
+    "from": "Depuis : {name}",
+    "available": "Solde disponible :",
+    "to": "Vers le compte",
+    "chooseDestination": "Choisir un compte",
+    "amount": "Montant",
+    "note": "Note (optionnel)",
+    "notePlaceholder": "Ex. : épargne vacances",
+    "hint": "Les deux soldes sont mis à jour. Les enveloppes ne changent pas. Transferts possibles seulement entre comptes chèques, épargne et placement (pas de carte de crédit ni de dette).",
+    "noDestination": "Aucun autre compte chèques, épargne ou placement pour recevoir l'argent.",
+    "submit": "Transférer",
+    "errors": {
+      "destinationRequired": "Choisissez le compte qui reçoit l'argent.",
+      "amountPositive": "Le montant doit être supérieur à 0.",
+      "insufficient": "Solde insuffisant : {amount} disponibles."
     }
   },
   "accountBalance": {

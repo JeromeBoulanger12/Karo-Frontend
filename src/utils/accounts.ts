@@ -19,6 +19,12 @@ export function accountTypeKey(type: string | null | undefined): string | null {
   return ACCOUNT_TYPE_KEYS[(type ?? '').toLowerCase()] ?? null
 }
 
+// Money can move between chequing, savings and investment accounts; a credit card, line of credit or
+// mortgage holds a debt, which is paid from a debt envelope instead
+export function canTransferBetween(type: string | null | undefined): boolean {
+  return ['Checking', 'Savings', 'Investment'].includes(accountTypeKey(type) ?? '')
+}
+
 // The surplus (balance minus envelopes) means something for a chequing or investment account only
 export function showsSurplus(type: string | null | undefined): boolean {
   if (isCreditAccount(type)) return false

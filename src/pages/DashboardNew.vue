@@ -11,6 +11,7 @@ import EnvelopeFormModal from '../components/EnvelopeFormModal.vue'
 import AccountFormModal from '../components/AccountFormModal.vue'
 import AccountBalanceModal from '../components/AccountBalanceModal.vue'
 import AccountHistoryModal from '../components/AccountHistoryModal.vue'
+import AccountTransferModal from '../components/AccountTransferModal.vue'
 import TransferEnvelopeModal from '../components/TransferEnvelopeModal.vue'
 import EnvelopeActionModal from '../components/EnvelopeActionModal.vue'
 import PayBillModal from '../components/PayBillModal.vue'
@@ -84,6 +85,8 @@ const currentAccountIdForEnvelope = ref<string>('')
 const currentAccountIdForJob = ref<string>('')
 const selectedJobForDeposit = ref<any>(null)
 const selectedAccountForBalance = ref<any>(null)
+const showAccountTransferModal = ref(false)
+const selectedTransferAccount = ref<any>(null)
 // Balance history per account id, from the dashboard overview
 const accountHistory = ref<Record<string, { capturedAt: string; amount: { amount: number; currency: string } }[]>>({})
 
@@ -729,6 +732,24 @@ const handleAccountBalanceSave = async (payload: { balance: number; note?: strin
   }
 }
 
+// Transfer between two accounts (e.g. chequing to savings): both balances change, the envelopes do not
+const openAccountTransferModal = (account: any) => {
+  submitError.value = ''
+  selectedTransferAccount.value = account
+  showAccountTransferModal.value = true
+}
+
+const handleAccountTransfer = async (payload: { toAccountId: string; amount: number; note?: string }) => {
+  showAccountTransferModal.value = false
+  try {
+    await accountsApi.transfer(selectedTransferAccount.value.id, payload)
+    await loadDashboard()
+  } catch (err) {
+    console.error('Error transferring between accounts:', err)
+    reopenWithError(err, t('dashboard.errors.save'), () => (showAccountTransferModal.value = true))
+  }
+}
+
 onMounted(() => {
   loadDashboard()
 })
@@ -832,6 +853,7 @@ onMounted(() => {
             @edit-envelope="openEditEnvelopeModal($event)"
             @edit-account="openEditAccountModal($event)"
             @edit-balance="openAccountBalanceModal($event)"
+            @transfer-account="openAccountTransferModal($event)"
             @view-history="openAccountHistoryModal($event)"
             @reorder-envelopes="handleEnvelopeReorder"
           />
@@ -895,6 +917,15 @@ onMounted(() => {
       :account="selectedAccountForBalance"
       @close="showAccountBalanceModal = false"
       @save="handleAccountBalanceSave"
+    />
+
+    <AccountTransferModal
+      :isOpen="showAccountTransferModal"
+      :submitError="submitError"
+      :account="selectedTransferAccount"
+      :accounts="accounts"
+      @close="showAccountTransferModal = false"
+      @save="handleAccountTransfer"
     />
 
     <AccountHistoryModal
