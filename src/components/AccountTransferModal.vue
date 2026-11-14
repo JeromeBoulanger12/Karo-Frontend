@@ -18,11 +18,14 @@ const props = withDefaults(defineProps<{
   // The account the money leaves
   account?: Account | null
   accounts?: Account[]
+  // The source's balance minus its envelopes: only this part can be transferred
+  surplus?: number | null
 }>(), {
   isOpen: false,
   submitError: '',
   account: null,
-  accounts: () => []
+  accounts: () => [],
+  surplus: null
 })
 
 const emit = defineEmits<{
@@ -47,6 +50,10 @@ const destinations = computed(() =>
 const destination = computed(() => destinations.value.find(a => a.id === toAccountId.value) ?? null)
 
 const sourceBalance = computed(() => balanceOf(props.account))
+// The money in the envelopes is already planned: only the surplus can leave the account
+const available = computed(() => Math.max(0, Math.min(props.surplus ?? 0, sourceBalance.value)))
+const hasSurplus = computed(() => available.value > 0)
+const canSubmit = computed(() => hasSurplus.value && destinations.value.length > 0)
 const roundedAmount = computed(() => Math.round((amount.value || 0) * 100) / 100)
 
 // Start each fresh transfer empty; keep what was typed when reopened after an error. With a single
@@ -69,8 +76,8 @@ const handleSubmit = () => {
     validationError.value = t('accountTransfer.errors.amountPositive')
     return
   }
-  if (roundedAmount.value > sourceBalance.value) {
-    validationError.value = t('accountTransfer.errors.insufficient', { amount: formatCurrency(sourceBalance.value) })
+  if (roundedAmount.value > available.value) {
+    validationError.value = t('accountTransfer.errors.insufficient', { amount: formatCurrency(available.value) })
     return
   }
   emit('save', { toAccountId: destination.value.id, amount: roundedAmount.value, note: note.value.trim() || undefined })
@@ -100,11 +107,15 @@ const formatCurrency = (value: number) => {
         <div class="account-info">
           <p class="account-name">{{ t('accountTransfer.from', { name: account?.name }) }}</p>
           <p class="account-current">
-            {{ t('accountTransfer.available') }} <strong>{{ formatCurrency(sourceBalance) }}</strong>
+            {{ t('accountTransfer.balance') }} <strong>{{ formatCurrency(sourceBalance) }}</strong>
+          </p>
+          <p class="account-current">
+            {{ t('accountTransfer.available') }} <strong>{{ formatCurrency(available) }}</strong>
           </p>
         </div>
 
-        <p v-if="destinations.length === 0" class="hint">{{ t('accountTransfer.noDestination') }}</p>
+        <p v-if="!hasSurplus" class="error-message">{{ t('accountTransfer.noSurplus') }}</p>
+        <p v-else-if="destinations.length === 0" class="hint">{{ t('accountTransfer.noDestination') }}</p>
 
         <template v-else>
           <div class="form-group">
@@ -146,7 +157,7 @@ const formatCurrency = (value: number) => {
 
       <div class="modal-footer">
         <button class="btn-secondary" @click="emit('close')">{{ t('common.cancel') }}</button>
-        <button class="btn-primary" :disabled="destinations.length === 0" @click="handleSubmit">
+        <button class="btn-primary" :disabled="!canSubmit" @click="handleSubmit">
           {{ t('accountTransfer.submit') }}
         </button>
       </div>

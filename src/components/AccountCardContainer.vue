@@ -114,8 +114,8 @@ const isCredit = computed(() => isCreditAccount(props.account.type))
 
 const showSurplus = computed(() => showsSurplus(props.account.type))
 
-// No transfer for a credit card or another debt account
-const canTransfer = computed(() => canTransferBetween(props.account.type))
+// Transfers are a paid-tier feature, and never from a credit card or another debt account
+const canTransfer = computed(() => !!subscriptionFeatures.value.allowPlanning && canTransferBetween(props.account.type))
 
 // The account type in the user's language; an unknown type is shown as it is
 const typeLabel = computed(() => {

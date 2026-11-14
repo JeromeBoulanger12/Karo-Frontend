@@ -924,6 +924,7 @@ onMounted(() => {
       :submitError="submitError"
       :account="selectedTransferAccount"
       :accounts="accounts"
+      :surplus="accountSurpluses.find(s => s.id === selectedTransferAccount?.id)?.amount ?? null"
       @close="showAccountTransferModal = false"
       @save="handleAccountTransfer"
     />

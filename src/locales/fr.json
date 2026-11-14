@@ -1183,19 +1183,21 @@
   "accountTransfer": {
     "title": "Transférer vers un autre compte",
     "from": "Depuis : {name}",
-    "available": "Solde disponible :",
+    "balance": "Solde du compte :",
+    "available": "Surplus transférable :",
+    "noSurplus": "Ce compte n'a pas de surplus : l'argent du solde est déjà réservé dans ses enveloppes. Un transfert est possible seulement quand le solde dépasse le total des enveloppes.",
     "to": "Vers le compte",
     "chooseDestination": "Choisir un compte",
     "amount": "Montant",
     "note": "Note (optionnel)",
     "notePlaceholder": "Ex. : épargne vacances",
-    "hint": "Les deux soldes sont mis à jour. Les enveloppes ne changent pas. Transferts possibles seulement entre comptes chèques, épargne et placement (pas de carte de crédit ni de dette).",
+    "hint": "Seul le surplus (solde moins les enveloppes) peut être transféré. Les deux soldes sont mis à jour, les enveloppes ne changent pas. Transferts possibles seulement entre comptes chèques, épargne et placement (pas de carte de crédit ni de dette).",
     "noDestination": "Aucun autre compte chèques, épargne ou placement pour recevoir l'argent.",
     "submit": "Transférer",
     "errors": {
       "destinationRequired": "Choisissez le compte qui reçoit l'argent.",
       "amountPositive": "Le montant doit être supérieur à 0.",
-      "insufficient": "Solde insuffisant : {amount} disponibles."
+      "insufficient": "Le montant dépasse le surplus du compte : {amount} transférables."
     }
   },
   "accountBalance": {

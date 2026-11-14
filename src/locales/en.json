@@ -1099,19 +1099,21 @@
   "accountTransfer": {
     "title": "Transfer to another account",
     "from": "From: {name}",
-    "available": "Available balance:",
+    "balance": "Account balance:",
+    "available": "Transferable surplus:",
+    "noSurplus": "This account has no surplus: its balance is already set aside in its envelopes. A transfer is only possible when the balance is above the envelopes' total.",
     "to": "To account",
     "chooseDestination": "Choose an account",
     "amount": "Amount",
     "note": "Note (optional)",
     "notePlaceholder": "E.g. vacation savings",
-    "hint": "Both balances are updated. Envelopes do not change. Transfers only between chequing, savings and investment accounts (no credit card or debt).",
+    "hint": "Only the surplus (balance minus envelopes) can be transferred. Both balances are updated, envelopes do not change. Transfers only between chequing, savings and investment accounts (no credit card or debt).",
     "noDestination": "No other chequing, savings or investment account to receive the money.",
     "submit": "Transfer",
     "errors": {
       "destinationRequired": "Choose the account that receives the money.",
       "amountPositive": "The amount must be greater than 0.",
-      "insufficient": "Insufficient balance: {amount} available."
+      "insufficient": "The amount is above the account's surplus: {amount} can be transferred."
     }
   },
   "accountBalance": {
