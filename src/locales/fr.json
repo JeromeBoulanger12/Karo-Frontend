@@ -1048,54 +1048,90 @@
   },
   "onboarding": {
     "title": "Bienvenue sur Karo",
-    "intro": "Configurons ensemble les bases de votre budget. Vous pourrez tout modifier ensuite.",
+    "intro": "En quelques minutes : votre compte, votre paie et les enveloppes qu'elle remplit. Vous pourrez tout modifier ensuite.",
     "skipAll": "Passer la configuration",
     "skipStep": "Passer cette étape",
     "next": "Suivant",
     "saving": "Enregistrement...",
     "goToDashboard": "Aller au tableau de bord",
     "steps": {
+      "howItWorks": "Comment ça marche",
       "account": "Compte",
       "job": "Paie",
-      "envelope": "Enveloppe",
+      "envelope": "Enveloppes",
       "summary": "Résumé"
     },
     "defaults": {
       "account": "Compte principal",
       "job": "Emploi principal",
-      "envelope": "Épicerie"
+      "envelope": "Épicerie",
+      "bill": "Loyer",
+      "groceries": "Épicerie",
+      "savings": "Épargne"
     },
     "account": {
       "title": "Votre compte bancaire",
-      "description": "Le compte où votre paie est déposée, par exemple votre compte chèques.",
+      "description": "Le compte où votre paie est déposée, en général votre compte chèques.",
       "name": "Nom du compte",
       "type": "Type de compte",
       "types": {
         "checking": "Compte chèques",
         "savings": "Compte épargne"
-      }
+      },
+      "balance": "Solde actuel",
+      "balanceHint": "Le solde affiché aujourd'hui dans votre application bancaire. Sans lui, le surplus ne peut pas être calculé."
     },
     "job": {
       "title": "Votre paie",
-      "description": "Le plan de répartition de votre revenu, à partir de la fréquence de vos paies.",
+      "description": "Votre revenu : à quelle fréquence il arrive, et quand.",
       "name": "Nom du revenu",
       "frequency": "Fréquence de paie",
       "homeAccount": "Compte de dépôt",
       "chooseAccount": "Choisir un compte",
-      "setMain": "Marquer comme revenu principal"
+      "setMain": "Marquer comme revenu principal",
+      "nextPayday": "Date de la prochaine paie",
+      "amount": "Montant habituel d'une paie (net)",
+      "amountHint": "Sert à vous montrer le surplus à la fin. Chaque paie réelle se dépose ensuite depuis le tableau de bord."
     },
     "envelope": {
-      "title": "Votre première enveloppe",
-      "description": "Une enveloppe réserve de l'argent pour un usage précis, comme l'épicerie ou un objectif d'épargne.",
-      "name": "Nom de l’enveloppe",
-      "purpose": "Objectif",
+      "title": "Vos enveloppes",
+      "description": "Indiquez ce que chaque paie doit mettre de côté. Laissez le montant vide pour ne pas créer une enveloppe.",
+      "noJob": "Vous avez passé l'étape de la paie : les enveloppes seront créées sans être reliées à une paie. Vous pourrez les relier depuis le tableau de bord.",
+      "name": "Nom de l'enveloppe",
+      "purpose": "Type",
+      "account": "Compte",
+      "remove": "Retirer",
+      "addLine": "Ajouter une enveloppe",
+      "dayOfMonth": "Jour de l'échéance",
+      "targetDate": "Date visée",
       "target": "Montant cible (optionnel)",
-      "account": "Compte"
+      "amountLabels": {
+        "Bill": "Montant de la facture (par mois)",
+        "WeeklyExpenses": "Montant par paie",
+        "SavingsGoal": "Montant à atteindre",
+        "GeneralReserve": "Montant par paie"
+      },
+      "explain": {
+        "Bill": "Karo met une part de la facture à chaque paie pour qu'elle soit couverte le jour de l'échéance.",
+        "WeeklyExpenses": "Ce montant est ajouté à l'enveloppe à chaque paie.",
+        "SavingsGoal": "Karo divise ce qui manque par le nombre de paies jusqu'à la date visée.",
+        "GeneralReserve": "Ce montant est ajouté à l'enveloppe à chaque paie."
+      }
     },
     "summary": {
-      "title": "C’est prêt !",
-      "description": "Voici ce qui a été créé. Vous pouvez ajouter le reste depuis le tableau de bord.",
-      "notCreated": "Non créé"
+      "title": "C'est prêt !",
+      "description": "Voici ce qui a été créé.",
+      "notCreated": "Non créé",
+      "splitTitle": "Une paie, répartie",
+      "paycheck": "Paie",
+      "about": "≈ {amount}",
+      "surplus": "Surplus (argent libre)",
+      "deficit": "Manque",
+      "estimateHint": "Estimation : pour les factures et les objectifs, Karo recalcule la part exacte à chaque paie.",
+      "nextTitle": "Et ensuite ?",
+      "nextDeposit": "Le {date}, déposez votre paie depuis le tableau de bord : elle remplira vos enveloppes.",
+      "nextBalance": "Gardez le solde de vos comptes à jour avec « Ajuster le solde ».",
+      "nextHelp": "Les « ? » à côté des mots expliquent chaque outil. La carte « Premiers pas » vous guide aussi."
     },
     "frequencies": {
       "weekly": "Chaque semaine",
@@ -1107,7 +1143,22 @@
     "errors": {
       "generic": "Une erreur est survenue. Réessayez.",
       "nameRequired": "Le nom est requis.",
-      "accountRequired": "Choisissez un compte de dépôt."
+      "accountRequired": "Choisissez un compte de dépôt.",
+      "paydayRequired": "Indiquez la date de la prochaine paie.",
+      "billDayRequired": "« {name} » : indiquez le jour de l'échéance (1 à 31).",
+      "goalDateRequired": "« {name} » : indiquez une date visée dans le futur."
+    },
+    "start": "Commencer",
+    "howItWorks": {
+      "title": "Comment fonctionne Karo",
+      "accountTitle": "1. Votre compte contient l'argent réel",
+      "account": "Vous entrez son solde, comme dans votre application bancaire.",
+      "paycheckTitle": "2. Chaque paie se répartit",
+      "paycheck": "Quand une paie arrive, Karo la divise entre vos enveloppes selon les règles que vous choisissez.",
+      "envelopesTitle": "3. Les enveloppes réservent l'argent",
+      "envelopes": "Une enveloppe met de côté l'argent d'un usage : le loyer, l'épicerie, un voyage. Pour une facture, Karo calcule la part à mettre à chaque paie pour qu'elle soit couverte à l'échéance.",
+      "surplusTitle": "4. Le surplus, c'est l'argent libre",
+      "surplus": "Solde du compte moins les enveloppes. En vert, vous pouvez le dépenser ou l'épargner. En rouge (déficit), vos enveloppes réservent plus que ce que vous avez."
     }
   },
   "faq": {
@@ -1142,7 +1193,7 @@
       },
       "transferWithdraw": {
         "question": "Quelle différence entre Transférer et Retirer ?",
-        "answer": "Transférer déplace de l'argent d'une enveloppe vers une autre, dans la même devise. Retirer sort l'argent de l'enveloppe sans changer le solde du compte ; cochez « dépense imprévue » pour une dépense non planifiée."
+        "answer": "Transférer (sur une enveloppe) déplace de l'argent d'une enveloppe vers une autre. Retirer sort l'argent de l'enveloppe sans changer le solde du compte ; cochez « dépense imprévue » pour une dépense non planifiée. Pour déplacer de l'argent entre deux comptes, utilisez « Transférer » sur le compte."
       },
       "debt": {
         "question": "Pourquoi je ne peux pas retirer d'une enveloppe de dette ?",
@@ -1150,7 +1201,39 @@
       },
       "sharing": {
         "question": "Comment partager une enveloppe avec mon ménage ?",
-        "answer": "Activez l'option « partageable » sur l'enveloppe. Les autres membres du ménage peuvent alors la voir et la lier à leur propre enveloppe."
+        "answer": "Avec le forfait Famille, cochez « Partager avec les membres du ménage » dans le formulaire de l'enveloppe et indiquez la part payée par l'autre personne."
+      },
+      "howItWorks": {
+        "question": "Comment fonctionne Karo ?",
+        "answer": "Votre compte contient l'argent réel. Chaque paie déposée se répartit entre vos enveloppes selon les règles choisies. Les enveloppes réservent l'argent pour un usage. Ce qui reste (solde moins enveloppes) est votre surplus, l'argent libre."
+      },
+      "surplus": {
+        "question": "Qu'est-ce que le surplus ou le déficit ?",
+        "answer": "Le surplus est le solde du compte moins le total de ses enveloppes : l'argent qui n'est réservé à rien. Un déficit veut dire que les enveloppes réservent plus que le solde. Gardez le solde à jour avec « Ajuster le solde » pour qu'il soit juste."
+      },
+      "billShare": {
+        "question": "Comment fonctionne la « part de la facture à chaque paie » ?",
+        "answer": "Karo prend ce qui manque à l'enveloppe pour couvrir la facture et le divise par le nombre de paies avant l'échéance. Le calcul est refait à chaque paie : si vous ajoutez de l'argent vous-même, les parts suivantes baissent."
+      },
+      "goalShare": {
+        "question": "Comment fonctionne la « part de l'objectif à chaque paie » ?",
+        "answer": "Pour un objectif d'épargne avec un montant et une date, Karo divise ce qui manque par le nombre de paies jusqu'à la date. Le montant est recalculé à chaque paie."
+      },
+      "paycheckPreview": {
+        "question": "Que montrent le total prélevé et le surplus d'une paie ?",
+        "answer": "Sur la carte d'un emploi, chaque règle affiche ce que la prochaine paie mettra dans l'enveloppe. Le total est la somme, et le surplus est la paie moins ce total. Un « Manque » veut dire que les règles demandent plus que la paie. Offert avec un abonnement payant."
+      },
+      "withdrawal": {
+        "question": "Qu'est-ce que le prélèvement à chaque paie ?",
+        "answer": "Pour un paiement qui sort automatiquement de votre compte (abonnement, assurance), l'enveloppe reçoit son montant à chaque paie, puis le prélèvement le retire quand vous le cochez au dépôt de la paie."
+      },
+      "autoPay": {
+        "question": "Qu'est-ce que le paiement automatique de la facture ?",
+        "answer": "Le jour de l'échéance, Karo paie la facture à partir de son enveloppe si elle contient assez d'argent : l'enveloppe et le solde du compte baissent. Offert avec un abonnement payant."
+      },
+      "accountTransfer": {
+        "question": "Comment transférer de l'argent d'un compte à l'autre ?",
+        "answer": "Avec le bouton « Transférer » d'un compte chèques, épargne ou placement (abonnement payant). Seul le surplus peut être transféré : l'argent des enveloppes est déjà réservé. Les deux soldes changent, les enveloppes non. Pas de transfert avec une carte de crédit ou une dette."
       }
     }
   },
@@ -1684,6 +1767,57 @@
       "statusFallback": "actif",
       "billingPeriodFallback": "mois",
       "freePlanNote": "Vous êtes sur le plan gratuit"
+    }
+  },
+  "helpTips": {
+    "label": "Aide",
+    "more": "En savoir plus",
+    "surplus": "Solde du compte moins le total de ses enveloppes. En vert : de l'argent libre. En rouge : les enveloppes réservent plus que le solde.",
+    "paycheckSplit": "Ce que chaque paie de cet emploi met dans vos enveloppes. On relie une enveloppe à une paie dans le formulaire de l'enveloppe.",
+    "paycheckPreview": "La somme que les règles prennent sur la prochaine paie. Le surplus est ce qui reste de la paie.",
+    "allocationType": "Comment la paie remplit cette enveloppe : part de la facture ou de l'objectif (calculée par Karo), montant fixe ou pourcentage de la paie.",
+    "funding": "D'où vient l'argent de l'enveloppe : une ou plusieurs paies, chacune avec sa règle.",
+    "withdrawal": "Pour un paiement qui sort tout seul de votre compte : l'enveloppe reçoit le montant à chaque paie, puis le prélèvement le retire.",
+    "autoPay": "Le jour de l'échéance, Karo paie la facture à partir de l'enveloppe si elle contient assez d'argent.",
+    "transferSurplus": "Seul l'argent libre (solde moins enveloppes) peut être transféré.",
+    "expectedIncome": "La dernière paie de chaque emploi (ou sa paie fixe) multipliée par le nombre de paies dans un mois."
+  },
+  "gettingStarted": {
+    "title": "Premiers pas",
+    "intro": "Six étapes pour que Karo répartisse vos paies. Elles se cochent toutes seules.",
+    "progress": "{done} sur {total}",
+    "dismiss": "Masquer",
+    "items": {
+      "account": {
+        "title": "Ajouter votre compte",
+        "why": "Le compte où votre paie est déposée.",
+        "action": "Ajouter"
+      },
+      "balance": {
+        "title": "Entrer le solde du compte",
+        "why": "Sans solde, le surplus ne veut rien dire.",
+        "action": "Entrer le solde"
+      },
+      "job": {
+        "title": "Ajouter votre paie",
+        "why": "Sa fréquence et sa date permettent de calculer les parts.",
+        "action": "Ajouter"
+      },
+      "envelope": {
+        "title": "Créer une enveloppe",
+        "why": "Pour réserver l'argent d'un usage : loyer, épicerie, épargne.",
+        "action": "Créer"
+      },
+      "link": {
+        "title": "Relier une enveloppe à votre paie",
+        "why": "Dans l'enveloppe, « Ajouter une autre source de paie » : chaque paie la remplit.",
+        "action": "Relier"
+      },
+      "deposit": {
+        "title": "Déposer une première paie",
+        "why": "La paie se répartit dans vos enveloppes.",
+        "action": "Déposer"
+      }
     }
   }
 }

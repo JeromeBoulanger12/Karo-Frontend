@@ -964,54 +964,90 @@
   },
   "onboarding": {
     "title": "Welcome to Karo",
-    "intro": "Let's set up the basics of your budget together. You can change everything later.",
+    "intro": "In a few minutes: your account, your pay and the envelopes it fills. You can change everything later.",
     "skipAll": "Skip setup",
     "skipStep": "Skip this step",
     "next": "Next",
     "saving": "Saving...",
     "goToDashboard": "Go to the dashboard",
     "steps": {
+      "howItWorks": "How it works",
       "account": "Account",
       "job": "Pay",
-      "envelope": "Envelope",
+      "envelope": "Envelopes",
       "summary": "Summary"
     },
     "defaults": {
       "account": "Main account",
       "job": "Main job",
-      "envelope": "Groceries"
+      "envelope": "Groceries",
+      "bill": "Rent",
+      "groceries": "Groceries",
+      "savings": "Savings"
     },
     "account": {
       "title": "Your bank account",
-      "description": "The account where your pay is deposited, for example your checking account.",
+      "description": "The account your pay is deposited into, usually your chequing account.",
       "name": "Account name",
       "type": "Account type",
       "types": {
         "checking": "Checking",
         "savings": "Savings"
-      }
+      },
+      "balance": "Current balance",
+      "balanceHint": "The balance shown today in your banking app. Without it, the surplus cannot be worked out."
     },
     "job": {
       "title": "Your pay",
-      "description": "How your income is split, based on how often you get paid.",
+      "description": "Your income: how often it comes in, and when.",
       "name": "Income name",
       "frequency": "Pay frequency",
       "homeAccount": "Deposit account",
       "chooseAccount": "Choose an account",
-      "setMain": "Mark as main income"
+      "setMain": "Mark as main income",
+      "nextPayday": "Next payday",
+      "amount": "Usual amount of a paycheck (net)",
+      "amountHint": "Used to show you the surplus at the end. Each real paycheck is then deposited from the dashboard."
     },
     "envelope": {
-      "title": "Your first envelope",
-      "description": "An envelope sets money aside for one purpose, like groceries or a savings goal.",
+      "title": "Your envelopes",
+      "description": "Say what each paycheck should set aside. Leave the amount empty to skip an envelope.",
+      "noJob": "You skipped the pay step: the envelopes will be created without a paycheck. You can link them from the dashboard.",
       "name": "Envelope name",
-      "purpose": "Purpose",
+      "purpose": "Type",
+      "account": "Account",
+      "remove": "Remove",
+      "addLine": "Add an envelope",
+      "dayOfMonth": "Due day of the month",
+      "targetDate": "Target date",
       "target": "Target amount (optional)",
-      "account": "Account"
+      "amountLabels": {
+        "Bill": "Bill amount (per month)",
+        "WeeklyExpenses": "Amount per paycheck",
+        "SavingsGoal": "Amount to reach",
+        "GeneralReserve": "Amount per paycheck"
+      },
+      "explain": {
+        "Bill": "Karo puts a share of the bill in on each paycheck so it is covered on the due date.",
+        "WeeklyExpenses": "This amount is added to the envelope on each paycheck.",
+        "SavingsGoal": "Karo divides what is missing by the paychecks left until the target date.",
+        "GeneralReserve": "This amount is added to the envelope on each paycheck."
+      }
     },
     "summary": {
       "title": "All set!",
-      "description": "Here is what was created. You can add the rest from the dashboard.",
-      "notCreated": "Not created"
+      "description": "Here is what was created.",
+      "notCreated": "Not created",
+      "splitTitle": "One paycheck, split",
+      "paycheck": "Paycheck",
+      "about": "≈ {amount}",
+      "surplus": "Surplus (free money)",
+      "deficit": "Shortfall",
+      "estimateHint": "Estimate: for bills and goals, Karo recalculates the exact share on each paycheck.",
+      "nextTitle": "What next?",
+      "nextDeposit": "On {date}, deposit your paycheck from the dashboard: it will fill your envelopes.",
+      "nextBalance": "Keep your account balances up to date with « Adjust balance ».",
+      "nextHelp": "The « ? » beside words explain each tool. The « Getting started » card guides you too."
     },
     "frequencies": {
       "weekly": "Every week",
@@ -1023,7 +1059,22 @@
     "errors": {
       "generic": "Something went wrong. Please try again.",
       "nameRequired": "The name is required.",
-      "accountRequired": "Choose a deposit account."
+      "accountRequired": "Choose a deposit account.",
+      "paydayRequired": "Enter the next payday.",
+      "billDayRequired": "« {name} »: enter the due day (1 to 31).",
+      "goalDateRequired": "« {name} »: enter a target date in the future."
+    },
+    "start": "Start",
+    "howItWorks": {
+      "title": "How Karo works",
+      "accountTitle": "1. Your account holds the real money",
+      "account": "You enter its balance, as shown in your banking app.",
+      "paycheckTitle": "2. Each paycheck is split",
+      "paycheck": "When a paycheck comes in, Karo divides it between your envelopes, following the rules you choose.",
+      "envelopesTitle": "3. Envelopes set money aside",
+      "envelopes": "An envelope sets aside the money for one use: rent, groceries, a trip. For a bill, Karo works out the share to put in on each paycheck so it is covered by the due date.",
+      "surplusTitle": "4. The surplus is your free money",
+      "surplus": "The account balance minus the envelopes. In green, you can spend or save it. In red (deficit), your envelopes set aside more than you have."
     }
   },
   "faq": {
@@ -1058,7 +1109,7 @@
       },
       "transferWithdraw": {
         "question": "What is the difference between Transfer and Withdraw?",
-        "answer": "Transfer moves money from one envelope to another in the same currency. Withdraw takes money out of the envelope without changing the account balance; tick \"unexpected expense\" for an expense you did not plan."
+        "answer": "Transfer (on an envelope) moves money from one envelope to another. Withdraw takes money out of the envelope without changing the account balance; tick « unexpected expense » for an unplanned expense. To move money between two accounts, use « Transfer » on the account."
       },
       "debt": {
         "question": "Why can I not withdraw from a debt envelope?",
@@ -1066,7 +1117,39 @@
       },
       "sharing": {
         "question": "How do I share an envelope with my household?",
-        "answer": "Turn on the \"shareable\" option on the envelope. Other household members can then see it and link it to their own envelope."
+        "answer": "With the Family plan, tick « Share with household members » in the envelope form and enter the share paid by the other person."
+      },
+      "howItWorks": {
+        "question": "How does Karo work?",
+        "answer": "Your account holds the real money. Each paycheck you deposit is split between your envelopes following the rules you chose. Envelopes set money aside for one use. What is left (balance minus envelopes) is your surplus, the free money."
+      },
+      "surplus": {
+        "question": "What is the surplus or the deficit?",
+        "answer": "The surplus is the account balance minus the total of its envelopes: money set aside for nothing. A deficit means the envelopes set aside more than the balance. Keep the balance up to date with « Adjust balance » so it stays right."
+      },
+      "billShare": {
+        "question": "How does the « share of the bill each paycheck » work?",
+        "answer": "Karo takes what the envelope still lacks to cover the bill and divides it by the paychecks left before the due date. It is recalculated on each paycheck: if you add money yourself, the next shares go down."
+      },
+      "goalShare": {
+        "question": "How does the « share of the goal each paycheck » work?",
+        "answer": "For a savings goal with an amount and a date, Karo divides what is missing by the paychecks left until the date. It is recalculated on each paycheck."
+      },
+      "paycheckPreview": {
+        "question": "What do the total taken and the surplus of a paycheck show?",
+        "answer": "On a job's card, each rule shows what the next paycheck will put in the envelope. The total is the sum, and the surplus is the paycheck minus that total. A « Shortfall » means the rules ask for more than the paycheck. Comes with a paid plan."
+      },
+      "withdrawal": {
+        "question": "What is the withdrawal on each paycheck?",
+        "answer": "For a payment taken from your account automatically (subscription, insurance), the envelope gets its amount on each paycheck, then the withdrawal takes it out when you tick it while depositing the paycheck."
+      },
+      "autoPay": {
+        "question": "What is the automatic payment of a bill?",
+        "answer": "On the due date, Karo pays the bill from its envelope if it holds enough money: the envelope and the account balance go down. Comes with a paid plan."
+      },
+      "accountTransfer": {
+        "question": "How do I move money from one account to another?",
+        "answer": "With the « Transfer » button of a chequing, savings or investment account (paid plan). Only the surplus can be transferred: the envelopes' money is already set aside. Both balances change, the envelopes do not. No transfer with a credit card or a debt."
       }
     }
   },
@@ -1600,6 +1683,57 @@
       "statusFallback": "active",
       "billingPeriodFallback": "month",
       "freePlanNote": "You are on the free plan"
+    }
+  },
+  "helpTips": {
+    "label": "Help",
+    "more": "Learn more",
+    "surplus": "The account balance minus the total of its envelopes. Green: free money. Red: the envelopes set aside more than the balance.",
+    "paycheckSplit": "What each paycheck of this job puts in your envelopes. You link an envelope to a paycheck in the envelope's form.",
+    "paycheckPreview": "What the rules take from the next paycheck. The surplus is what is left of the paycheck.",
+    "allocationType": "How the paycheck fills this envelope: share of the bill or goal (worked out by Karo), fixed amount or percentage of the paycheck.",
+    "funding": "Where the envelope's money comes from: one or more paychecks, each with its rule.",
+    "withdrawal": "For a payment taken from your account automatically: the envelope gets the amount on each paycheck, then the withdrawal takes it out.",
+    "autoPay": "On the due date, Karo pays the bill from the envelope if it holds enough money.",
+    "transferSurplus": "Only the free money (balance minus envelopes) can be transferred.",
+    "expectedIncome": "Each job's last paycheck (or fixed pay) times the number of paychecks in a month."
+  },
+  "gettingStarted": {
+    "title": "Getting started",
+    "intro": "Six steps so Karo can split your paychecks. They tick themselves off.",
+    "progress": "{done} of {total}",
+    "dismiss": "Hide",
+    "items": {
+      "account": {
+        "title": "Add your account",
+        "why": "The account your pay is deposited into.",
+        "action": "Add"
+      },
+      "balance": {
+        "title": "Enter the account balance",
+        "why": "Without a balance, the surplus means nothing.",
+        "action": "Enter balance"
+      },
+      "job": {
+        "title": "Add your pay",
+        "why": "Its frequency and date let Karo work out the shares.",
+        "action": "Add"
+      },
+      "envelope": {
+        "title": "Create an envelope",
+        "why": "To set money aside for one use: rent, groceries, savings.",
+        "action": "Create"
+      },
+      "link": {
+        "title": "Link an envelope to your pay",
+        "why": "In the envelope, « Add another paycheck source »: each paycheck fills it.",
+        "action": "Link"
+      },
+      "deposit": {
+        "title": "Deposit a first paycheck",
+        "why": "The paycheck is split into your envelopes.",
+        "action": "Deposit"
+      }
     }
   }
 }

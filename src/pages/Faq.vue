@@ -1,20 +1,39 @@
 <script setup lang="ts">
+import { nextTick, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
 
 const { t } = useI18n()
+const route = useRoute()
 
 // Keys of the questions in the locale files (faq.items.<key>.question / .answer)
 const ITEMS = [
+  'howItWorks',
   'envelope',
   'accountVsEnvelope',
-  'expectedIncome',
+  'surplus',
   'addIncome',
   'allocation',
+  'billShare',
+  'goalShare',
+  'paycheckPreview',
+  'withdrawal',
+  'autoPay',
+  'expectedIncome',
   'paid',
   'transferWithdraw',
+  'accountTransfer',
   'debt',
   'sharing'
 ] as const
+
+// A help bubble links to /faq#<key>: that question opens and scrolls into view
+const target = route.hash.slice(1)
+onMounted(async () => {
+  if (!target) return
+  await nextTick()
+  document.getElementById(target)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+})
 </script>
 
 <template>
@@ -29,7 +48,7 @@ const ITEMS = [
     </header>
 
     <div class="faq-list">
-      <details v-for="id in ITEMS" :key="id" class="faq-item">
+      <details v-for="id in ITEMS" :id="id" :key="id" class="faq-item" :open="id === target">
         <summary>{{ t(`faq.items.${id}.question`) }}</summary>
         <p>{{ t(`faq.items.${id}.answer`) }}</p>
       </details>
@@ -78,6 +97,7 @@ const ITEMS = [
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 1rem 1.25rem;
+  scroll-margin-top: 1rem;
 }
 
 .faq-item summary {

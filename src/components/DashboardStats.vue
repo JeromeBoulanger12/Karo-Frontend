@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
+import HelpTip from './HelpTip.vue'
 
 withDefaults(defineProps<{
   totalBalance?: number
@@ -36,7 +37,7 @@ const formatCurrency = (value: number) => {
       <div class="stat-value">{{ envelopesCount }}</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">{{ t('dashboard.stats.expectedIncome') }}</div>
+      <div class="stat-label">{{ t('dashboard.stats.expectedIncome') }} <HelpTip topic="expectedIncome" faq="expectedIncome" /></div>
       <div class="stat-value" style="color: var(--success)">{{ formatCurrency(expectedIncome) }}</div>
     </div>
     <div class="stat-card">

@@ -4,6 +4,7 @@ import Sortable from 'sortablejs'
 import EnvelopeRow from './EnvelopeRow.vue'
 import AccountBalanceChart from './AccountBalanceChart.vue'
 import AccountSparkline from './AccountSparkline.vue'
+import HelpTip from './HelpTip.vue'
 import { useI18n } from 'vue-i18n'
 import type { EnvelopeSummary } from '../utils/envelopes'
 import { accountTypeKey, canTransferBetween, isCreditAccount, showsSurplus } from '../utils/accounts'
@@ -227,7 +228,10 @@ const toggleExpand = () => {
           <div v-if="surplus !== null && showSurplus" class="surplus-box" :class="surplus < 0 ? 'is-deficit' : 'is-surplus'">
             <i class="mdi" :class="surplus < 0 ? 'mdi-alert-circle' : 'mdi-check-circle'"></i>
             <div class="surplus-text">
-              <span class="surplus-label">{{ surplus < 0 ? t('dashboard.stats.deficit') : t('dashboard.stats.surplus') }}</span>
+              <span class="surplus-label">
+                {{ surplus < 0 ? t('dashboard.stats.deficit') : t('dashboard.stats.surplus') }}
+                <HelpTip topic="surplus" faq="surplus" />
+              </span>
               <span class="surplus-amount">{{ formatCurrency(Math.abs(surplus)) }}</span>
             </div>
           </div>

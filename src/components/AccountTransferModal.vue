@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { canTransferBetween } from '../utils/accounts'
+import HelpTip from './HelpTip.vue'
 
 interface Account {
   id: string
@@ -111,6 +112,7 @@ const formatCurrency = (value: number) => {
           </p>
           <p class="account-current">
             {{ t('accountTransfer.available') }} <strong>{{ formatCurrency(available) }}</strong>
+            <HelpTip topic="transferSurplus" faq="accountTransfer" />
           </p>
         </div>
 

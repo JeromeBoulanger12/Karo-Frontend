@@ -3,6 +3,7 @@ import { ref, computed, watch, inject } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { isCreditAccount } from '../utils/accounts'
 import { isBillPurpose } from '../utils/envelopes'
+import HelpTip from './HelpTip.vue'
 
 // Colour and arrangement of envelopes are paid features: the palette is locked on the free plan
 const subscriptionFeatures = inject('subscriptionFeatures', ref({ allowPlanning: false, allowMembers: false }))
@@ -479,6 +480,7 @@ const withdrawalFrequencies = [
             <label>
               <input v-model="formData.billAutoPay" type="checkbox" />
               {{ t('envelopeForm.autoPay.label') }}
+              <HelpTip topic="autoPay" faq="autoPay" />
             </label>
             <small class="form-hint">{{ t('envelopeForm.autoPay.hint') }}</small>
           </div>
@@ -502,13 +504,14 @@ const withdrawalFrequencies = [
 
         <!-- 3. Funding: where the money comes from. A debt has no automatic withdrawal: it is paid by hand -->
         <div class="section-divider">
-          <h3>{{ t('envelopeForm.groups.funding') }}</h3>
+          <h3>{{ t('envelopeForm.groups.funding') }} <HelpTip topic="funding" faq="allocation" /></h3>
 
           <template v-if="!isDebtPurpose">
             <div class="form-group">
               <label>
                 <input v-model="formData.isAutomaticWithdrawal" type="checkbox" />
                 {{ t('envelopeForm.withdrawal.enable') }}
+                <HelpTip topic="withdrawal" faq="withdrawal" />
               </label>
             </div>
 
@@ -546,7 +549,7 @@ const withdrawalFrequencies = [
             </div>
 
             <div class="form-group">
-              <label>{{ t('envelopes.form.allocationType') }}</label>
+              <label>{{ t('envelopes.form.allocationType') }} <HelpTip topic="allocationType" faq="allocation" /></label>
               <select v-model="line.allocationType">
                 <option v-for="type in allocationTypes" :key="type.value" :value="type.value">{{ type.label }}</option>
               </select>

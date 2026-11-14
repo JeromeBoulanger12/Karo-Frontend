@@ -12,6 +12,7 @@ import AccountFormModal from '../components/AccountFormModal.vue'
 import AccountBalanceModal from '../components/AccountBalanceModal.vue'
 import AccountHistoryModal from '../components/AccountHistoryModal.vue'
 import AccountTransferModal from '../components/AccountTransferModal.vue'
+import GettingStarted from '../components/GettingStarted.vue'
 import TransferEnvelopeModal from '../components/TransferEnvelopeModal.vue'
 import EnvelopeActionModal from '../components/EnvelopeActionModal.vue'
 import PayBillModal from '../components/PayBillModal.vue'
@@ -790,6 +791,19 @@ onMounted(() => {
           </button>
         </template>
       </PageHeader>
+
+      <!-- First steps: checks itself from the data, for those who skipped the wizard or joined a household -->
+      <GettingStarted
+        :accounts="accounts"
+        :envelopes="envelopes"
+        :jobs="jobs"
+        @add-account="openAddAccountModal"
+        @edit-balance="openAccountBalanceModal($event)"
+        @add-job="openAddJobModal('')"
+        @add-envelope="openAddEnvelopeModal($event)"
+        @edit-envelope="openEditEnvelopeModal($event)"
+        @deposit="openDepositPaycheckModal($event)"
+      />
 
       <template v-if="canPlan">
         <MonthEndProjection :result="monthEnd" />

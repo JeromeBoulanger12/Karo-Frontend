@@ -2,6 +2,7 @@
 import { computed, inject, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { jobsApi } from '../api/jobs'
+import HelpTip from './HelpTip.vue'
 import { formatRuleAmount, type DistributionRule, type PaycheckPreview } from '../utils/distributionRules'
 
 interface Money {
@@ -177,7 +178,7 @@ const formatDate = (dateString: string | undefined) => {
 
     <!-- Distribution rules: where each paycheck goes -->
     <div class="job-rules">
-      <div class="job-label">{{ t('jobCard.rules.header') }}</div>
+      <div class="job-label">{{ t('jobCard.rules.header') }} <HelpTip topic="paycheckSplit" faq="allocation" /></div>
       <ul v-if="job.rules?.length" class="job-rules-list">
         <li v-for="(rule, index) in job.rules" :key="index" class="job-rule-row">
           <span>{{ rule.envelopeName }}</span>
@@ -188,7 +189,7 @@ const formatDate = (dateString: string | undefined) => {
       <!-- Paid plans: what the rules take from the next paycheck, and what is left over -->
       <div v-if="preview && job.rules?.length" class="job-preview">
         <div class="job-rule-row job-preview-total">
-          <span>{{ t('jobCard.preview.total') }}</span>
+          <span>{{ t('jobCard.preview.total') }} <HelpTip topic="paycheckPreview" faq="paycheckPreview" /></span>
           <strong>{{ formatCurrency(preview.total) }}</strong>
         </div>
         <div
