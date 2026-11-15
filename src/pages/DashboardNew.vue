@@ -24,11 +24,8 @@ import { accountsApi, toDebtProfileInput, fromDebtProfileDto } from '../api/acco
 import { envelopesApi } from '../api/envelopes'
 import { jobsApi } from '../api/jobs'
 import { dashboardAPI } from '../api/dashboard'
-import { paychecksPerMonth, nextPaymentDate, isBillPurpose } from '../utils/envelopes'
+import { paychecksPerMonth, isBillPurpose } from '../utils/envelopes'
 import { isCreditAccount } from '../utils/accounts'
-import { monthEndProjection, type BillCoverage } from '../utils/monthEnd'
-import { payOccurrences } from '../utils/calendar'
-import MonthEndProjection from '../components/MonthEndProjection.vue'
 import PlanningCalendar from '../components/PlanningCalendar.vue'
 import '../styles/dashboard.css'
 
@@ -107,7 +104,7 @@ const accountSurpluses = computed(() => {
   })
 })
 
-// Planning tools (month-end card and calendar) are a paid-tier feature, provided by App.vue
+// The planning calendar is a paid-tier feature, provided by App.vue
 const subscriptionFeatures = inject('subscriptionFeatures', ref({ allowPlanning: false }))
 const canPlan = computed(() => !!subscriptionFeatures.value.allowPlanning)
 
@@ -132,60 +129,8 @@ const calendarJobs = computed(() =>
   }))
 )
 
-// Where the money stands at month end: surplus today, expected income still to come, and bills due
-// before month end that their envelopes don't fully cover
-const monthEnd = computed(() => {
-  const bills = envelopes.value
-    .filter(env => isBillPurpose(env.purpose) && env.billPaymentScheduleJson)
-    .map(env => {
-      const dueDate = nextPaymentDate(env.billPaymentScheduleJson)
-      if (!dueDate) return null
-      return {
-        name: env.name,
-        target: env.targetAmount?.amount ?? 0,
-        balance: env.balance?.amount ?? 0,
-        dueDate
-      } as BillCoverage
-    })
-    .filter((bill): bill is BillCoverage => bill !== null)
-
-  return monthEndProjection({
-    surplus: accountSurpluses.value.reduce((sum, acc) => sum + acc.amount, 0),
-    incomeToCome: incomeToComeThisMonth.value,
-    today: new Date(),
-    bills
-  })
-})
-
-// Paychecks still to come before month end: from tomorrow (today's payday is already in the surplus once it
-// is deposited) to the last day of the month, each at its own amount. A job with no schedule falls back to the
-// monthly forecast spread over the days left.
-const incomeToComeThisMonth = computed(() => {
-  const today = new Date()
-  const from = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1)
-  const to = new Date(today.getFullYear(), today.getMonth() + 1, 0)
-  const daysInMonth = to.getDate()
-  const daysLeft = daysInMonth - today.getDate()
-
-  return jobs.value.reduce((sum, job) => {
-    const amount = job.fixedAmount?.amount ?? job.lastPaycheck?.amount?.amount ?? 0
-    const pattern = job.recurrencePattern
-
-    if (!pattern?.anchorDate) {
-      return sum + amount * paychecksPerMonth(pattern) * (daysLeft / daysInMonth)
-    }
-
-    const paydays = payOccurrences(
-      { name: job.name, amount, anchorDate: pattern.anchorDate, frequency: pattern.frequency, interval: pattern.interval },
-      from,
-      to
-    )
-    return sum + paydays.length * amount
-  }, 0)
-})
-
 // Each paycheck's amount: the fixed amount when the job has one (automatic paychecks), otherwise the last
-// paycheck recorded. A new job with no history yet would otherwise count as 0 in the month-end projection.
+// paycheck recorded. A new job with no history yet would otherwise count as 0.
 const expectedIncome = computed(() => {
   return jobs.value.reduce((sum, job) => {
     const amount = job.fixedAmount?.amount ?? job.lastPaycheck?.amount?.amount ?? 0
@@ -805,10 +750,7 @@ onMounted(() => {
         @deposit="openDepositPaycheckModal($event)"
       />
 
-      <template v-if="canPlan">
-        <MonthEndProjection :result="monthEnd" />
-        <PlanningCalendar :bills="calendarBills" :jobs="calendarJobs" />
-      </template>
+      <PlanningCalendar v-if="canPlan" :bills="calendarBills" :jobs="calendarJobs" />
 
       <!-- Stats Row -->
       <DashboardStats

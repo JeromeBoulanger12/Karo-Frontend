@@ -623,21 +623,6 @@
       "empty": "Aucune échéance ni paie sur cette période.",
       "estimate": "Les paies sont projetées à partir de la dernière paie enregistrée ; les factures suivent leur échéancier."
     },
-    "monthEnd": {
-      "title": "Fin de mois",
-      "daysLeft": "{days} jours restants",
-      "lastDay": "Dernier jour du mois",
-      "ok": "Vous allez y arriver",
-      "risk": "Marge négative prévue",
-      "caption": "Argent libre prévu à la fin du mois",
-      "incomeNone": "Aucune paie d'ici la fin du mois",
-      "unfundedTitle": "Factures non couvertes avant la fin du mois",
-      "surplus": "Surplus actuel",
-      "income": "Paies estimées d'ici la fin du mois ({days} j)",
-      "unfunded": "Factures non couvertes d'ici la fin du mois",
-      "unfundedItem": "{name} : {amount} (échéance {date})",
-      "estimate": "Estimation : les paies à venir sont réparties sur les jours restants du mois."
-    },
     "balanceHistory": {
       "edit": "Modifier",
       "delete": "Supprimer",

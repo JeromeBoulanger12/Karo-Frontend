@@ -630,21 +630,6 @@
       "empty": "No due dates or pay in this period.",
       "estimate": "Pay is projected from the last recorded paycheck; bills follow their schedule."
     },
-    "monthEnd": {
-      "title": "Month end",
-      "daysLeft": "{days} days left",
-      "lastDay": "Last day of the month",
-      "ok": "You should make it",
-      "risk": "Negative margin expected",
-      "caption": "Free money expected at month end",
-      "incomeNone": "No pay before month end",
-      "unfundedTitle": "Bills not covered before month end",
-      "surplus": "Current surplus",
-      "income": "Estimated pay until month end ({days} d)",
-      "unfunded": "Bills not covered by month end",
-      "unfundedItem": "{name}: {amount} (due {date})",
-      "estimate": "Estimate: upcoming pay is spread over the remaining days of the month."
-    },
     "balanceHistory": {
       "edit": "Edit",
       "delete": "Delete",
