@@ -14,7 +14,7 @@ const now = new Date()
 // First day of the first visible month; the arrows move it by one month
 const startMonth = ref(new Date(now.getFullYear(), now.getMonth(), 1))
 
-const MONTHS_VISIBLE = 3
+const MONTHS_VISIBLE = 2
 const months = computed(() =>
   Array.from({ length: MONTHS_VISIBLE }, (_, i) =>
     new Date(startMonth.value.getFullYear(), startMonth.value.getMonth() + i, 1)
@@ -124,21 +124,20 @@ const shift = (delta: number) => {
               class="cal-day"
               :class="{
                 'is-today': cell.isToday,
-                'is-empty': cell.day === null,
-                'has-events': cell.events.length > 0,
-                'has-bill': cell.events.some(e => e.kind === 'bill'),
-                'has-pay': cell.events.some(e => e.kind === 'pay')
+                'is-empty': cell.day === null
               }"
-              :tabindex="cell.events.length ? 0 : -1"
             >
               <span v-if="cell.day !== null" class="cal-day-number">{{ cell.day }}</span>
-              <!-- Hover or focus on a day with events: name and amount of each item -->
-              <div v-if="cell.events.length" class="cal-tooltip" role="tooltip">
-                <div v-for="(event, index) in cell.events" :key="index" class="cal-tip-row">
-                  <span class="cal-tip-dot" :class="event.kind"></span>
-                  <span class="cal-tip-label">{{ event.label }}</span>
-                  <strong class="cal-tip-amount">{{ formatCurrency(event.amount) }}</strong>
-                </div>
+              <!-- Each item of the day, written in the box: name and amount -->
+              <div
+                v-for="(event, index) in cell.events"
+                :key="index"
+                class="cal-event"
+                :class="event.kind"
+                :title="`${event.label} : ${formatCurrency(event.amount)}`"
+              >
+                <span class="cal-event-label">{{ event.label }}</span>
+                <strong class="cal-event-amount">{{ formatCurrency(event.amount) }}</strong>
               </div>
             </div>
           </div>
@@ -212,7 +211,7 @@ const shift = (delta: number) => {
 
 .cal-months {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 1.25rem;
 }
 
@@ -238,43 +237,85 @@ const shift = (delta: number) => {
 }
 
 .cal-day {
-  position: relative;
-  min-height: 2.25rem;
+  min-width: 0;
+  min-height: 4rem;
+  border: 1px solid var(--border);
   border-radius: 6px;
-  padding: 0.25rem 0;
+  padding: 0.25rem;
   font-size: 0.8125rem;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  align-items: stretch;
   gap: 2px;
+  text-align: left;
 }
 
-.cal-day.has-events {
-  background: var(--bg);
-  border: 1px solid var(--border);
+.cal-day-number {
+  font-size: 0.75rem;
+  color: var(--text-muted);
 }
 
 .cal-day.is-today {
   outline: 2px solid var(--primary);
   outline-offset: -2px;
+}
+
+.cal-day.is-today .cal-day-number {
+  color: var(--primary);
   font-weight: 700;
 }
 
-/* Tint by what falls on the day: red for a bill, green for a pay, both split */
-.cal-day.has-bill:not(.has-pay) {
-  background: rgba(239, 68, 68, 0.18);
-  border-color: rgba(239, 68, 68, 0.45);
+/* Each item in the box: red for a bill, green for a pay */
+.cal-event {
+  display: flex;
+  flex-direction: column;
+  padding: 1px 4px;
+  border-radius: 4px;
+  border-left: 3px solid;
+  font-size: 0.6875rem;
+  line-height: 1.25;
 }
 
-.cal-day.has-pay:not(.has-bill) {
-  background: rgba(16, 185, 129, 0.18);
-  border-color: rgba(16, 185, 129, 0.45);
+.cal-event.bill {
+  background: rgba(239, 68, 68, 0.12);
+  border-left-color: var(--danger);
 }
 
-.cal-day.has-bill.has-pay {
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.18) 50%, rgba(16, 185, 129, 0.18) 50%);
-  border-color: var(--border);
+.cal-event.pay {
+  background: rgba(16, 185, 129, 0.12);
+  border-left-color: var(--success);
+}
+
+.cal-event-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-primary);
+}
+
+.cal-event-amount {
+  white-space: nowrap;
+}
+
+.cal-event.bill .cal-event-amount {
+  color: var(--danger);
+}
+
+.cal-event.pay .cal-event-amount {
+  color: var(--success);
+}
+
+/* Phones: boxes are too narrow for the name, the amount stays (the full text is in the title) */
+@media (max-width: 600px) {
+  .cal-event {
+    padding: 1px 2px;
+    font-size: 0.5625rem;
+    overflow: hidden;
+  }
+
+  .cal-event-label {
+    display: none;
+  }
 }
 
 .cal-day.is-empty {
@@ -317,63 +358,5 @@ const shift = (delta: number) => {
   margin: 0.5rem 0 0;
   font-size: 0.8125rem;
   color: var(--text-muted);
-}
-.cal-day:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 1px;
-}
-
-.cal-tooltip {
-  display: none;
-  position: absolute;
-  bottom: calc(100% + 6px);
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 20;
-  min-width: 12rem;
-  padding: 0.5rem 0.75rem;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  box-shadow: var(--shadow-md);
-  text-align: left;
-  white-space: nowrap;
-}
-
-.cal-day.has-events:hover .cal-tooltip,
-.cal-day.has-events:focus-visible .cal-tooltip {
-  display: block;
-}
-
-.cal-tip-row {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.25rem 0;
-  font-size: 0.8125rem;
-  color: var(--text-primary);
-}
-
-.cal-tip-row + .cal-tip-row {
-  border-top: 1px solid var(--border);
-}
-
-.cal-tip-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-}
-
-.cal-tip-dot.bill {
-  background: var(--danger);
-}
-
-.cal-tip-dot.pay {
-  background: var(--success);
-}
-
-.cal-tip-amount {
-  white-space: nowrap;
 }
 </style>
