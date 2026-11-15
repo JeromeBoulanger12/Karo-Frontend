@@ -607,10 +607,6 @@
     "manage_members": "Manage Members",
     "error_loading": "Error loading dashboard",
     "stats": {
-      "totalBalance": "Total balance",
-      "envelopes": "Envelopes",
-      "expectedIncome": "Expected income / month",
-      "spendingThisMonth": "Spending this month",
       "surplus": "Surplus",
       "deficit": "Deficit"
     },

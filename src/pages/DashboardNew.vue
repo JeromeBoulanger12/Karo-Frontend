@@ -3,7 +3,6 @@ import { ref, onMounted, computed, inject } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import PageHeader from '../components/PageHeader.vue'
-import DashboardStats from '../components/DashboardStats.vue'
 import AccountCardContainer from '../components/AccountCardContainer.vue'
 import JobCard from '../components/JobCard.vue'
 import AdjustPaycheckModal from '../components/AdjustPaycheckModal.vue'
@@ -24,7 +23,7 @@ import { accountsApi, toDebtProfileInput, fromDebtProfileDto } from '../api/acco
 import { envelopesApi } from '../api/envelopes'
 import { jobsApi } from '../api/jobs'
 import { dashboardAPI } from '../api/dashboard'
-import { paychecksPerMonth, isBillPurpose } from '../utils/envelopes'
+import { isBillPurpose } from '../utils/envelopes'
 import { isCreditAccount } from '../utils/accounts'
 import PlanningCalendar from '../components/PlanningCalendar.vue'
 import '../styles/dashboard.css'
@@ -89,11 +88,6 @@ const selectedTransferAccount = ref<any>(null)
 const accountHistory = ref<Record<string, { capturedAt: string; amount: { amount: number; currency: string } }[]>>({})
 
 // Computed properties
-const totalBalance = computed(() => {
-  return accounts.value.reduce((sum, acc) => sum + (acc.latestBalance?.amount ?? acc.latestSnapshot?.amount?.amount ?? 0), 0)
-})
-
-// Monthly forecast: the last distributed paycheck of each plan, times how often that plan is paid
 // Per account: its balance minus the total of its envelopes (negative means a deficit).
 // Credit cards are left out: their balance is the amount owed, so a surplus means nothing for them.
 const accountSurpluses = computed(() => {
@@ -128,24 +122,6 @@ const calendarJobs = computed(() =>
     interval: job.recurrencePattern?.interval ?? null
   }))
 )
-
-// Each paycheck's amount: the fixed amount when the job has one (automatic paychecks), otherwise the last
-// paycheck recorded. A new job with no history yet would otherwise count as 0.
-const expectedIncome = computed(() => {
-  return jobs.value.reduce((sum, job) => {
-    const amount = job.fixedAmount?.amount ?? job.lastPaycheck?.amount?.amount ?? 0
-    return sum + amount * paychecksPerMonth(job.recurrencePattern)
-  }, 0)
-})
-
-const spendingThisMonth = computed(() => {
-  return envelopes.value.reduce((sum, env) => {
-    // Estimate spending from envelope targets
-    const target = env.targetAmount?.amount ?? 0
-    const balance = env.balance?.amount ?? 0
-    return sum + Math.max(0, target - balance)
-  }, 0)
-})
 
 const tierBadge = computed(() => {
   const tier = dashboardStats.value?.subscriptionTier || 'Free'
@@ -751,15 +727,6 @@ onMounted(() => {
       />
 
       <PlanningCalendar v-if="canPlan" :bills="calendarBills" :jobs="calendarJobs" />
-
-      <!-- Stats Row -->
-      <DashboardStats
-        :totalBalance="totalBalance"
-        :envelopesCount="envelopes.length"
-        :jobsCount="jobs.length"
-        :spendingThisMonth="spendingThisMonth"
-        :expectedIncome="expectedIncome"
-      />
 
       <!-- Jump links: the accounts and paychecks sections are long on a dashboard with many accounts -->
       <nav class="section-jump" :aria-label="t('dashboardPage.jumpLabel')">

@@ -10,9 +10,6 @@ const props = defineProps<{
   jobs: JobInput[]
 }>()
 
-// Collapsed by default: the calendar is a planning aid, not the first thing to read
-const open = ref(false)
-
 const now = new Date()
 // First day of the first visible month; the arrows move it by one month
 const startMonth = ref(new Date(now.getFullYear(), now.getMonth(), 1))
@@ -101,15 +98,11 @@ const shift = (delta: number) => {
 
 <template>
   <section class="planning-calendar">
-    <button class="cal-toggle" :aria-expanded="open" @click="open = !open">
-      <span class="cal-toggle-title">
-        <i class="mdi mdi-calendar-month"></i>
-        {{ t('dashboard.calendar.title') }}
-      </span>
-      <i class="mdi" :class="open ? 'mdi-chevron-up' : 'mdi-chevron-down'"></i>
-    </button>
+    <h3 class="cal-title">
+      <i class="mdi mdi-calendar-month"></i>
+      {{ t('dashboard.calendar.title') }}
+    </h3>
 
-    <template v-if="open">
       <div class="cal-nav">
         <button class="cal-arrow" :aria-label="t('dashboard.calendar.previous')" @click="shift(-1)">
           <i class="mdi mdi-chevron-left"></i>
@@ -160,7 +153,6 @@ const shift = (delta: number) => {
       <p v-if="!events.length" class="cal-empty">{{ t('dashboard.calendar.empty') }}</p>
 
       <p class="cal-note">{{ t('dashboard.calendar.estimate') }}</p>
-    </template>
   </section>
 </template>
 
@@ -173,27 +165,18 @@ const shift = (delta: number) => {
   margin-bottom: 1.5rem;
 }
 
-.cal-toggle {
-  width: 100%;
+.cal-title {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  background: none;
-  border: none;
+  gap: 0.5rem;
+  margin: 0;
   padding: 0.25rem 0;
-  cursor: pointer;
   color: var(--text-primary);
   font-size: 1rem;
   font-weight: 700;
 }
 
-.cal-toggle-title {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.cal-toggle-title i {
+.cal-title i {
   color: var(--primary);
 }
 

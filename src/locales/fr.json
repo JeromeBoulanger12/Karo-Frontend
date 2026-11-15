@@ -600,10 +600,6 @@
     "manage_members": "Gérer les membres",
     "error_loading": "Erreur lors du chargement du tableau de bord",
     "stats": {
-      "totalBalance": "Solde total",
-      "envelopes": "Enveloppes",
-      "expectedIncome": "Revenus prévus / mois",
-      "spendingThisMonth": "Dépenses ce mois",
       "surplus": "Surplus",
       "deficit": "Déficit"
     },
