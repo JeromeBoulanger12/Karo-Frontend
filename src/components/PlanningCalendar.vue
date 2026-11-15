@@ -11,23 +11,14 @@ const props = defineProps<{
 }>()
 
 const now = new Date()
-// First day of the first visible month; the arrows move it by one month
-const startMonth = ref(new Date(now.getFullYear(), now.getMonth(), 1))
+// First day of the month shown; the arrows move it by one month
+const month = ref(new Date(now.getFullYear(), now.getMonth(), 1))
 
-const MONTHS_VISIBLE = 2
-const months = computed(() =>
-  Array.from({ length: MONTHS_VISIBLE }, (_, i) =>
-    new Date(startMonth.value.getFullYear(), startMonth.value.getMonth() + i, 1)
-  )
+const monthEnd = computed(() =>
+  new Date(month.value.getFullYear(), month.value.getMonth() + 1, 0, 23, 59, 59)
 )
 
-const rangeStart = computed(() => months.value[0])
-const rangeEnd = computed(() => {
-  const last = months.value[MONTHS_VISIBLE - 1]
-  return new Date(last.getFullYear(), last.getMonth() + 1, 0, 23, 59, 59)
-})
-
-const events = computed(() => calendarEvents(props.bills, props.jobs, rangeStart.value, rangeEnd.value))
+const events = computed(() => calendarEvents(props.bills, props.jobs, month.value, monthEnd.value))
 
 const dayKey = (date: Date) => `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`
 
@@ -43,19 +34,14 @@ const eventsByDay = computed(() => {
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat('fr-CA', { style: 'currency', currency: 'CAD' }).format(value)
 
-// Monday-first weekday names, from a known Monday (1 Jan 2024)
+// Sunday-first weekday names, from a known Sunday (7 Jan 2024)
 const weekdays = Array.from({ length: 7 }, (_, i) =>
-  new Intl.DateTimeFormat('fr-CA', { weekday: 'short' }).format(new Date(2024, 0, 1 + i))
+  new Intl.DateTimeFormat('fr-CA', { weekday: 'short' }).format(new Date(2024, 0, 7 + i))
 )
 
-const monthTitle = (month: Date) =>
-  month.toLocaleDateString('fr-CA', { month: 'long', year: 'numeric' })
-
-const rangeLabel = computed(() => {
-  const first = months.value[0].toLocaleDateString('fr-CA', { month: 'long' })
-  const last = months.value[MONTHS_VISIBLE - 1].toLocaleDateString('fr-CA', { month: 'long', year: 'numeric' })
-  return `${first} – ${last}`
-})
+const monthTitle = computed(() =>
+  month.value.toLocaleDateString('fr-CA', { month: 'long', year: 'numeric' })
+)
 
 interface Cell {
   key: string
@@ -65,12 +51,12 @@ interface Cell {
   events: CalendarEvent[]
 }
 
-const cellsFor = (month: Date): Cell[] => {
-  const year = month.getFullYear()
-  const monthIndex = month.getMonth()
+const cells = computed((): Cell[] => {
+  const year = month.value.getFullYear()
+  const monthIndex = month.value.getMonth()
   const daysInMonth = new Date(year, monthIndex + 1, 0).getDate()
-  // Monday-first: Sunday (0) goes last
-  const leading = (new Date(year, monthIndex, 1).getDay() + 6) % 7
+  // Sunday-first: getDay() is already the number of blanks before day 1
+  const leading = new Date(year, monthIndex, 1).getDay()
 
   const blanks: Cell[] = Array.from({ length: leading }, (_, i) => ({
     key: `blank-${i}`, day: null, date: null, isToday: false, events: []
@@ -89,10 +75,10 @@ const cellsFor = (month: Date): Cell[] => {
   })
 
   return [...blanks, ...days]
-}
+})
 
 const shift = (delta: number) => {
-  startMonth.value = new Date(startMonth.value.getFullYear(), startMonth.value.getMonth() + delta, 1)
+  month.value = new Date(month.value.getFullYear(), month.value.getMonth() + delta, 1)
 }
 </script>
 
@@ -103,55 +89,50 @@ const shift = (delta: number) => {
       {{ t('dashboard.calendar.title') }}
     </h3>
 
-      <div class="cal-nav">
-        <button class="cal-arrow" :aria-label="t('dashboard.calendar.previous')" @click="shift(-1)">
-          <i class="mdi mdi-chevron-left"></i>
-        </button>
-        <span class="cal-range">{{ rangeLabel }}</span>
-        <button class="cal-arrow" :aria-label="t('dashboard.calendar.next')" @click="shift(1)">
-          <i class="mdi mdi-chevron-right"></i>
-        </button>
-      </div>
+    <div class="cal-nav">
+      <button class="cal-arrow" :aria-label="t('dashboard.calendar.previous')" @click="shift(-1)">
+        <i class="mdi mdi-chevron-left"></i>
+      </button>
+      <span class="cal-range">{{ monthTitle }}</span>
+      <button class="cal-arrow" :aria-label="t('dashboard.calendar.next')" @click="shift(1)">
+        <i class="mdi mdi-chevron-right"></i>
+      </button>
+    </div>
 
-      <div class="cal-months">
-        <div v-for="month in months" :key="month.getTime()" class="cal-month">
-          <h4>{{ monthTitle(month) }}</h4>
-          <div class="cal-grid">
-            <span v-for="wd in weekdays" :key="wd" class="cal-weekday">{{ wd }}</span>
-            <div
-              v-for="cell in cellsFor(month)"
-              :key="cell.key"
-              class="cal-day"
-              :class="{
-                'is-today': cell.isToday,
-                'is-empty': cell.day === null
-              }"
-            >
-              <span v-if="cell.day !== null" class="cal-day-number">{{ cell.day }}</span>
-              <!-- Each item of the day, written in the box: name and amount -->
-              <div
-                v-for="(event, index) in cell.events"
-                :key="index"
-                class="cal-event"
-                :class="event.kind"
-                :title="`${event.label} : ${formatCurrency(event.amount)}`"
-              >
-                <span class="cal-event-label">{{ event.label }}</span>
-                <strong class="cal-event-amount">{{ formatCurrency(event.amount) }}</strong>
-              </div>
-            </div>
-          </div>
+    <div class="cal-grid">
+      <span v-for="wd in weekdays" :key="wd" class="cal-weekday">{{ wd }}</span>
+      <div
+        v-for="cell in cells"
+        :key="cell.key"
+        class="cal-day"
+        :class="{
+          'is-today': cell.isToday,
+          'is-empty': cell.day === null
+        }"
+      >
+        <span v-if="cell.day !== null" class="cal-day-number">{{ cell.day }}</span>
+        <!-- Each item of the day, written in the box: name and amount -->
+        <div
+          v-for="(event, index) in cell.events"
+          :key="index"
+          class="cal-event"
+          :class="event.kind"
+          :title="`${event.label} : ${formatCurrency(event.amount)}`"
+        >
+          <span class="cal-event-label">{{ event.label }}</span>
+          <strong class="cal-event-amount">{{ formatCurrency(event.amount) }}</strong>
         </div>
       </div>
+    </div>
 
-      <div class="cal-legend">
-        <span><i class="dot bill"></i> {{ t('dashboard.calendar.bills') }}</span>
-        <span><i class="dot pay"></i> {{ t('dashboard.calendar.pays') }}</span>
-      </div>
+    <div class="cal-legend">
+      <span><i class="dot bill"></i> {{ t('dashboard.calendar.bills') }}</span>
+      <span><i class="dot pay"></i> {{ t('dashboard.calendar.pays') }}</span>
+    </div>
 
-      <p v-if="!events.length" class="cal-empty">{{ t('dashboard.calendar.empty') }}</p>
+    <p v-if="!events.length" class="cal-empty">{{ t('dashboard.calendar.empty') }}</p>
 
-      <p class="cal-note">{{ t('dashboard.calendar.estimate') }}</p>
+    <p class="cal-note">{{ t('dashboard.calendar.estimate') }}</p>
   </section>
 </template>
 
@@ -209,18 +190,6 @@ const shift = (delta: number) => {
   color: var(--primary);
 }
 
-.cal-months {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 1.25rem;
-}
-
-.cal-month h4 {
-  margin: 0 0 0.5rem;
-  font-size: 0.9375rem;
-  text-transform: capitalize;
-}
-
 .cal-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -238,7 +207,7 @@ const shift = (delta: number) => {
 
 .cal-day {
   min-width: 0;
-  min-height: 4rem;
+  min-height: 5rem;
   border: 1px solid var(--border);
   border-radius: 6px;
   padding: 0.25rem;

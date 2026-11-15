@@ -618,12 +618,12 @@
     "sparklineTitle": "Balance over {days} days",
     "noAccounts": "No account",
     "calendar": {
-      "title": "Quarterly calendar",
+      "title": "Calendar",
       "previous": "Previous month",
       "next": "Next month",
       "bills": "Bills",
       "pays": "Pay (estimated)",
-      "empty": "No due dates or pay in this period.",
+      "empty": "No due dates or pay this month.",
       "estimate": "Pay is projected from the last recorded paycheck; bills follow their schedule."
     },
     "balanceHistory": {

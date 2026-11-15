@@ -611,12 +611,12 @@
     "sparklineTitle": "Solde sur {days} jours",
     "noAccounts": "Aucun compte",
     "calendar": {
-      "title": "Calendrier trimestriel",
+      "title": "Calendrier",
       "previous": "Mois précédent",
       "next": "Mois suivant",
       "bills": "Factures",
       "pays": "Paies (estimées)",
-      "empty": "Aucune échéance ni paie sur cette période.",
+      "empty": "Aucune échéance ni paie ce mois-ci.",
       "estimate": "Les paies sont projetées à partir de la dernière paie enregistrée ; les factures suivent leur échéancier."
     },
     "balanceHistory": {
