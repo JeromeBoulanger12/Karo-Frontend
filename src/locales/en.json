@@ -386,7 +386,11 @@
       "remaining": "Left in the envelope after payment: {amount}",
       "submit": "Pay",
       "errorPositive": "The amount must be greater than 0.",
-      "errorExceeds": "The amount exceeds the bill balance ({amount})."
+      "errorExceeds": "The amount exceeds the bill balance ({amount}).",
+      "cardBalance": "Credit card balance",
+      "remainingOwed": "Left to pay on the card after payment: {amount}",
+      "errorExceedsOwed": "The amount exceeds the card balance ({amount}).",
+      "errorExceedsEnvelope": "The amount exceeds the envelope balance ({amount}). Add money to the envelope or pay a smaller amount."
     },
     "transferModal": {
       "title": "Transfer",

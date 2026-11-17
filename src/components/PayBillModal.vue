@@ -20,11 +20,14 @@ const props = withDefaults(defineProps<{
   submitError?: string
   bill?: Envelope | null
   title?: string
+  // Amount owed on the credit card a debt envelope pays; null for a plain bill
+  debtOwed?: number | null
 }>(), {
   isOpen: false,
   submitError: '',
   bill: null,
-  title: ''
+  title: '',
+  debtOwed: null
 })
 
 const emit = defineEmits<{
@@ -38,15 +41,15 @@ const error = ref('')
 const balance = computed(() => props.bill?.balance?.amount ?? 0)
 const currency = computed(() => props.bill?.balance?.currency ?? 'CAD')
 
-const remainingAfterPayment = computed(() => {
-  if (amount.value === null || Number.isNaN(amount.value)) return balance.value
-  return balance.value - amount.value
-})
+const isDebt = computed(() => props.debtOwed !== null)
+const paid = computed(() => (amount.value === null || Number.isNaN(amount.value) ? 0 : amount.value))
+const remainingAfterPayment = computed(() => balance.value - paid.value)
+const owedAfterPayment = computed(() => (props.debtOwed ?? 0) - paid.value)
 
-// Start with the full balance so a plain "Payé" still pays the whole bill
+// A bill starts with the full envelope balance; a card starts with what is owed on it
 watch(() => props.isOpen, (open) => {
   if (open && !props.submitError) {
-    amount.value = balance.value
+    amount.value = isDebt.value ? props.debtOwed : balance.value
     error.value = ''
   }
 })
@@ -61,7 +64,12 @@ const handleSubmit = () => {
     return
   }
   if (amount.value > balance.value) {
-    error.value = t('envelopes.payModal.errorExceeds', { amount: formatCurrency(balance.value) })
+    const key = isDebt.value ? 'envelopes.payModal.errorExceedsEnvelope' : 'envelopes.payModal.errorExceeds'
+    error.value = t(key, { amount: formatCurrency(balance.value) })
+    return
+  }
+  if (isDebt.value && amount.value > (props.debtOwed ?? 0)) {
+    error.value = t('envelopes.payModal.errorExceedsOwed', { amount: formatCurrency(props.debtOwed ?? 0) })
     return
   }
   emit('pay', amount.value)
@@ -82,14 +90,20 @@ const handleSubmit = () => {
         <p class="bill-info">
           <strong>{{ bill?.name }}</strong>{{ t('payModal.billSeparator') }}{{ t('envelopes.payModal.balanceLine') }}{{ t('payModal.balanceColon') }}<strong>{{ formatCurrency(balance) }}</strong>
         </p>
+        <p v-if="isDebt" class="bill-info">
+          {{ t('envelopes.payModal.cardBalance') }}{{ t('payModal.balanceColon') }}<strong>{{ formatCurrency(debtOwed ?? 0) }}</strong>
+        </p>
 
         <div class="form-group">
           <label>{{ t('envelopes.payModal.amountPaid') }}</label>
-          <input v-model.number="amount" type="number" step="0.01" min="0" :max="balance" />
+          <input v-model.number="amount" type="number" step="0.01" min="0" />
         </div>
 
         <p class="remaining">
           {{ t('envelopes.payModal.remaining', { amount: formatCurrency(remainingAfterPayment) }) }}
+        </p>
+        <p v-if="isDebt" class="remaining">
+          {{ t('envelopes.payModal.remainingOwed', { amount: formatCurrency(owedAfterPayment) }) }}
         </p>
 
         <p v-if="error" class="error-text">{{ error }}</p>

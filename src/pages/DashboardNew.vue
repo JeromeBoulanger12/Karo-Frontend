@@ -363,6 +363,14 @@ const openPayBillModal = (envelope: any) => {
 
 const isDebtPayment = computed(() => selectedBill.value?.purpose === 'DebtPayment')
 
+// Amount still owed on the card a debt envelope pays, so the modal can offer to pay it off
+const selectedDebtOwed = computed<number | null>(() => {
+  if (!isDebtPayment.value) return null
+  const card = accounts.value.find(acc => acc.id === selectedBill.value?.targetAccountId)
+  if (!card) return null
+  return card.latestBalance?.amount ?? card.latestSnapshot?.amount?.amount ?? 0
+})
+
 // Debt envelopes pay the debt account; bill envelopes pay the bill
 const handleBillPay = async (amount: number) => {
   if (!selectedBill.value?.id) return
@@ -882,6 +890,7 @@ onMounted(() => {
       :isOpen="showPayBillModal"
       :submitError="submitError"
       :bill="selectedBill"
+      :debtOwed="selectedDebtOwed"
       :title="isDebtPayment ? t('envelopes.payModal.titleDebt') : t('envelopes.payModal.title')"
       @close="showPayBillModal = false"
       @pay="handleBillPay"

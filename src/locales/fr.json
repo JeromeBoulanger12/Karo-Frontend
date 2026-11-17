@@ -376,7 +376,11 @@
       "remaining": "Reste dans l'enveloppe après paiement : {amount}",
       "submit": "Payer",
       "errorPositive": "Le montant doit être supérieur à 0.",
-      "errorExceeds": "Le montant dépasse le solde de la facture ({amount})."
+      "errorExceeds": "Le montant dépasse le solde de la facture ({amount}).",
+      "cardBalance": "Solde de la carte de crédit",
+      "remainingOwed": "Reste à payer sur la carte après paiement : {amount}",
+      "errorExceedsOwed": "Le montant dépasse le solde de la carte ({amount}).",
+      "errorExceedsEnvelope": "Le montant dépasse le solde de l'enveloppe ({amount}). Ajoutez de l'argent à l'enveloppe ou payez un montant plus petit."
     },
     "transferModal": {
       "title": "Transférer",
