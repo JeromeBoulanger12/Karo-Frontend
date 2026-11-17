@@ -72,7 +72,7 @@ const selectedActionEnvelope = ref<any>(null)
 const selectedBill = ref<any>(null)
 // Quick edit of one distribution rule, opened from a job card
 const showRuleModal = ref(false)
-const selectedRule = ref<{ job: any; index: number } | null>(null)
+const selectedRule = ref<{ job: any; index: number; amount: { amount: number; currency: string } | null } | null>(null)
 const showWithdrawModal = ref(false)
 const selectedWithdrawSource = ref<any>(null)
 const showAddFundsModal = ref(false)
@@ -393,10 +393,17 @@ const handleBillPay = async (amount: number) => {
 }
 
 // A rule clicked in a job card: change its allocation or remove it without opening the envelope form
-const openRuleModal = (job: any, index: number) => {
+const openRuleModal = (job: any, index: number, amount: { amount: number; currency: string } | null) => {
   submitError.value = ''
-  selectedRule.value = { job, index }
+  selectedRule.value = { job, index, amount }
   showRuleModal.value = true
+}
+
+// A bill or goal share is computed from the envelope: its amount changes in the envelope form
+const openRuleEnvelope = () => {
+  if (!selectedRuleEnvelope.value) return
+  showRuleModal.value = false
+  openEditEnvelopeModal(selectedRuleEnvelope.value)
 }
 
 const selectedRuleData = computed(() => selectedRule.value?.job.rules?.[selectedRule.value.index] ?? null)
@@ -952,7 +959,9 @@ onMounted(() => {
       :rule="selectedRuleData"
       :envelope="selectedRuleEnvelope"
       :otherSourcesCount="selectedRuleOtherSources"
+      :computedAmount="selectedRule?.amount ?? null"
       @close="showRuleModal = false"
+      @edit-envelope="openRuleEnvelope"
       @save="handleRuleSave"
       @remove="handleRuleRemove"
     />

@@ -1513,6 +1513,13 @@
       "save": "Enregistrer",
       "remove": "Retirer de cette paie",
       "confirmRemove": "Cette paie ne remplira plus l'enveloppe. Continuer?",
+      "computedLabel": "Montant calculé par Karo",
+      "computedPerPaycheck": "{amount} à la prochaine paie",
+      "computedFromBill": "Il vient du montant de la facture et de son échéancier, réparti sur les paies avant l'échéance. Pour le changer, modifiez la facture dans l'enveloppe.",
+      "computedFromGoal": "Il vient du montant cible et de la date cible de l'objectif : ce qui manque, divisé par les paies restantes. Pour le changer, modifiez l'objectif dans l'enveloppe.",
+      "computedFromWithdrawal": "Il vient du prélèvement automatique de l'enveloppe. Pour le changer, modifiez le prélèvement dans l'enveloppe.",
+      "computedSwitchHint": "Pour entrer un montant vous-même, choisissez « Montant fixe à chaque paie » ci-dessus.",
+      "editEnvelope": "Modifier l'enveloppe",
       "close": "Fermer"
     },
     "preview": {

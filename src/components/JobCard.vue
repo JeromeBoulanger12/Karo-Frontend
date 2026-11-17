@@ -41,7 +41,8 @@ const emit = defineEmits<{
   deposit: [job: Job]
   adjust: [job: Job]
   'set-main-job': [job: Job]
-  'edit-rule': [job: Job, ruleIndex: number]
+  // The amount is what the next paycheck puts in the envelope (paid plans), or null when not known
+  'edit-rule': [job: Job, ruleIndex: number, amount: Money | null]
 }>()
 
 const { t, locale } = useI18n()
@@ -68,9 +69,14 @@ watch([() => props.job, canPlan], async ([job, allowed]) => {
 }, { immediate: true })
 
 // The rule's amount on the next paycheck when known, else its setting (fixed amount, percentage, automatic)
-const ruleAmount = (rule: DistributionRule, index: number) => {
+const previewAmount = (rule: DistributionRule, index: number) => {
   const line = preview.value?.lines[index]
-  return line && line.envelopeId === rule.envelopeId ? formatCurrency(line.amount) : formatRuleAmount(rule)
+  return line && line.envelopeId === rule.envelopeId ? line.amount : null
+}
+
+const ruleAmount = (rule: DistributionRule, index: number) => {
+  const amount = previewAmount(rule, index)
+  return amount ? formatCurrency(amount) : formatRuleAmount(rule)
 }
 
 const frequencyLabel = computed(() => {
@@ -187,7 +193,7 @@ const formatDate = (dateString: string | undefined) => {
             type="button"
             class="job-rule-row job-rule-button"
             :title="t('jobCard.rules.editHint')"
-            @click="emit('edit-rule', job, index)"
+            @click="emit('edit-rule', job, index, previewAmount(rule, index))"
           >
             <span>{{ rule.envelopeName }}</span>
             <strong>{{ ruleAmount(rule, index) }} <i class="mdi mdi-pencil-outline"></i></strong>

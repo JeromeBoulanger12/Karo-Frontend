@@ -1429,6 +1429,13 @@
       "save": "Save",
       "remove": "Remove from this paycheck",
       "confirmRemove": "This paycheck will no longer fill the envelope. Continue?",
+      "computedLabel": "Amount computed by Karo",
+      "computedPerPaycheck": "{amount} on the next paycheck",
+      "computedFromBill": "It comes from the bill amount and its schedule, spread over the paychecks before the due date. To change it, edit the bill in the envelope.",
+      "computedFromGoal": "It comes from the goal's target amount and date: what is missing, divided by the paychecks left. To change it, edit the goal in the envelope.",
+      "computedFromWithdrawal": "It comes from the envelope's automatic withdrawal. To change it, edit the withdrawal in the envelope.",
+      "computedSwitchHint": "To enter an amount yourself, choose a fixed amount above.",
+      "editEnvelope": "Edit the envelope",
       "close": "Close"
     },
     "preview": {

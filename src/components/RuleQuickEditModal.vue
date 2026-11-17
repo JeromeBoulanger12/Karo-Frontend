@@ -7,7 +7,9 @@ import type { DistributionRule } from '../utils/distributionRules'
 
 type AllocationType = DistributionRule['allocationType']
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
+
+const isExclusive = (type: AllocationType) => type === 'BillProrated' || type === 'GoalProrated' || type === 'Automatic'
 
 const props = withDefaults(defineProps<{
   isOpen: boolean
@@ -18,20 +20,39 @@ const props = withDefaults(defineProps<{
   envelope?: EnvelopeSummary | null
   // Rules feeding the same envelope from other jobs: a bill share, goal share or automatic withdrawal can't sit beside them
   otherSourcesCount?: number
+  // What the next paycheck puts in the envelope with the saved rule (paid plans), or null when not known
+  computedAmount?: { amount: number; currency: string } | null
 }>(), {
   isOpen: false,
   submitError: '',
   job: null,
   rule: null,
   envelope: null,
-  otherSourcesCount: 0
+  otherSourcesCount: 0,
+  computedAmount: null
 })
 
 const emit = defineEmits<{
   close: []
   save: [payload: { allocationType: AllocationType; fixedAmount: number | null; percentageValue: number | null }]
   remove: []
+  'edit-envelope': []
 }>()
+
+const formatMoney = (money: { amount: number; currency: string }) =>
+  new Intl.NumberFormat(locale.value, { style: 'currency', currency: money.currency || 'CAD' }).format(money.amount)
+
+// Bill and goal shares and automatic withdrawals have no amount of their own: Karo computes it from the envelope
+const isComputed = computed(() => isExclusive(allocationType.value))
+// The amount shown is the saved rule's, so it only applies while its type is still selected
+const shownComputedAmount = computed(() =>
+  props.computedAmount && allocationType.value === props.rule?.allocationType ? props.computedAmount : null
+)
+const computedSource = computed(() => {
+  if (allocationType.value === 'BillProrated') return t('jobCard.ruleModal.computedFromBill')
+  if (allocationType.value === 'GoalProrated') return t('jobCard.ruleModal.computedFromGoal')
+  return t('jobCard.ruleModal.computedFromWithdrawal')
+})
 
 const allocationType = ref<AllocationType>('FixedAmount')
 const fixedAmount = ref<number | null>(null)
@@ -61,8 +82,6 @@ const allocationTypes = computed(() => [
   { value: 'FixedAmount', label: t('envelopes.form.fixedAmount') },
   { value: 'Percentage', label: t('envelopes.form.percentage') }
 ])
-
-const isExclusive = (type: AllocationType) => type === 'BillProrated' || type === 'GoalProrated' || type === 'Automatic'
 
 const handleSubmit = () => {
   error.value = ''
@@ -119,7 +138,19 @@ const handleSubmit = () => {
           <select v-model="allocationType">
             <option v-for="type in allocationTypes" :key="type.value" :value="type.value">{{ type.label }}</option>
           </select>
-          <small v-if="allocationType === 'GoalProrated'" class="form-hint">{{ t('envelopes.form.goalProratedHint') }}</small>
+        </div>
+
+        <!-- No amount field for a computed share: say where the amount comes from and how to change it -->
+        <div v-if="isComputed" class="computed-box">
+          <p class="computed-amount">
+            {{ t('jobCard.ruleModal.computedLabel') }}<template v-if="shownComputedAmount">{{ t('payModal.balanceColon') }}<strong>{{ t('jobCard.ruleModal.computedPerPaycheck', { amount: formatMoney(shownComputedAmount) }) }}</strong></template>
+          </p>
+          <p class="form-hint">{{ computedSource }}</p>
+          <p class="form-hint">{{ t('jobCard.ruleModal.computedSwitchHint') }}</p>
+          <button type="button" class="btn-secondary btn-envelope" @click="emit('edit-envelope')">
+            <i class="mdi mdi-pencil"></i>
+            {{ t('jobCard.ruleModal.editEnvelope') }}
+          </button>
         </div>
 
         <div v-if="allocationType === 'FixedAmount'" class="form-group">
@@ -241,7 +272,28 @@ const handleSubmit = () => {
 }
 
 .form-hint {
+  margin: 0;
   color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.computed-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.computed-amount {
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.btn-envelope {
+  align-self: flex-start;
 }
 
 .error-text {
