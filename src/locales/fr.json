@@ -1346,7 +1346,7 @@
     "errors": {
       "planRequired": "Choisissez le plan de chaque source de paie, ou retirez la source.",
       "duplicatePlan": "Un plan ne peut alimenter une même enveloppe qu'une seule fois.",
-      "exclusivePlan": "Une facture répartie ou un retrait automatique doit être la seule source de l'enveloppe.",
+      "exclusivePlan": "Une part de facture, une part d'objectif ou un retrait automatique doit être la seule source de l'enveloppe.",
       "nameRequired": "Le nom est requis",
       "billScheduleRequired": "Le type de calendrier est requis pour une facture",
       "annualDatesRequired": "Au moins une date de paiement est requise pour un calendrier annuel",
@@ -1505,7 +1505,15 @@
     "nextDeposit": "Prochain versement:",
     "rules": {
       "header": "Répartition",
-      "empty": "Aucune règle : cette paie n'alloue rien aux enveloppes."
+      "empty": "Aucune règle : cette paie n'alloue rien aux enveloppes.",
+      "editHint": "Modifier cette répartition"
+    },
+    "ruleModal": {
+      "subtitle": "Ce que chaque paie de « {job} » met dans cette enveloppe.",
+      "save": "Enregistrer",
+      "remove": "Retirer de cette paie",
+      "confirmRemove": "Cette paie ne remplira plus l'enveloppe. Continuer?",
+      "close": "Fermer"
     },
     "preview": {
       "total": "Total prélevé par paie",

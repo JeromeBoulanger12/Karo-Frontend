@@ -73,6 +73,11 @@ export const jobsApi = {
     return client.post(`/jobs/plans/${id}/rules`, data)
   },
 
+  // Changes a rule's allocation in place: it keeps its envelope and its position in the plan
+  updateRule(planId: string, ruleIndex: number, data: Record<string, unknown>) {
+    return client.put(`/jobs/plans/${planId}/rules/${ruleIndex}`, data)
+  },
+
   distributePaycheck(id: string, data: Record<string, unknown>) {
     return client.post(`/jobs/plans/${id}/distribute`, data)
   },

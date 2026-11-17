@@ -41,6 +41,7 @@ const emit = defineEmits<{
   deposit: [job: Job]
   adjust: [job: Job]
   'set-main-job': [job: Job]
+  'edit-rule': [job: Job, ruleIndex: number]
 }>()
 
 const { t, locale } = useI18n()
@@ -180,9 +181,17 @@ const formatDate = (dateString: string | undefined) => {
     <div class="job-rules">
       <div class="job-label">{{ t('jobCard.rules.header') }} <HelpTip topic="paycheckSplit" faq="allocation" /></div>
       <ul v-if="job.rules?.length" class="job-rules-list">
-        <li v-for="(rule, index) in job.rules" :key="index" class="job-rule-row">
-          <span>{{ rule.envelopeName }}</span>
-          <strong>{{ ruleAmount(rule, index) }}</strong>
+        <!-- A click opens a quick editor for the rule, without going through the envelope form -->
+        <li v-for="(rule, index) in job.rules" :key="index">
+          <button
+            type="button"
+            class="job-rule-row job-rule-button"
+            :title="t('jobCard.rules.editHint')"
+            @click="emit('edit-rule', job, index)"
+          >
+            <span>{{ rule.envelopeName }}</span>
+            <strong>{{ ruleAmount(rule, index) }} <i class="mdi mdi-pencil-outline"></i></strong>
+          </button>
         </li>
       </ul>
 
@@ -404,6 +413,41 @@ const formatDate = (dateString: string | undefined) => {
 .job-rule-row strong {
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+}
+
+.job-rule-button {
+  width: calc(100% + 0.5rem);
+  background: none;
+  border: none;
+  border-radius: 4px;
+  padding: 0.125rem 0.25rem;
+  margin: 0 -0.25rem;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.job-rule-button i {
+  color: var(--text-muted);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.job-rule-button:hover,
+.job-rule-button:focus-visible {
+  background: var(--surface);
+}
+
+.job-rule-button:hover i,
+.job-rule-button:focus-visible i {
+  opacity: 1;
+}
+
+/* Touch screens have no hover: keep the pencil visible so the rows look editable */
+@media (hover: none) {
+  .job-rule-button i {
+    opacity: 1;
+  }
 }
 
 .job-preview {

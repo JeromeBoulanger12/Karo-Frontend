@@ -19,6 +19,7 @@ import WithdrawEnvelopeModal from '../components/WithdrawEnvelopeModal.vue'
 import AddFundsModal from '../components/AddFundsModal.vue'
 import JobFormModal from '../components/JobFormModal.vue'
 import DepositPaycheckModal from '../components/DepositPaycheckModal.vue'
+import RuleQuickEditModal from '../components/RuleQuickEditModal.vue'
 import { accountsApi, toDebtProfileInput, fromDebtProfileDto } from '../api/accounts'
 import { envelopesApi } from '../api/envelopes'
 import { jobsApi } from '../api/jobs'
@@ -69,6 +70,9 @@ const showPayBillModal = ref(false)
 const showEnvelopeActionModal = ref(false)
 const selectedActionEnvelope = ref<any>(null)
 const selectedBill = ref<any>(null)
+// Quick edit of one distribution rule, opened from a job card
+const showRuleModal = ref(false)
+const selectedRule = ref<{ job: any; index: number } | null>(null)
 const showWithdrawModal = ref(false)
 const selectedWithdrawSource = ref<any>(null)
 const showAddFundsModal = ref(false)
@@ -385,6 +389,50 @@ const handleBillPay = async (amount: number) => {
   } catch (err) {
     console.error('Error recording payment:', err)
     reopenWithError(err, t('dashboard.errors.save'), () => (showPayBillModal.value = true))
+  }
+}
+
+// A rule clicked in a job card: change its allocation or remove it without opening the envelope form
+const openRuleModal = (job: any, index: number) => {
+  submitError.value = ''
+  selectedRule.value = { job, index }
+  showRuleModal.value = true
+}
+
+const selectedRuleData = computed(() => selectedRule.value?.job.rules?.[selectedRule.value.index] ?? null)
+const selectedRuleEnvelope = computed(() =>
+  envelopes.value.find(env => env.id === selectedRuleData.value?.envelopeId) ?? null
+)
+// Other jobs feeding the same envelope: a bill share, goal share or automatic withdrawal must be its only source
+const selectedRuleOtherSources = computed(() =>
+  jobs.value
+    .filter(job => job.id !== selectedRule.value?.job.id)
+    .reduce((count, job) => count + (job.rules ?? []).filter((r: any) => r.envelopeId === selectedRuleData.value?.envelopeId).length, 0)
+)
+
+const handleRuleSave = async (payload: { allocationType: string; fixedAmount: number | null; percentageValue: number | null }) => {
+  if (!selectedRule.value) return
+  const { job, index } = selectedRule.value
+  showRuleModal.value = false
+  try {
+    await jobsApi.updateRule(job.id, index, { ...payload, priority: selectedRuleData.value?.priority ?? 'Medium' })
+    await loadDashboard()
+  } catch (err) {
+    console.error('Error updating rule:', err)
+    reopenWithError(err, t('dashboard.errors.save'), () => (showRuleModal.value = true))
+  }
+}
+
+const handleRuleRemove = async () => {
+  if (!selectedRule.value) return
+  const { job, index } = selectedRule.value
+  showRuleModal.value = false
+  try {
+    await jobsApi.deleteRule(job.id, index)
+    await loadDashboard()
+  } catch (err) {
+    console.error('Error removing rule:', err)
+    reopenWithError(err, t('dashboard.errors.save'), () => (showRuleModal.value = true))
   }
 }
 
@@ -821,6 +869,7 @@ onMounted(() => {
             @deposit="openDepositPaycheckModal($event)"
             @adjust="openAdjustModal($event)"
             @set-main-job="handleSetMainJob($event)"
+            @edit-rule="openRuleModal"
           />
           <div class="add-job-card" @click="openAddJobModal('')">
             <i class="mdi mdi-plus"></i>
@@ -894,6 +943,18 @@ onMounted(() => {
       :title="isDebtPayment ? t('envelopes.payModal.titleDebt') : t('envelopes.payModal.title')"
       @close="showPayBillModal = false"
       @pay="handleBillPay"
+    />
+
+    <RuleQuickEditModal
+      :isOpen="showRuleModal"
+      :submitError="submitError"
+      :job="selectedRule?.job"
+      :rule="selectedRuleData"
+      :envelope="selectedRuleEnvelope"
+      :otherSourcesCount="selectedRuleOtherSources"
+      @close="showRuleModal = false"
+      @save="handleRuleSave"
+      @remove="handleRuleRemove"
     />
 
     <WithdrawEnvelopeModal

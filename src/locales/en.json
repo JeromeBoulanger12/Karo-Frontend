@@ -1354,7 +1354,7 @@
     "errors": {
       "planRequired": "Choose the plan of each paycheck source, or remove the source.",
       "duplicatePlan": "A plan can feed the same envelope only once.",
-      "exclusivePlan": "A bill share or automatic withdrawal must be the only source of the envelope.",
+      "exclusivePlan": "A bill share, goal share or automatic withdrawal must be the only source of the envelope.",
       "householdNotFound": "Household not found",
       "loadMembersFailed": "Failed to load members",
       "acceptInvitationFailed": "Failed to accept invitation",
@@ -1421,7 +1421,15 @@
     "nextDeposit": "Next deposit:",
     "rules": {
       "header": "Allocation",
-      "empty": "No rule: this paycheck allocates nothing to envelopes."
+      "empty": "No rule: this paycheck allocates nothing to envelopes.",
+      "editHint": "Edit this allocation"
+    },
+    "ruleModal": {
+      "subtitle": "What each \"{job}\" paycheck puts in this envelope.",
+      "save": "Save",
+      "remove": "Remove from this paycheck",
+      "confirmRemove": "This paycheck will no longer fill the envelope. Continue?",
+      "close": "Close"
     },
     "preview": {
       "total": "Total taken per paycheck",
