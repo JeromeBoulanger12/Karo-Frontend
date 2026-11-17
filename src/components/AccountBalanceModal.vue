@@ -57,6 +57,7 @@ watch(() => props.isOpen, (open) => {
   if (open && !props.submitError) note.value = ''
 })
 
+// Called by the Save button and by Enter in any field; a balance of 0 still needs a second press to confirm
 const handleSubmit = () => {
   if (needsZeroConfirmation.value && !zeroConfirmed.value) {
     zeroConfirmed.value = true
@@ -106,12 +107,12 @@ const formatCurrency = (value: number) => {
 
         <div v-if="mode === 'set'" class="form-group">
           <label>{{ t('accountBalance.newBalanceLabel') }}</label>
-          <input v-model.number="formData.balance" type="number" step="0.01" placeholder="0.00" />
+          <input v-model.number="formData.balance" type="number" step="0.01" placeholder="0.00" @keydown.enter.prevent="handleSubmit" />
         </div>
 
         <div v-else class="form-group">
           <label>{{ t('accountBalance.adjustLabel') }}</label>
-          <input v-model.number="adjustment" type="number" step="0.01" placeholder="0.00" />
+          <input v-model.number="adjustment" type="number" step="0.01" placeholder="0.00" @keydown.enter.prevent="handleSubmit" />
           <small class="form-hint">{{ t('accountBalance.adjustHint') }}</small>
         </div>
 
@@ -126,7 +127,7 @@ const formatCurrency = (value: number) => {
 
         <div class="form-group">
           <label>{{ t('accountBalance.noteLabel') }}</label>
-          <input v-model="note" type="text" maxlength="500" :placeholder="t('accountBalance.notePlaceholder')" />
+          <input v-model="note" type="text" maxlength="500" :placeholder="t('accountBalance.notePlaceholder')" @keydown.enter.prevent="handleSubmit" />
         </div>
       </div>
 
