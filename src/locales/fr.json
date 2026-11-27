@@ -1592,7 +1592,20 @@
     "link": "Lier"
   },
   "loginPage": {
-    "sessionExpired": "Ta session a expiré. Reconnecte-toi pour continuer."
+    "sessionExpired": "Ta session a expiré. Reconnecte-toi pour continuer.",
+    "heroTitle": "Ton budget, une enveloppe à la fois.",
+    "heroSubtitle": "Chaque paie se répartit toute seule dans tes enveloppes. Tu sais toujours ce qui est prêt et ce qu’il te reste.",
+    "previewRent": "Loyer",
+    "previewGroceries": "Épicerie",
+    "previewTrip": "Voyage d’été",
+    "pointEnvelopes": "Des enveloppes pour chaque facture et chaque objectif",
+    "pointPaycheck": "La paie répartie automatiquement, au bon montant",
+    "pointPrivacy": "Tes données hébergées au Québec",
+    "welcomeBack": "Bon retour !",
+    "subtitle": "Connecte-toi pour retrouver ton budget.",
+    "showPassword": "Afficher le mot de passe",
+    "hidePassword": "Masquer le mot de passe",
+    "createAccount": "Créer un compte"
   },
   "membersPage": {
     "loading": "Chargement",

@@ -1508,7 +1508,20 @@
     "link": "Link"
   },
   "loginPage": {
-    "sessionExpired": "Your session has expired. Log in again to continue."
+    "sessionExpired": "Your session has expired. Log in again to continue.",
+    "heroTitle": "Your budget, one envelope at a time.",
+    "heroSubtitle": "Every paycheck splits itself into your envelopes. You always know what is ready and what is left.",
+    "previewRent": "Rent",
+    "previewGroceries": "Groceries",
+    "previewTrip": "Summer trip",
+    "pointEnvelopes": "Envelopes for every bill and every goal",
+    "pointPaycheck": "Your paycheck split automatically, by the right amount",
+    "pointPrivacy": "Your data hosted in Québec",
+    "welcomeBack": "Welcome back!",
+    "subtitle": "Sign in to get back to your budget.",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "createAccount": "Create an account"
   },
   "membersPage": {
     "loading": "Loading",
