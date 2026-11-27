@@ -202,8 +202,8 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { createClient } from '@supabase/supabase-js'
 import client from '../api/client'
+import { supabase } from '../api/supabase'
 import { billingApi, billingErrorMessage, profileReturnUrl, type BillingInterval, type PaidTier, type PlanPrice } from '../api/billing'
 import { userSettingsApi } from '../api/userSettings'
 import { LEGAL_VERSION } from '../legal/version'
@@ -212,9 +212,6 @@ const { t } = useI18n()
 const router = useRouter()
 const route = useRoute()
 
-const SUPABASE_URL = 'https://ikxnkhvvlsfqnwervleg.supabase.co'
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlreG5raHZ2bHNmcW53ZXJ2bGVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA0NjMwMTQsImV4cCI6MjEwNjAzOTAxNH0.EyDhkDC9ENeXrFeGKxDBVYnggYhTw5OyG-9W0TECTP8'
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
 const loading = ref(false)
 const error = ref('')
