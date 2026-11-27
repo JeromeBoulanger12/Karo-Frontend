@@ -44,10 +44,10 @@ export const LEGAL_DOCUMENTS: Record<'privacy' | 'terms', Record<'fr' | 'en', Le
         {
           heading: '4. Fournisseurs qui traitent vos renseignements',
           paragraphs: [
-            'Supabase : authentification et base de données. Actuellement hébergée aux États-Unis; migration vers le Canada prévue au lancement.',
-            'Microsoft Azure : hébergement de l\'API, région Canada central.',
+            'Supabase : authentification et base de données, hébergées à Montréal (Québec).',
+            'Microsoft Azure : hébergement de l\'API, région Canada Centre (Toronto, Ontario, hors Québec).',
             "GitHub Pages : hébergement de l'interface.",
-            "Resend : envoi des courriels d'invitation, hors Québec (États-Unis).",
+            "Resend : envoi des courriels (invitations, confirmations, alertes), hors Québec (États-Unis).",
             "Stripe : paiement de l'abonnement; Stripe agit comme marchand de référence (Managed Payments) et traite vos données de paiement, y compris les taxes de vente."
           ]
         },
@@ -119,10 +119,10 @@ export const LEGAL_DOCUMENTS: Record<'privacy' | 'terms', Record<'fr' | 'en', Le
         {
           heading: '4. Providers that process your information',
           paragraphs: [
-            'Supabase: authentication and database. Currently hosted in the United States; a move to Canada is planned for launch.',
-            'Microsoft Azure: API hosting, Canada Central region.',
+            'Supabase: authentication and database, hosted in Montréal (Quebec).',
+            'Microsoft Azure: API hosting, Canada Central region (Toronto, Ontario, outside Quebec).',
             'GitHub Pages: hosting of the web interface.',
-            'Resend: sends invitation emails, outside Quebec (United States).',
+            'Resend: sends emails (invitations, confirmations, alerts), outside Quebec (United States).',
             'Stripe: subscription payments; Stripe acts as merchant of record (Managed Payments) and processes payment details, sales taxes included.'
           ]
         },
