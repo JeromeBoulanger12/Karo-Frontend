@@ -174,34 +174,17 @@ const { t } = useI18n()
 const loading = ref(false)
 const saving = ref(false)
 
+// Stripe is the only provider; its keys live in the Azure app settings (Stripe__SecretKey, Stripe__WebhookSecret)
 const paymentProviders = [
   {
-    id: 'Mock',
-    name: 'Mock Provider (Testing)',
-    description: 'Test environment without real payments',
-    icon: 'mdi mdi-test-tube'
-  },
-  {
-    id: 'LemonSqueezy',
-    name: 'Lemon Squeezy',
-    description: 'Merchant of Record - handles payments & taxes globally',
-    icon: 'mdi mdi-lemon'
-  },
-  {
     id: 'Stripe',
-    name: 'Stripe',
-    description: 'Industry-leading payment processing',
+    name: 'Stripe (Managed Payments)',
+    description: 'Merchant of record: Stripe collects the taxes and handles refunds and disputes',
     icon: 'mdi mdi-credit-card'
-  },
-  {
-    id: 'Paddle',
-    name: 'Paddle',
-    description: 'Global payments platform',
-    icon: 'mdi mdi-wallet'
   }
 ]
 
-const currentProvider = ref('Mock')
+const currentProvider = ref('Stripe')
 const selectedProvider = ref<any>(null)
 const providerConfig = ref({
   apiKey: '',

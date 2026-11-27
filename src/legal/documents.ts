@@ -48,7 +48,7 @@ export const LEGAL_DOCUMENTS: Record<'privacy' | 'terms', Record<'fr' | 'en', Le
             'Microsoft Azure : hébergement de l\'API, région Canada central.',
             "GitHub Pages : hébergement de l'interface.",
             "Resend : envoi des courriels d'invitation, hors Québec (États-Unis).",
-            "Lemon Squeezy : paiement de l'abonnement; ce fournisseur agit comme marchand de référence et traite vos données de paiement."
+            "Stripe : paiement de l'abonnement; Stripe agit comme marchand de référence (Managed Payments) et traite vos données de paiement, y compris les taxes de vente."
           ]
         },
         {
@@ -123,7 +123,7 @@ export const LEGAL_DOCUMENTS: Record<'privacy' | 'terms', Record<'fr' | 'en', Le
             'Microsoft Azure: API hosting, Canada Central region.',
             'GitHub Pages: hosting of the web interface.',
             'Resend: sends invitation emails, outside Quebec (United States).',
-            'Lemon Squeezy: subscription payments; it acts as merchant of record and processes payment details.'
+            'Stripe: subscription payments; Stripe acts as merchant of record (Managed Payments) and processes payment details, sales taxes included.'
           ]
         },
         {

@@ -1735,5 +1735,36 @@
         "action": "Deposit"
       }
     }
+  },
+  "billing": {
+    "tiers": {
+      "Free": "Free",
+      "Pro": "Pro",
+      "Family": "Family"
+    },
+    "interval": "Billing frequency",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "perMonth": "month",
+    "perYear": "year",
+    "billedMonthly": "Billed monthly",
+    "billedYearly": "Billed yearly",
+    "renewsOn": "Renews on {date}",
+    "endsOn": "Cancelled: stays active until {date}",
+    "granted": "Access granted by an administrator",
+    "grantedUntil": "Access granted by an administrator until {date}",
+    "manage": "Manage my subscription",
+    "manageHint": "Change plan or card, or cancel, on Stripe’s secure page.",
+    "choose": "Choose {plan}",
+    "taxesHint": "Taxes calculated at checkout. Secure payment by Stripe, cancel anytime.",
+    "pending": "Payment received. Your plan will be active in a few moments.",
+    "activated": "Your subscription is active. Thank you!",
+    "cancelled": "Payment cancelled: nothing was charged.",
+    "loadFailed": "Your subscription could not be loaded.",
+    "checkoutFailed": "The payment page could not be opened. Try again later.",
+    "portalFailed": "The subscription page could not be opened. Try again later.",
+    "stripeMonthlyPriceId": "Stripe monthly price (price_...)",
+    "stripeAnnualPriceId": "Stripe yearly price (price_...)",
+    "stripePricesHint": "Ids of the prices created in Stripe. Without a price, that interval is not offered."
   }
 }

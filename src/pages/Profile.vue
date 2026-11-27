@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { useAuth } from '../composables/useAuth'
 import client from '../api/client'
 import { userSettingsApi, listTimeZones } from '../api/userSettings'
+import SubscriptionPlanCard from '../components/SubscriptionPlanCard.vue'
 import '../styles/dashboard.css'
 
 const { t, locale } = useI18n()
@@ -39,26 +40,9 @@ const province = ref('')
 const postalCode = ref('')
 const country = ref('')
 
-// Subscriptions and orders
-const subscriptions = ref<any[]>([])
+// Orders (no purchase history is stored yet)
 const orders = ref<any[]>([])
 const loadingSubscriptions = ref(false)
-
-const loadSubscriptionsAndOrders = async () => {
-  loadingSubscriptions.value = true
-  try {
-    // Fetch current subscription
-    const subResponse = await client.get('/subscriptions/my-subscription')
-    if (subResponse.data) {
-      subscriptions.value = [subResponse.data]
-    }
-  } catch (err) {
-    console.error('Error loading subscription:', err)
-    // If no subscription, that's ok - user is on free tier
-  } finally {
-    loadingSubscriptions.value = false
-  }
-}
 
 const loadProfile = async () => {
   try {
@@ -83,7 +67,6 @@ onMounted(async () => {
   if (user.value) {
     email.value = user.value.email
     await loadProfile()
-    await loadSubscriptionsAndOrders()
   }
 })
 
@@ -276,56 +259,8 @@ const confirmDeleteAccount = async () => {
         </div>
       </div>
 
-      <!-- Subscription Card -->
-      <div class="card">
-        <div class="card-header">
-          <i class="mdi mdi-star"></i>
-          <h2>{{ t('profile.subscription') }}</h2>
-        </div>
-
-        <div class="card-body">
-          <v-progress-linear
-            v-if="loadingSubscriptions"
-            indeterminate
-          ></v-progress-linear>
-
-          <div v-else-if="subscriptions.length > 0" class="subscription-list">
-            <div v-for="sub in subscriptions" :key="sub.id" class="subscription-item">
-              <div class="subscription-name">{{ sub.tier || sub.planName || t('profilePage.subscription.planFallback') }}</div>
-              <div class="subscription-details">
-                <div class="detail-row">
-                  <strong>{{ t('common.status') }}:</strong>
-                  <v-chip
-                    :color="sub.status === 'active' ? 'success' : 'warning'"
-                    label
-                    small
-                  >
-                    {{ sub.status || t('profilePage.subscription.statusFallback') }}
-                  </v-chip>
-                </div>
-                <div v-if="sub.amount" class="detail-row">
-                  <strong>{{ t('profile.amount') }}:</strong>
-                  <span>{{ sub.amount }}{{ sub.currency || 'CAD' }} / {{ sub.billingPeriod || t('profilePage.subscription.billingPeriodFallback') }}</span>
-                </div>
-                <div v-if="sub.renewalDate" class="detail-row">
-                  <strong>{{ t('profile.renewal') }}:</strong>
-                  <span>{{ new Date(sub.renewalDate).toLocaleDateString(locale) }}</span>
-                </div>
-                <div v-if="sub.startDate" class="detail-row">
-                  <strong>{{ t('profile.startDate') }}:</strong>
-                  <span>{{ new Date(sub.startDate).toLocaleDateString(locale) }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div v-else class="empty-placeholder">
-            <i class="mdi mdi-inbox-outline"></i>
-            <p>{{ t('profile.noSubscriptions') }}</p>
-            <small style="display: block; margin-top: 0.5rem; color: var(--text-muted);">{{ t('profilePage.subscription.freePlanNote') }}</small>
-          </div>
-        </div>
-      </div>
+      <!-- Subscription Card: current plan, Stripe checkout and customer portal -->
+      <SubscriptionPlanCard />
     </div>
 
     <!-- Purchase History Section -->

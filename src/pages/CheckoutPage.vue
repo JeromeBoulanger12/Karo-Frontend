@@ -17,9 +17,14 @@
             <p class="plan-desc">{{ selectedPlan?.description }}</p>
           </div>
 
+          <div v-if="isPaidPlan && yearlyAvailable" class="interval-toggle" role="group" :aria-label="t('billing.interval')">
+            <button type="button" :class="{ active: interval === 'month' }" @click="interval = 'month'">{{ t('billing.monthly') }}</button>
+            <button type="button" :class="{ active: interval === 'year' }" @click="interval = 'year'">{{ t('billing.yearly') }}</button>
+          </div>
+
           <div class="plan-price">
-            <span class="price">${{ selectedPlan?.price?.toFixed(2) }}</span>
-            <span class="period">/{{ t('landing.month') }}</span>
+            <span class="price">${{ planPrice.toFixed(2) }}</span>
+            <span class="period">/{{ interval === 'year' ? t('billing.perYear') : t('landing.month') }}</span>
           </div>
 
           <div class="plan-features">
@@ -37,7 +42,7 @@
         <div class="order-total">
           <div class="total-row">
             <span>{{ t('checkout.subtotal') }}</span>
-            <span>${{ selectedPlan?.price?.toFixed(2) }}</span>
+            <span>${{ planPrice.toFixed(2) }}</span>
           </div>
           <div class="total-row">
             <span>{{ t('checkout.tax') }}</span>
@@ -45,7 +50,7 @@
           </div>
           <div class="total-row grand-total">
             <span>{{ t('checkout.total') }}</span>
-            <span>${{ selectedPlan?.price?.toFixed(2) }}</span>
+            <span>${{ planPrice.toFixed(2) }}</span>
           </div>
         </div>
       </div>
@@ -199,6 +204,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { createClient } from '@supabase/supabase-js'
 import client from '../api/client'
+import { billingApi, billingErrorMessage, profileReturnUrl, type BillingInterval, type PaidTier, type PlanPrice } from '../api/billing'
 import { userSettingsApi } from '../api/userSettings'
 import { LEGAL_VERSION } from '../legal/version'
 
@@ -267,33 +273,23 @@ const plansMap = {
   }
 }
 
-const selectedPlan = computed(() => {
+const planKey = computed(() => {
   const planParam = (route.query.plan as string)?.toLowerCase() || 'free'
-  return plansMap[planParam as keyof typeof plansMap] || plansMap.free
+  return (planParam in plansMap ? planParam : 'free') as keyof typeof plansMap
 })
+const selectedPlan = computed(() => plansMap[planKey.value])
+const paidTier = computed<PaidTier | null>(() => (planKey.value === 'pro' ? 'Pro' : planKey.value === 'family' ? 'Family' : null))
+const isPaidPlan = computed(() => paidTier.value !== null)
 
-const initiateLemonSqueezyCheckout = async (email: string, tier: string, householdId: string): Promise<string | null> => {
-  try {
-    const returnUrl = `${window.location.origin}/dashboard?checkout=success&tier=${tier}&household=${householdId}`
-
-    const response = await client.post('/checkout/lemon-squeezy', {
-      tier: tier,
-      returnUrl: returnUrl
-    })
-
-    // Check if this is a Mock provider response
-    if (response.data.success && response.data.message?.includes('Mock provider')) {
-      console.log('[CHECKOUT] Mock provider: Subscription created, redirecting to dashboard')
-      return response.data.checkoutUrl // Will be /dashboard URL
-    }
-
-    return response.data.checkoutUrl
-  } catch (err) {
-    console.error('Failed to create checkout:', err)
-    error.value = err instanceof Error ? err.message : t('checkout.checkout_failed')
-    return null
-  }
-}
+// Prices come from the tier configuration once it loads; the figures above are the fallback
+const interval = ref<BillingInterval>(route.query.interval === 'year' ? 'year' : 'month')
+const plans = ref<PlanPrice[]>([])
+const tierPlan = computed(() => plans.value.find(p => p.tier === paidTier.value))
+const yearlyAvailable = computed(() => !!tierPlan.value?.stripeAnnualPriceId)
+const planPrice = computed(() => {
+  if (!tierPlan.value) return selectedPlan.value.price
+  return interval.value === 'year' ? tierPlan.value.annualPrice : tierPlan.value.monthlyPrice
+})
 
 const handleCheckout = async () => {
   // Validation
@@ -329,13 +325,8 @@ const handleCheckout = async () => {
     const accessToken = data.session.access_token
     localStorage.setItem('token', accessToken)
 
-    // 2. Bootstrap user with selected tier
-    const tierName = (route.query.plan as string) || 'Free'
-    console.log('[CHECKOUT] Bootstrap with tier:', tierName)
-    const bootstrapResponse = await client.post('/auth/bootstrap', {
-      email: form.value.email,
-      subscriptionTier: tierName
-    })
+    // 2. Create the account; it starts on Free and Stripe's confirmation upgrades it
+    await client.post('/auth/bootstrap', { email: form.value.email })
 
     // 3. Update user profile with first and last name
     if (form.value.firstName || form.value.lastName) {
@@ -361,25 +352,19 @@ const handleCheckout = async () => {
       console.warn('[CHECKOUT] Address or time zone not saved:', profileErr)
     }
 
-    // 4. Handle payment and redirection based on tier
-    const planName = selectedPlan.value.name.toLowerCase()
-
-    if (planName === 'free') {
-      // Free plan: redirect to dashboard
+    // 4. Free goes straight to the dashboard; a paid plan continues to the Stripe checkout
+    if (!paidTier.value) {
       await router.push('/dashboard')
-    } else if (planName === 'pro' || planName === 'family') {
-      // Paid plans: redirect to Lemon Squeezy checkout
-      const checkoutUrl = await initiateLemonSqueezyCheckout(
-        form.value.email,
-        tierName,
-        bootstrapResponse.data.householdId
-      )
-      if (checkoutUrl) {
-        window.location.href = checkoutUrl
-      } else {
-        // Fallback if checkout URL generation fails
-        await router.push('/dashboard')
-      }
+      return
+    }
+
+    try {
+      window.location.href = await billingApi.startCheckout(paidTier.value, interval.value, profileReturnUrl())
+    } catch (checkoutErr) {
+      // The account exists: the user can subscribe from their profile
+      console.error('Checkout error:', checkoutErr)
+      error.value = billingErrorMessage(checkoutErr, t('checkout.checkout_failed'))
+      await router.push('/profile')
     }
   } catch (err) {
     error.value = err instanceof Error ? err.message : t('checkout.checkout_failed')
@@ -390,6 +375,7 @@ const handleCheckout = async () => {
 }
 
 onMounted(() => {
+  billingApi.getPlans().then(result => (plans.value = result)).catch(() => {})
   // If already logged in, redirect to dashboard
   if (localStorage.getItem('token')) {
     router.push({ name: 'Dashboard' })
@@ -472,6 +458,26 @@ onMounted(() => {
   align-items: baseline;
   gap: 5px;
   margin: 20px 0;
+}
+
+.interval-toggle {
+  display: inline-flex;
+  margin-top: 16px;
+  border: 1px solid #ddd;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.interval-toggle button {
+  padding: 6px 16px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.interval-toggle button.active {
+  background: #3b82f6;
+  color: #fff;
 }
 
 .price {

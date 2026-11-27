@@ -1819,5 +1819,36 @@
         "action": "Déposer"
       }
     }
+  },
+  "billing": {
+    "tiers": {
+      "Free": "Gratuit",
+      "Pro": "Pro",
+      "Family": "Famille"
+    },
+    "interval": "Fréquence de facturation",
+    "monthly": "Mensuel",
+    "yearly": "Annuel",
+    "perMonth": "mois",
+    "perYear": "an",
+    "billedMonthly": "Facturé chaque mois",
+    "billedYearly": "Facturé chaque année",
+    "renewsOn": "Se renouvelle le {date}",
+    "endsOn": "Annulé : reste actif jusqu’au {date}",
+    "granted": "Accès accordé par un administrateur",
+    "grantedUntil": "Accès accordé par un administrateur jusqu’au {date}",
+    "manage": "Gérer mon abonnement",
+    "manageHint": "Changer de forfait, de carte ou annuler, sur la page sécurisée de Stripe.",
+    "choose": "Choisir {plan}",
+    "taxesHint": "Taxes calculées au paiement. Paiement sécurisé par Stripe, annulable en tout temps.",
+    "pending": "Paiement reçu. Ton forfait sera activé dans quelques instants.",
+    "activated": "Ton abonnement est actif. Merci !",
+    "cancelled": "Paiement annulé : aucun montant n’a été facturé.",
+    "loadFailed": "Impossible de charger ton abonnement.",
+    "checkoutFailed": "La page de paiement n’a pas pu s’ouvrir. Réessaie plus tard.",
+    "portalFailed": "La page de gestion de l’abonnement n’a pas pu s’ouvrir. Réessaie plus tard.",
+    "stripeMonthlyPriceId": "Prix Stripe mensuel (price_...)",
+    "stripeAnnualPriceId": "Prix Stripe annuel (price_...)",
+    "stripePricesHint": "Identifiants des prix créés dans Stripe. Sans prix, l’intervalle n’est pas offert."
   }
 }

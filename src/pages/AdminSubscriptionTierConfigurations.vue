@@ -53,6 +53,29 @@
                   class="form-control"
                 />
               </div>
+              <template v-if="tier.tier !== 'Free'">
+                <div class="form-group">
+                  <label>{{ t('billing.stripeMonthlyPriceId') }}</label>
+                  <input
+                    v-model.trim="tier.stripeMonthlyPriceId"
+                    type="text"
+                    placeholder="price_..."
+                    :disabled="editingId !== tier.id"
+                    class="form-control"
+                  />
+                </div>
+                <div class="form-group">
+                  <label>{{ t('billing.stripeAnnualPriceId') }}</label>
+                  <input
+                    v-model.trim="tier.stripeAnnualPriceId"
+                    type="text"
+                    placeholder="price_..."
+                    :disabled="editingId !== tier.id"
+                    class="form-control"
+                  />
+                </div>
+                <small>{{ t('billing.stripePricesHint') }}</small>
+              </template>
             </div>
 
             <div class="limits-section">
@@ -303,6 +326,8 @@ interface SubscriptionTier {
   tier: string
   monthlyPrice: number
   annualPrice: number
+  stripeMonthlyPriceId: string | null
+  stripeAnnualPriceId: string | null
   maxAccounts: number
   maxEnvelopes: number
   maxPaycheckJobs: number
@@ -405,6 +430,9 @@ const saveEdit = async (tier: SubscriptionTier) => {
       body: JSON.stringify({
         monthlyPrice: tier.monthlyPrice,
         annualPrice: tier.annualPrice,
+        // Blank clears a price (the backend reads null as unchanged)
+        stripeMonthlyPriceId: tier.stripeMonthlyPriceId ?? '',
+        stripeAnnualPriceId: tier.stripeAnnualPriceId ?? '',
         maxAccounts: tier.maxAccounts,
         maxEnvelopes: tier.maxEnvelopes,
         maxPaycheckJobs: tier.maxPaycheckJobs,
