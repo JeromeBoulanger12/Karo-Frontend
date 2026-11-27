@@ -1,14 +1,5 @@
 import client from './client'
 
-// Mirrors the backend PostalAddress (camelCase JSON). Every part is optional.
-export interface PostalAddress {
-  street: string | null
-  city: string | null
-  province: string | null
-  postalCode: string | null
-  country: string | null
-}
-
 // Mirrors the backend UserProfileDto
 export interface UserProfile {
   email: string
@@ -16,7 +7,6 @@ export interface UserProfile {
   lastName: string
   timeZoneId: string
   notificationsEnabled: boolean
-  address: PostalAddress | null
 }
 
 export const userSettingsApi = {
@@ -29,9 +19,6 @@ export const userSettingsApi = {
   // The language is left out when not given, so the stored one is kept
   updatePreferences(timeZoneId: string, notificationsEnabled: boolean, language?: string) {
     return client.put('/auth/preferences', { timeZoneId, notificationsEnabled, language })
-  },
-  updateAddress(address: PostalAddress) {
-    return client.put('/auth/address', address)
   },
   // Proof of consent: the version of the policy and terms the user accepted
   recordConsent(version: string) {
