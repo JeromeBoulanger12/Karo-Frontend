@@ -35,5 +35,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
+          # Writes the CNAME file on each deploy, so the custom domain is not lost when gh-pages is replaced
+          cname: karobudget.ca
           user_name: 'github-actions[bot]'
           user_email: '41898282+github-actions[bot]@users.noreply.github.com'

@@ -3,7 +3,8 @@ import { defineConfig } from 'vite'
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: '/Karo-Frontend/',
+  // Served at the root of karobudget.ca
+  base: '/',
   plugins: [vue()],
   server: {
     proxy: {
