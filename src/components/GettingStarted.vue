@@ -3,7 +3,7 @@ import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 // Checklist of the first things to set up. Each item checks itself from the dashboard data, so it also
-// guides people who skipped the setup wizard or joined a household that already had accounts.
+// fits people who joined a household that already had accounts.
 const props = defineProps<{
   accounts: any[]
   envelopes: any[]

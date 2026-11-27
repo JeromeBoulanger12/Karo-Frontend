@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, inject } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
 import PageHeader from '../components/PageHeader.vue'
 import AccountCardContainer from '../components/AccountCardContainer.vue'
 import JobCard from '../components/JobCard.vue'
@@ -38,7 +37,6 @@ const formatCurrency = (value: number) => {
 }
 
 const { t, locale } = useI18n()
-const router = useRouter()
 
 // Data refs
 const accounts = ref<any[]>([])
@@ -592,12 +590,6 @@ const loadDashboard = async () => {
 
     accounts.value = overview.accounts || []
 
-    // No account yet: send the user through the setup wizard (unless they finished or skipped it)
-    if (accounts.value.length === 0 && !overview.onboardingCompleted) {
-      router.replace('/onboarding')
-      return
-    }
-
     envelopes.value = overview.envelopes || []
     dashboardStats.value = overview.stats || {}
     accountHistory.value = overview.accountHistory || {}
@@ -776,7 +768,7 @@ onMounted(() => {
         </template>
       </PageHeader>
 
-      <!-- First steps: checks itself from the data, for those who skipped the wizard or joined a household -->
+      <!-- First steps: guides a new user through the setup, checking itself from the dashboard data -->
       <GettingStarted
         :accounts="accounts"
         :envelopes="envelopes"

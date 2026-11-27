@@ -23,7 +23,6 @@ import Household from './pages/Household.vue'
 import InviteUser from './pages/InviteUser.vue'
 import PendingInvitations from './pages/PendingInvitations.vue'
 import DashboardNew from './pages/DashboardNew.vue'
-import Onboarding from './pages/Onboarding.vue'
 import Faq from './pages/Faq.vue'
 import LegalPage from './pages/LegalPage.vue'
 import AdminDashboard from './pages/AdminDashboard.vue'
@@ -53,7 +52,8 @@ const routes = [
 
   // Main app routes
   { path: '/dashboard', component: DashboardNew },
-  { path: '/onboarding', component: Onboarding },
+  // The setup wizard was replaced by the first-steps card on the dashboard
+  { path: '/onboarding', redirect: '/dashboard' },
   { path: '/faq', component: Faq },
   { path: '/profile', component: Profile },
   { path: '/paiement', component: PaymentPage },
