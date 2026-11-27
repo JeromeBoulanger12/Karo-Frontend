@@ -13,6 +13,7 @@ interface Envelope {
   id: string
   name: string
   balance?: Money
+  targetAmount?: Money | null
 }
 
 const props = withDefaults(defineProps<{
@@ -46,10 +47,16 @@ const paid = computed(() => (amount.value === null || Number.isNaN(amount.value)
 const remainingAfterPayment = computed(() => balance.value - paid.value)
 const owedAfterPayment = computed(() => (props.debtOwed ?? 0) - paid.value)
 
-// A bill starts with the full envelope balance; a card starts with what is owed on it
+// A bill starts with its amount, so what the envelope holds beyond it stays for the next one
+const billAmount = computed(() => {
+  const target = props.bill?.targetAmount?.amount ?? 0
+  return target > 0 ? Math.min(target, balance.value) : balance.value
+})
+
+// A card starts with what is owed on it
 watch(() => props.isOpen, (open) => {
   if (open && !props.submitError) {
-    amount.value = isDebt.value ? props.debtOwed : balance.value
+    amount.value = isDebt.value ? props.debtOwed : billAmount.value
     error.value = ''
   }
 })
