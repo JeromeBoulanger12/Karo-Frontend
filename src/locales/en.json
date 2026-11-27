@@ -1779,5 +1779,13 @@
     "stripeMonthlyPriceId": "Stripe monthly price (price_...)",
     "stripeAnnualPriceId": "Stripe yearly price (price_...)",
     "stripePricesHint": "Ids of the prices created in Stripe. Without a price, that interval is not offered."
+  },
+  "payment": {
+    "title": "Payment",
+    "back": "Back to my profile",
+    "secure": "Secure, encrypted payment",
+    "taxes": "Taxes calculated for your province",
+    "cancelAnytime": "Cancel anytime",
+    "loading": "Loading the payment form…"
   }
 }

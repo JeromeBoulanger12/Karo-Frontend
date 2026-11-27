@@ -1863,5 +1863,13 @@
     "stripeMonthlyPriceId": "Prix Stripe mensuel (price_...)",
     "stripeAnnualPriceId": "Prix Stripe annuel (price_...)",
     "stripePricesHint": "Identifiants des prix créés dans Stripe. Sans prix, l’intervalle n’est pas offert."
+  },
+  "payment": {
+    "title": "Paiement",
+    "back": "Retour à mon profil",
+    "secure": "Paiement sécurisé et chiffré",
+    "taxes": "Taxes calculées selon ta province",
+    "cancelAnytime": "Annulable en tout temps",
+    "loading": "Chargement du formulaire de paiement…"
   }
 }

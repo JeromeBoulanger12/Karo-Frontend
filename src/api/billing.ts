@@ -40,6 +40,12 @@ export const billingApi = {
   startCheckout(tier: PaidTier, interval: BillingInterval, returnUrl = profileReturnUrl()) {
     return client.post<{ url: string }>('/billing/checkout', { tier, interval, returnUrl }).then(r => r.data.url)
   },
+  // The same checkout, shown inside Karo's payment page: the form's secret and Stripe's public key
+  startEmbeddedCheckout(tier: PaidTier, interval: BillingInterval, returnUrl = profileReturnUrl()) {
+    return client
+      .post<{ clientSecret: string; publishableKey: string }>('/billing/checkout/embedded', { tier, interval, returnUrl })
+      .then(r => r.data)
+  },
   // Returns the Stripe customer portal (cancel, change plan or card)
   openPortal(returnUrl = profileReturnUrl()) {
     return client.post<{ url: string }>('/billing/portal', { returnUrl }).then(r => r.data.url)

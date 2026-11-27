@@ -53,7 +53,7 @@ onMounted(async () => {
     const checkout = route.query.checkout
     if (checkout) {
       // Clear the flag so a refresh does not show the message again
-      router.replace({ query: { ...route.query, checkout: undefined } })
+      router.replace({ query: { ...route.query, checkout: undefined, session_id: undefined } })
       if (checkout === 'success') {
         notice.value = t('billing.pending')
         await waitForActivation()
@@ -73,14 +73,8 @@ onMounted(async () => {
 })
 
 const subscribe = async (tier: PaidTier) => {
-  redirecting.value = true
-  error.value = null
-  try {
-    window.location.href = await billingApi.startCheckout(tier, interval.value)
-  } catch (err) {
-    error.value = billingErrorMessage(err, t('billing.checkoutFailed'))
-    redirecting.value = false
-  }
+  // Karo's payment page shows Stripe's form and reports a refusal itself
+  await router.push({ path: '/paiement', query: { tier, interval: interval.value } })
 }
 
 const manage = async () => {

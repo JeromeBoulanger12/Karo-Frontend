@@ -205,7 +205,7 @@ import { useI18n } from 'vue-i18n'
 import client from '../api/client'
 import { supabase } from '../api/supabase'
 import { useAuth } from '../composables/useAuth'
-import { billingApi, profileReturnUrl, type BillingInterval, type PaidTier, type PlanPrice } from '../api/billing'
+import { billingApi, type BillingInterval, type PaidTier, type PlanPrice } from '../api/billing'
 import { userSettingsApi } from '../api/userSettings'
 import { LEGAL_VERSION } from '../legal/version'
 
@@ -363,13 +363,8 @@ const handleCheckout = async () => {
       return
     }
 
-    try {
-      window.location.href = await billingApi.startCheckout(paidTier.value, interval.value, profileReturnUrl())
-    } catch (checkoutErr) {
-      // The account exists: the user can subscribe from their profile, which says the payment page did not open
-      console.error('Checkout error:', checkoutErr)
-      await router.push({ path: '/profile', query: { checkout: 'failed' } })
-    }
+    // Karo's payment page shows Stripe's form; it falls back to Stripe's own page if the form cannot load
+    await router.push({ path: '/paiement', query: { tier: paidTier.value, interval: interval.value } })
   } catch (err) {
     error.value = err instanceof Error ? err.message : t('checkout.checkout_failed')
     console.error('Checkout error:', err)

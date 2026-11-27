@@ -17,6 +17,7 @@ import Login from './pages/Login.vue'
 import Signup from './pages/Signup.vue'
 import CheckoutPage from './pages/CheckoutPage.vue'
 import Profile from './pages/Profile.vue'
+import PaymentPage from './pages/PaymentPage.vue'
 import Feedback from './pages/Feedback.vue'
 import Household from './pages/Household.vue'
 import InviteUser from './pages/InviteUser.vue'
@@ -55,6 +56,7 @@ const routes = [
   { path: '/onboarding', component: Onboarding },
   { path: '/faq', component: Faq },
   { path: '/profile', component: Profile },
+  { path: '/paiement', component: PaymentPage },
   { path: '/feedback', component: Feedback },
   { path: '/household', component: Household },
   { path: '/household/invite', component: InviteUser },
