@@ -59,6 +59,9 @@ onMounted(async () => {
         await waitForActivation()
       } else if (checkout === 'cancelled') {
         notice.value = t('billing.cancelled')
+      } else if (checkout === 'failed') {
+        // The sign-up page created the account but could not open the payment page
+        error.value = t('billing.checkoutFailed')
       }
     }
   } catch (err) {

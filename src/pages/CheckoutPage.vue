@@ -204,13 +204,15 @@ import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import client from '../api/client'
 import { supabase } from '../api/supabase'
-import { billingApi, billingErrorMessage, profileReturnUrl, type BillingInterval, type PaidTier, type PlanPrice } from '../api/billing'
+import { useAuth } from '../composables/useAuth'
+import { billingApi, profileReturnUrl, type BillingInterval, type PaidTier, type PlanPrice } from '../api/billing'
 import { userSettingsApi } from '../api/userSettings'
 import { LEGAL_VERSION } from '../legal/version'
 
 const { t } = useI18n()
 const router = useRouter()
 const route = useRoute()
+const { checkAuth } = useAuth()
 
 
 const loading = ref(false)
@@ -323,7 +325,10 @@ const handleCheckout = async () => {
     localStorage.setItem('token', accessToken)
 
     // 2. Create the account; it starts on Free and Stripe's confirmation upgrades it
-    await client.post('/auth/bootstrap', { email: form.value.email })
+    const { data: boot } = await client.post('/auth/bootstrap', { email: form.value.email })
+    if (boot?.householdId) {
+      localStorage.setItem('householdId', boot.householdId)
+    }
 
     // 3. Update user profile with first and last name
     if (form.value.firstName || form.value.lastName) {
@@ -349,6 +354,9 @@ const handleCheckout = async () => {
       console.warn('[CHECKOUT] Address or time zone not saved:', profileErr)
     }
 
+    // The router guard reads the shared auth state: without this, the next page sends the new user to the login page
+    await checkAuth()
+
     // 4. Free goes straight to the dashboard; a paid plan continues to the Stripe checkout
     if (!paidTier.value) {
       await router.push('/dashboard')
@@ -358,10 +366,9 @@ const handleCheckout = async () => {
     try {
       window.location.href = await billingApi.startCheckout(paidTier.value, interval.value, profileReturnUrl())
     } catch (checkoutErr) {
-      // The account exists: the user can subscribe from their profile
+      // The account exists: the user can subscribe from their profile, which says the payment page did not open
       console.error('Checkout error:', checkoutErr)
-      error.value = billingErrorMessage(checkoutErr, t('checkout.checkout_failed'))
-      await router.push('/profile')
+      await router.push({ path: '/profile', query: { checkout: 'failed' } })
     }
   } catch (err) {
     error.value = err instanceof Error ? err.message : t('checkout.checkout_failed')
