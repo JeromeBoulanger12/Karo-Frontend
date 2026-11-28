@@ -1,0 +1,140 @@
+/* Single-card pages around sign-in (forgot password, reset password), in the style of the login form */
+.auth-page {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  /* The app bar (64px) overlays the page: the global reset cancels the space Vuetify reserves for it */
+  min-height: 100dvh;
+  padding: calc(64px + 3rem) 1.25rem 3rem;
+  background: linear-gradient(180deg, #eef2ff 0%, var(--surface, #f8fafc) 40%);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  padding: 2rem 1.75rem;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+}
+
+.auth-title {
+  margin: 0;
+  font-size: 1.65rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--text-primary, #0f172a);
+}
+
+.auth-subtitle {
+  margin: 0.5rem 0 1.75rem;
+  line-height: 1.5;
+  color: var(--text-muted, #64748b);
+}
+
+.auth-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.85rem 1rem;
+  margin-bottom: 1.25rem;
+  border-radius: 12px;
+  font-size: 0.925rem;
+  line-height: 1.45;
+}
+
+.auth-notice i {
+  font-size: 1.2rem;
+  line-height: 1.2;
+}
+
+.auth-notice--success {
+  background: var(--success-light, #dcfce7);
+  color: #15803d;
+}
+
+.auth-notice--error {
+  background: var(--danger-light, #fee2e2);
+  color: #b91c1c;
+}
+
+.auth-form {
+  display: grid;
+  gap: 1.1rem;
+}
+
+.auth-field {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.auth-field-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-secondary, #475569);
+}
+
+.auth-field input {
+  width: 100%;
+  height: 50px;
+  padding: 0 1rem;
+  font-size: 1rem;
+  color: var(--text-primary, #0f172a);
+  background: #fff;
+  border: 1.5px solid var(--border, #e2e8f0);
+  border-radius: 14px;
+  outline: none;
+  transition: border-color 150ms, box-shadow 150ms;
+}
+
+.auth-field input:focus {
+  border-color: var(--primary, #3b82f6);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+}
+
+.auth-field-error {
+  font-size: 0.825rem;
+  color: #b91c1c;
+}
+
+.auth-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: 52px;
+  margin-top: 0.4rem;
+  border: none;
+  border-radius: 14px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.28);
+  cursor: pointer;
+}
+
+.auth-submit:disabled {
+  opacity: 0.7;
+  cursor: progress;
+}
+
+.auth-submit:focus-visible {
+  outline: 3px solid rgba(59, 130, 246, 0.45);
+  outline-offset: 2px;
+}
+
+.auth-footer {
+  margin: 1.75rem 0 0;
+  text-align: center;
+}
+
+.auth-footer a {
+  font-weight: 600;
+  color: var(--primary-dark, #2563eb);
+  text-decoration: none;
+}
+
+.auth-footer a:hover {
+  text-decoration: underline;
+}

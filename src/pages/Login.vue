@@ -128,6 +128,13 @@ onMounted(() => {
             </span>
           </label>
 
+          <router-link
+            class="forgot"
+            :to="{ path: '/forgot-password', query: email ? { email } : {} }"
+          >
+            {{ t('passwordReset.forgotLink') }}
+          </router-link>
+
           <button type="submit" class="submit" :disabled="loading">
             <i v-if="loading" class="mdi mdi-loading mdi-spin"></i>
             <span>{{ t('auth.login') }}</span>
@@ -449,6 +456,19 @@ onMounted(() => {
 .field-toggle:focus-visible {
   outline: 2px solid var(--primary, #3b82f6);
   outline-offset: 1px;
+}
+
+.forgot {
+  justify-self: end;
+  margin-top: -0.4rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--primary-dark, #2563eb);
+  text-decoration: none;
+}
+
+.forgot:hover {
+  text-decoration: underline;
 }
 
 .submit {
