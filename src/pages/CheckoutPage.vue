@@ -152,7 +152,7 @@
             />
             <label for="terms">
               {{ t('checkout.agree_to_terms') }}
-              <a href="#" target="_blank">{{ t('landing.terms') }}</a>
+              <a href="/conditions" target="_blank" rel="noopener">{{ t('landing.terms') }}</a>
             </label>
           </div>
 

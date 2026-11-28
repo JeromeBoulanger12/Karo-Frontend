@@ -1603,7 +1603,11 @@
   },
   "legalPage": {
     "draft": "Ébauche : ce texte est en attente de révision juridique.",
-    "version": "Version {version}"
+    "version": "Version {version}",
+    "eyebrow": "Légal",
+    "toc": "Sommaire",
+    "questions": "Une question sur ce document ?",
+    "back": "Retour à l’accueil"
   },
   "linkedEnvelope": {
     "title": "Enveloppe Liée",
