@@ -15,6 +15,8 @@ import Landing from './pages/Landing.vue'
 import PricingWithTax from './pages/PricingWithTax.vue'
 import Login from './pages/Login.vue'
 import Signup from './pages/Signup.vue'
+import ForgotPassword from './pages/ForgotPassword.vue'
+import ResetPassword from './pages/ResetPassword.vue'
 import CheckoutPage from './pages/CheckoutPage.vue'
 import Profile from './pages/Profile.vue'
 import PaymentPage from './pages/PaymentPage.vue'
@@ -46,6 +48,8 @@ const routes = [
   { path: '/pricing', component: PricingWithTax },
   { path: '/login', component: Login },
   { path: '/signup', component: Signup },
+  { path: '/forgot-password', component: ForgotPassword },
+  { path: '/reset-password', component: ResetPassword },
   { path: '/checkout', component: CheckoutPage, name: 'Checkout' },
   { path: '/confidentialite', component: LegalPage, props: { document: 'privacy' } },
   { path: '/conditions', component: LegalPage, props: { document: 'terms' } },
@@ -130,8 +134,13 @@ router.beforeEach(async (to, from) => {
     return true // Allow unauthenticated users to see landing
   }
 
-  // Public routes (login, signup, pricing, checkout)
-  const publicRoutes = ['/login', '/signup', '/pricing', '/checkout']
+  // The recovery link opens a session: the reset page shows its form signed in or not
+  if (to.path === '/reset-password') {
+    return true
+  }
+
+  // Public routes (login, signup, password reset request, pricing, checkout)
+  const publicRoutes = ['/login', '/signup', '/forgot-password', '/pricing', '/checkout']
   const isPublicRoute = publicRoutes.includes(to.path)
 
   if (isPublicRoute) {

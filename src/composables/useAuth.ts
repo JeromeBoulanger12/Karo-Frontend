@@ -202,6 +202,11 @@ export const useAuth = () => {
         return
       }
 
+      // A recovery link also signs in, but the reset page must stay open to set the new password
+      if (window.location.pathname.endsWith('/reset-password')) {
+        return
+      }
+
       console.log('Processing email confirmation hash...')
 
       // Use listener approach for PKCE flow compatibility
@@ -309,6 +314,36 @@ export const useAuth = () => {
     }
   }
 
+  // Sends the Supabase recovery email. Supabase answers the same way for an unknown address,
+  // so the page never tells whether an account exists.
+  const requestPasswordReset = async (email: string): Promise<string | null> => {
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}${import.meta.env.BASE_URL}reset-password`
+    })
+    return resetError ? (resetError.code ?? 'unknown') : null
+  }
+
+  // Sets a new password on the current session (the recovery link opens one), then keeps the API token in step
+  const updatePassword = async (newPassword: string): Promise<string | null> => {
+    const { error: updateError } = await supabase.auth.updateUser({ password: newPassword })
+    if (updateError) return updateError.code ?? 'unknown'
+
+    const { data } = await supabase.auth.getSession()
+    if (data.session) localStorage.setItem('token', data.session.access_token)
+    return null
+  }
+
+  // From the profile: the current password is checked first, so an unattended open session cannot change it
+  const changePassword = async (currentPassword: string, newPassword: string): Promise<string | null> => {
+    const email = user.value?.email
+    if (!email) return 'no_session'
+
+    const { error: checkError } = await supabase.auth.signInWithPassword({ email, password: currentPassword })
+    if (checkError) return 'invalid_current_password'
+
+    return updatePassword(newPassword)
+  }
+
   // Clears the browser session without calling Supabase (used after the account was deleted server-side,
   // when a server-side sign-out would be rejected)
   const clearLocalSession = async () => {
@@ -331,6 +366,9 @@ export const useAuth = () => {
     signup,
     logout,
     clearLocalSession,
+    requestPasswordReset,
+    updatePassword,
+    changePassword,
     checkAuth,
     handleEmailConfirmation
   }
