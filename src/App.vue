@@ -7,6 +7,7 @@ import { householdsAPI } from './api/households'
 import { notificationsApi } from './api/notifications'
 import { userSettingsApi } from './api/userSettings'
 import client from './api/client'
+import { supabase } from './api/supabase'
 
 const router = useRouter()
 const route = useRoute()
@@ -135,9 +136,21 @@ onMounted(async () => {
   // If user loaded, role will be loaded by the watch
 })
 
-const changeLanguage = (lang) => {
+const changeLanguage = async (lang) => {
   locale.value = lang
   localStorage.setItem('language', lang)
+
+  if (!user.value) return
+
+  // Emails follow the language the user reads the app in: Karo's own (stored by the backend)
+  // and Supabase's (its templates read the language from the account metadata)
+  try {
+    const { data: profile } = await userSettingsApi.getProfile()
+    await userSettingsApi.updatePreferences(profile.timeZoneId, profile.notificationsEnabled, lang)
+    await supabase.auth.updateUser({ data: { language: lang } })
+  } catch (err) {
+    console.error('[App.vue] Could not save the email language', err)
+  }
 }
 
 const handleLogout = async () => {
