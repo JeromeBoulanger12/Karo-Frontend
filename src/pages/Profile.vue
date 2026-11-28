@@ -8,7 +8,44 @@ import SubscriptionPlanCard from '../components/SubscriptionPlanCard.vue'
 import '../styles/dashboard.css'
 
 const { t, locale } = useI18n()
-const { user, clearLocalSession } = useAuth()
+const { user, clearLocalSession, changePassword } = useAuth()
+
+// Password change: the current password is asked again
+const currentPassword = ref('')
+const newPassword = ref('')
+const confirmNewPassword = ref('')
+const changingPassword = ref(false)
+const passwordError = ref<string | null>(null)
+const passwordSuccess = ref(false)
+
+const passwordMismatch = computed(() =>
+  confirmNewPassword.value.length > 0 && newPassword.value !== confirmNewPassword.value
+)
+
+const handleChangePassword = async () => {
+  if (passwordMismatch.value) return
+  changingPassword.value = true
+  passwordError.value = null
+  passwordSuccess.value = false
+
+  const code = await changePassword(currentPassword.value, newPassword.value)
+  if (code === 'invalid_current_password') {
+    passwordError.value = t('passwordReset.wrongCurrentPassword')
+  } else if (code === 'same_password') {
+    passwordError.value = t('passwordReset.samePassword')
+  } else if (code === 'weak_password') {
+    passwordError.value = t('passwordReset.weakPassword')
+  } else if (code) {
+    passwordError.value = t('passwordReset.updateError')
+  } else {
+    passwordSuccess.value = true
+    currentPassword.value = ''
+    newPassword.value = ''
+    confirmNewPassword.value = ''
+  }
+
+  changingPassword.value = false
+}
 
 // Account deletion
 const showDeleteDialog = ref(false)
@@ -216,6 +253,69 @@ const confirmDeleteAccount = async () => {
       <SubscriptionPlanCard />
     </div>
 
+    <!-- Password change -->
+    <section class="section">
+      <h2 class="section-title">
+        <i class="mdi mdi-lock-reset"></i>
+        {{ t('passwordReset.changeTitle') }}
+      </h2>
+      <div class="card">
+        <div class="card-body">
+          <v-alert v-if="passwordSuccess" type="success" class="mb-4">
+            {{ t('passwordReset.updated') }}
+          </v-alert>
+
+          <v-alert v-if="passwordError" type="error" class="mb-4">
+            {{ passwordError }}
+          </v-alert>
+
+          <form class="form" @submit.prevent="handleChangePassword">
+            <div class="form-group">
+              <label>{{ t('passwordReset.currentPassword') }}</label>
+              <input
+                v-model="currentPassword"
+                type="password"
+                autocomplete="current-password"
+                required
+                class="form-input"
+                :disabled="changingPassword"
+              />
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>{{ t('passwordReset.newPassword') }}</label>
+                <input
+                  v-model="newPassword"
+                  type="password"
+                  autocomplete="new-password"
+                  required
+                  class="form-input"
+                  :disabled="changingPassword"
+                />
+              </div>
+              <div class="form-group">
+                <label>{{ t('auth.confirmPassword') }}</label>
+                <input
+                  v-model="confirmNewPassword"
+                  type="password"
+                  autocomplete="new-password"
+                  required
+                  class="form-input"
+                  :disabled="changingPassword"
+                />
+                <small v-if="passwordMismatch" class="form-hint password-mismatch">{{ t('auth.passwordsMustMatch') }}</small>
+              </div>
+            </div>
+
+            <button type="submit" class="btn-primary" :disabled="changingPassword || passwordMismatch">
+              {{ changingPassword ? t('common.loading') : t('passwordReset.save') }}
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+
     <!-- Purchase History Section -->
     <section class="section">
       <h2 class="section-title">
@@ -418,6 +518,10 @@ const confirmDeleteAccount = async () => {
   display: block;
   color: #666666;
   margin-top: 0.25rem;
+}
+
+.password-mismatch {
+  color: #b91c1c;
 }
 
 .form-row {
