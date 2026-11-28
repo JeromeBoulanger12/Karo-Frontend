@@ -209,7 +209,7 @@ import { billingApi, type BillingInterval, type PaidTier, type PlanPrice } from 
 import { userSettingsApi } from '../api/userSettings'
 import { LEGAL_VERSION } from '../legal/version'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const router = useRouter()
 const route = useRoute()
 const { checkAuth } = useAuth()
@@ -306,10 +306,12 @@ const handleCheckout = async () => {
   error.value = ''
 
   try {
-    // 1. Sign up with Supabase
+    // 1. Sign up with Supabase. The language goes in the account metadata, read by the backend
+    // on the first sign-in and by the Supabase email templates
     const { data, error: signUpError } = await supabase.auth.signUp({
       email: form.value.email,
-      password: form.value.password
+      password: form.value.password,
+      options: { data: { language: locale.value === 'en' ? 'en' : 'fr' } }
     })
 
     if (signUpError) {
