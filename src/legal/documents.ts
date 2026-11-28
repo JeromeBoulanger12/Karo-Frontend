@@ -27,7 +27,6 @@ export const LEGAL_DOCUMENTS: Record<'privacy' | 'terms', Record<'fr' | 'en', Le
           heading: '2. Renseignements recueillis',
           paragraphs: [
             'Identité : courriel, prénom et nom.',
-            "Adresse postale (facultative) : utilisée à l'inscription et pour le paiement de l'abonnement.",
             'Préférences : fuseau horaire et choix de recevoir ou non des notifications.',
             'Données financières que vous saisissez : comptes et soldes, enveloppes et transactions, sources de revenu et paies, dettes, membres du foyer et invitations.',
             'Données techniques : jeton de session, langue et identifiant du foyer.'
@@ -48,7 +47,7 @@ export const LEGAL_DOCUMENTS: Record<'privacy' | 'terms', Record<'fr' | 'en', Le
             'Microsoft Azure : hébergement de l\'API, région Canada Centre (Toronto, Ontario, hors Québec).',
             "GitHub Pages : hébergement de l'interface.",
             "Resend : envoi des courriels (invitations, confirmations, alertes), hors Québec (États-Unis).",
-            "Stripe : paiement de l'abonnement; Stripe agit comme marchand de référence (Managed Payments) et traite vos données de paiement, y compris les taxes de vente."
+            "Stripe : paiement de l'abonnement; Stripe agit comme marchand de référence (Managed Payments) et recueille lui-même vos données de paiement et votre adresse de facturation, y compris pour les taxes de vente. Karo ne conserve ni votre adresse ni vos données de carte."
           ]
         },
         {
@@ -102,7 +101,6 @@ export const LEGAL_DOCUMENTS: Record<'privacy' | 'terms', Record<'fr' | 'en', Le
           heading: '2. Information we collect',
           paragraphs: [
             'Identity: email, first and last name.',
-            'Mailing address (optional): used at sign-up and to pay the subscription.',
             'Preferences: time zone and whether you want notifications.',
             'Financial data you enter: accounts and balances, envelopes and transactions, income sources and paychecks, debts, household members and invitations.',
             'Technical data: session token, language and household identifier.'
@@ -123,7 +121,7 @@ export const LEGAL_DOCUMENTS: Record<'privacy' | 'terms', Record<'fr' | 'en', Le
             'Microsoft Azure: API hosting, Canada Central region (Toronto, Ontario, outside Quebec).',
             'GitHub Pages: hosting of the web interface.',
             'Resend: sends emails (invitations, confirmations, alerts), outside Quebec (United States).',
-            'Stripe: subscription payments; Stripe acts as merchant of record (Managed Payments) and processes payment details, sales taxes included.'
+            'Stripe: subscription payments; Stripe acts as merchant of record (Managed Payments) and collects your payment details and billing address itself, sales taxes included. Karo keeps neither your address nor your card details.'
           ]
         },
         {

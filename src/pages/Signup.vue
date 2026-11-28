@@ -17,11 +17,6 @@ const confirmPassword = ref('')
 const firstName = ref('')
 const lastName = ref('')
 const acceptedPolicy = ref(false)
-const street = ref('')
-const city = ref('')
-const province = ref('')
-const postalCode = ref('')
-const country = ref('')
 
 const passwordsMatch = () => password.value === confirmPassword.value
 
@@ -40,14 +35,7 @@ const handleSignup = async () => {
     // The browser's zone is a good first guess; the profile page can change it
     timeZoneId: Intl.DateTimeFormat().resolvedOptions().timeZone,
     consentVersion: LEGAL_VERSION,
-    language,
-    address: {
-      street: street.value,
-      city: city.value,
-      province: province.value,
-      postalCode: postalCode.value,
-      country: country.value
-    }
+    language
   })
 
   await signup(email.value, password.value, language)
@@ -97,29 +85,6 @@ onMounted(() => {
           outlined
           class="mb-3"
         ></v-text-field>
-
-        <v-text-field
-          v-model="street"
-          :label="t('profile.street')"
-          outlined
-          class="mb-3"
-          autocomplete="street-address"
-        ></v-text-field>
-
-        <v-row dense>
-          <v-col cols="6">
-            <v-text-field v-model="city" :label="t('profile.city')" outlined class="mb-3" autocomplete="address-level2"></v-text-field>
-          </v-col>
-          <v-col cols="6">
-            <v-text-field v-model="postalCode" :label="t('profile.postalCode')" outlined class="mb-3" autocomplete="postal-code"></v-text-field>
-          </v-col>
-          <v-col cols="6">
-            <v-text-field v-model="province" :label="t('profile.province')" outlined class="mb-3" autocomplete="address-level1"></v-text-field>
-          </v-col>
-          <v-col cols="6">
-            <v-text-field v-model="country" :label="t('profile.country')" outlined class="mb-3" autocomplete="country-name"></v-text-field>
-          </v-col>
-        </v-row>
 
         <v-text-field
           v-model="password"

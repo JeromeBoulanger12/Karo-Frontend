@@ -64,18 +64,13 @@ const loading = ref(false)
 const error = ref<string | null>(null)
 const success = ref<string | null>(null)
 
-// Time zone, notifications and address
+// Time zone and notifications
 const subscriptionFeatures = inject('subscriptionFeatures', ref({ allowPlanning: false }))
 const userPreferences = inject<{ value: { notificationsEnabled: boolean } }>('userPreferences', ref({ notificationsEnabled: true }))
 const canUseNotifications = computed(() => !!subscriptionFeatures.value.allowPlanning)
 const timeZones = listTimeZones()
 const timeZoneId = ref('America/Toronto')
 const notificationsEnabled = ref(true)
-const street = ref('')
-const city = ref('')
-const province = ref('')
-const postalCode = ref('')
-const country = ref('')
 
 // Orders (no purchase history is stored yet)
 const orders = ref<any[]>([])
@@ -90,11 +85,6 @@ const loadProfile = async () => {
     lastName.value = profile.lastName
     timeZoneId.value = profile.timeZoneId
     notificationsEnabled.value = profile.notificationsEnabled
-    street.value = profile.address?.street ?? ''
-    city.value = profile.address?.city ?? ''
-    province.value = profile.address?.province ?? ''
-    postalCode.value = profile.address?.postalCode ?? ''
-    country.value = profile.address?.country ?? ''
   } catch (err) {
     console.error('Error loading profile:', err)
   }
@@ -116,13 +106,6 @@ const handleSave = async () => {
     await userSettingsApi.updateName(firstName.value, lastName.value)
     // On a free plan the switch is disabled, so this sends back the value the user already has
     await userSettingsApi.updatePreferences(timeZoneId.value, notificationsEnabled.value)
-    await userSettingsApi.updateAddress({
-      street: street.value,
-      city: city.value,
-      province: province.value,
-      postalCode: postalCode.value,
-      country: country.value
-    })
     userPreferences.value.notificationsEnabled = notificationsEnabled.value
 
     success.value = t('profile.updateSuccess')
@@ -257,36 +240,6 @@ const confirmDeleteAccount = async () => {
                 {{ t('profile.notifications') }}
               </label>
               <small v-if="!canUseNotifications" class="form-hint">{{ t('profile.notificationsPaidOnly') }}</small>
-            </div>
-
-            <h3 class="form-section-title">{{ t('profile.addressTitle') }}</h3>
-            <small class="form-hint">{{ t('profile.addressHint') }}</small>
-
-            <div class="form-group">
-              <label>{{ t('profile.street') }}</label>
-              <input v-model="street" type="text" class="form-input" autocomplete="street-address" />
-            </div>
-
-            <div class="form-row">
-              <div class="form-group">
-                <label>{{ t('profile.city') }}</label>
-                <input v-model="city" type="text" class="form-input" autocomplete="address-level2" />
-              </div>
-              <div class="form-group">
-                <label>{{ t('profile.province') }}</label>
-                <input v-model="province" type="text" class="form-input" autocomplete="address-level1" />
-              </div>
-            </div>
-
-            <div class="form-row">
-              <div class="form-group">
-                <label>{{ t('profile.postalCode') }}</label>
-                <input v-model="postalCode" type="text" class="form-input" autocomplete="postal-code" />
-              </div>
-              <div class="form-group">
-                <label>{{ t('profile.country') }}</label>
-                <input v-model="country" type="text" class="form-input" autocomplete="country-name" />
-              </div>
             </div>
 
             <button type="submit" class="btn-primary" :disabled="loading">

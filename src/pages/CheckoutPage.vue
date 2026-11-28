@@ -131,32 +131,6 @@
             />
           </div>
 
-          <!-- Mailing address (kept for the payment) -->
-          <div class="form-group">
-            <label for="street">{{ t('profile.street') }}</label>
-            <input id="street" v-model="form.street" type="text" :disabled="loading" class="form-control" autocomplete="street-address" />
-          </div>
-
-          <div class="form-group">
-            <label for="city">{{ t('profile.city') }}</label>
-            <input id="city" v-model="form.city" type="text" :disabled="loading" class="form-control" autocomplete="address-level2" />
-          </div>
-
-          <div class="form-group">
-            <label for="province">{{ t('profile.province') }}</label>
-            <input id="province" v-model="form.province" type="text" :disabled="loading" class="form-control" autocomplete="address-level1" />
-          </div>
-
-          <div class="form-group">
-            <label for="postalCode">{{ t('profile.postalCode') }}</label>
-            <input id="postalCode" v-model="form.postalCode" type="text" :disabled="loading" class="form-control" autocomplete="postal-code" />
-          </div>
-
-          <div class="form-group">
-            <label for="country">{{ t('profile.country') }}</label>
-            <input id="country" v-model="form.country" type="text" :disabled="loading" class="form-control" autocomplete="country-name" />
-          </div>
-
           <!-- Terms -->
           <div class="form-group checkbox">
             <input
@@ -224,11 +198,6 @@ const form = ref({
   confirmPassword: '',
   firstName: '',
   lastName: '',
-  street: '',
-  city: '',
-  province: '',
-  postalCode: '',
-  country: '',
   agreeToTerms: false
 })
 
@@ -340,20 +309,13 @@ const handleCheckout = async () => {
       })
     }
 
-    // The address is kept for the payment; the time zone starts as the browser's. Neither blocks the checkout
+    // The time zone starts as the browser's; Stripe asks for the billing address itself. Neither blocks the checkout
     try {
-      await userSettingsApi.updateAddress({
-        street: form.value.street,
-        city: form.value.city,
-        province: form.value.province,
-        postalCode: form.value.postalCode,
-        country: form.value.country
-      })
       await userSettingsApi.updatePreferences(Intl.DateTimeFormat().resolvedOptions().timeZone, true)
       // The box is required above, so the version the user accepted is recorded here
       await userSettingsApi.recordConsent(LEGAL_VERSION)
     } catch (profileErr) {
-      console.warn('[CHECKOUT] Address or time zone not saved:', profileErr)
+      console.warn('[CHECKOUT] Time zone or consent not saved:', profileErr)
     }
 
     // The router guard reads the shared auth state: without this, the next page sends the new user to the login page

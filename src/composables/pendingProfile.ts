@@ -1,11 +1,10 @@
-import { userSettingsApi, type PostalAddress } from '../api/userSettings'
+import { userSettingsApi } from '../api/userSettings'
 
 // Filled in at sign-up, when there is no session yet, and saved once the first sign-in has created the user
 const STORAGE_KEY = 'pendingProfile'
 
 export interface PendingProfile {
   timeZoneId?: string
-  address?: PostalAddress
   // Set when the user ticked the consent box at sign-up
   consentVersion?: string
   // The language the user signed up in (fr or en)
@@ -25,9 +24,6 @@ export async function applyPendingProfile() {
     const profile = JSON.parse(raw) as PendingProfile
     if (profile.timeZoneId) {
       await userSettingsApi.updatePreferences(profile.timeZoneId, true, profile.language)
-    }
-    if (profile.address) {
-      await userSettingsApi.updateAddress(profile.address)
     }
     if (profile.consentVersion) {
       await userSettingsApi.recordConsent(profile.consentVersion)
