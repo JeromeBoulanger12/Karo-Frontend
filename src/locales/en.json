@@ -1519,7 +1519,11 @@
   },
   "legalPage": {
     "draft": "Draft: this text is pending legal review.",
-    "version": "Version {version}"
+    "version": "Version {version}",
+    "eyebrow": "Legal",
+    "toc": "Contents",
+    "questions": "A question about this document?",
+    "back": "Back to home"
   },
   "linkedEnvelope": {
     "title": "Linked envelope",

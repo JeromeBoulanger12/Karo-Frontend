@@ -141,8 +141,9 @@ router.beforeEach(async (to, from) => {
     return true // Allow unauthenticated users to see landing
   }
 
-  // The recovery link opens a session: the reset page shows its form signed in or not
-  if (to.path === '/reset-password') {
+  // The recovery link opens a session: the reset page shows its form signed in or not.
+  // The privacy policy and terms must be readable by everyone, before and after signing up.
+  if (['/reset-password', '/confidentialite', '/conditions'].includes(to.path)) {
     return true
   }
 

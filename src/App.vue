@@ -37,8 +37,8 @@ const loadUserPreferences = async () => {
 
 const isAdmin = computed(() => userRole.value === 'Owner' || userRole.value === 'Admin')
 
-// The landing page (guests) has its own navbar, so the app bar is hidden there to avoid two stacked bars
-const showAppBar = computed(() => !!user.value || route.path !== '/')
+// The landing and legal pages (guests) have their own navbar, so the app bar is hidden there to avoid two stacked bars
+const showAppBar = computed(() => !!user.value || !['/', '/confidentialite', '/conditions'].includes(route.path))
 
 const loadFeatures = async () => {
   try {
