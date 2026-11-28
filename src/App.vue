@@ -12,7 +12,7 @@ import { supabase } from './api/supabase'
 const router = useRouter()
 const route = useRoute()
 const { locale, t } = useI18n()
-const { user, logout, handleEmailConfirmation, checkAuth } = useAuth()
+const { user, logout, checkAuth } = useAuth()
 const drawer = ref(true)
 const userMenuOpen = ref(false)
 const userRole = ref(null)
@@ -128,9 +128,8 @@ watch(() => user.value?.id, (userId) => {
 
 onMounted(async () => {
   console.log('[App.vue] onMounted fired')
-  handleEmailConfirmation()
 
-  // Force checkAuth to ensure user is loaded
+  // Force checkAuth to ensure user is loaded (a confirmation link is handled there too)
   await checkAuth()
 
   // If user loaded, role will be loaded by the watch

@@ -59,7 +59,17 @@
       <div class="checkout-form">
         <h2>{{ t('checkout.create_account') }}</h2>
 
-        <form @submit.prevent="handleCheckout">
+        <!-- Email confirmation on: the account waits for its link, then the payment page opens -->
+        <div v-if="confirmationSentTo" class="confirmation-message" role="status">
+          <i class="mdi mdi-email-check-outline"></i>
+          <div>
+            <strong>{{ t('emailConfirmation.title') }}</strong>
+            <p>{{ t('emailConfirmation.sent', { email: confirmationSentTo }) }}</p>
+            <p v-if="isPaidPlan">{{ t('emailConfirmation.thenPayment') }}</p>
+          </div>
+        </div>
+
+        <form v-else @submit.prevent="handleCheckout">
           <!-- Email -->
           <div class="form-group">
             <label for="email">{{ t('auth.email') }}</label>
@@ -176,21 +186,20 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import client from '../api/client'
-import { supabase } from '../api/supabase'
-import { useAuth } from '../composables/useAuth'
+import { useAuth, paymentRoute } from '../composables/useAuth'
 import { billingApi, type BillingInterval, type PaidTier, type PlanPrice } from '../api/billing'
-import { userSettingsApi } from '../api/userSettings'
 import { LEGAL_VERSION } from '../legal/version'
 
 const { t, locale } = useI18n()
 const router = useRouter()
 const route = useRoute()
-const { checkAuth } = useAuth()
-
+const { createAccount } = useAuth()
 
 const loading = ref(false)
 const error = ref('')
+
+// Set once the account waits for its confirmation link
+const confirmationSentTo = ref<string | null>(null)
 
 const form = ref({
   email: '',
@@ -275,60 +284,28 @@ const handleCheckout = async () => {
   error.value = ''
 
   try {
-    // 1. Sign up with Supabase. The language goes in the account metadata, read by the backend
-    // on the first sign-in and by the Supabase email templates
-    const { data, error: signUpError } = await supabase.auth.signUp({
-      email: form.value.email,
-      password: form.value.password,
-      options: { data: { language: locale.value === 'en' ? 'en' : 'fr' } }
+    // The account starts on Free and Stripe's confirmation upgrades it. Names, time zone, consent and the chosen
+    // plan go in the account metadata, saved in Karo at the first sign-in (now, or after the email confirmation)
+    const plan = paidTier.value ? { tier: paidTier.value, interval: interval.value } : undefined
+    const result = await createAccount(form.value.email, form.value.password, {
+      language: locale.value === 'en' ? 'en' : 'fr',
+      firstName: form.value.firstName.trim(),
+      lastName: form.value.lastName.trim(),
+      // The time zone starts as the browser's; Stripe asks for the billing address itself
+      timeZoneId: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      // The box is required above, so this is the version the user accepted
+      consentVersion: LEGAL_VERSION,
+      plan
     })
 
-    if (signUpError) {
-      throw signUpError
-    }
-
-    if (!data.user || !data.session) {
-      throw new Error(t('checkout.signup_failed'))
-    }
-
-    // Store token for bootstrap call
-    const accessToken = data.session.access_token
-    localStorage.setItem('token', accessToken)
-
-    // 2. Create the account; it starts on Free and Stripe's confirmation upgrades it
-    const { data: boot } = await client.post('/auth/bootstrap', { email: form.value.email })
-    if (boot?.householdId) {
-      localStorage.setItem('householdId', boot.householdId)
-    }
-
-    // 3. Update user profile with first and last name
-    if (form.value.firstName || form.value.lastName) {
-      await client.put('/auth/profile', {
-        firstName: form.value.firstName,
-        lastName: form.value.lastName
-      })
-    }
-
-    // The time zone starts as the browser's; Stripe asks for the billing address itself. Neither blocks the checkout
-    try {
-      await userSettingsApi.updatePreferences(Intl.DateTimeFormat().resolvedOptions().timeZone, true)
-      // The box is required above, so the version the user accepted is recorded here
-      await userSettingsApi.recordConsent(LEGAL_VERSION)
-    } catch (profileErr) {
-      console.warn('[CHECKOUT] Time zone or consent not saved:', profileErr)
-    }
-
-    // The router guard reads the shared auth state: without this, the next page sends the new user to the login page
-    await checkAuth()
-
-    // 4. Free goes straight to the dashboard; a paid plan continues to the Stripe checkout
-    if (!paidTier.value) {
-      await router.push('/dashboard')
+    // Email confirmation on: the payment page opens after the link is clicked
+    if (result.status === 'confirm') {
+      confirmationSentTo.value = form.value.email
       return
     }
 
     // Karo's payment page shows Stripe's form; it falls back to Stripe's own page if the form cannot load
-    await router.push({ path: '/paiement', query: { tier: paidTier.value, interval: interval.value } })
+    await router.push(result.plan ? paymentRoute(result.plan) : '/dashboard')
   } catch (err) {
     error.value = err instanceof Error ? err.message : t('checkout.checkout_failed')
     console.error('Checkout error:', err)
@@ -590,6 +567,26 @@ onMounted(() => {
   border-radius: 6px;
   margin-bottom: 20px;
   font-size: 14px;
+}
+
+.confirmation-message {
+  display: flex;
+  gap: 12px;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #065f46;
+  padding: 16px 18px;
+  border-radius: 8px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.confirmation-message i {
+  font-size: 24px;
+}
+
+.confirmation-message p {
+  margin: 6px 0 0;
 }
 
 .btn {

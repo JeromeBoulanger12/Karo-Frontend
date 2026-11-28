@@ -40,7 +40,7 @@ import AdminPrivacyIncidents from './pages/AdminPrivacyIncidents.vue'
 import AdminFeedback from './pages/AdminFeedback.vue'
 import AdminSubscriptionTierConfigurations from './pages/AdminSubscriptionTierConfigurations.vue'
 import MembersList from './pages/MembersList.vue'
-import { useAuth } from './composables/useAuth'
+import { useAuth, paymentRoute } from './composables/useAuth'
 import { setupAuthInterceptor } from './api/client'
 
 const routes = [
@@ -119,11 +119,18 @@ const authInstance = useAuth()
 
 // Router guard to protect routes and check authentication
 router.beforeEach(async (to, from) => {
-  const { checkAuth, isAuthenticated, authChecked } = authInstance
+  const { checkAuth, isAuthenticated, authChecked, pendingPlan } = authInstance
 
   // Check auth on first navigation only
   if (!authChecked.value) {
     await checkAuth()
+  }
+
+  // Back from the confirmation link after choosing a paid plan: open its payment page once
+  if (pendingPlan.value && isAuthenticated.value && to.path !== '/paiement') {
+    const plan = pendingPlan.value
+    pendingPlan.value = null
+    return paymentRoute(plan)
   }
 
   // Landing page is accessible to everyone
