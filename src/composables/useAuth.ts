@@ -2,7 +2,8 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import client from '../api/client'
 import { supabase } from '../api/supabase'
-import { applyPendingProfile } from './pendingProfile'
+import type { User as SupabaseUser } from '@supabase/supabase-js'
+import { applyPendingProfile, hasPendingProfile, toSignupMetadata, type PendingPlan, type PendingProfile } from './pendingProfile'
 
 interface User {
   id: string
@@ -14,6 +15,13 @@ const householdId = ref<string | null>(null)
 const loading = ref(false)
 const error = ref<string | null>(null)
 const authChecked = ref(false)
+
+// A paid plan chosen at sign-up, to open once the confirmed user is signed in (read by the router guard)
+const pendingPlan = ref<PendingPlan | null>(null)
+let checking: Promise<void> | null = null
+
+// Where a new user lands after the first sign-in: the payment page for the plan they chose, else the dashboard
+export const paymentRoute = (plan: PendingPlan) => ({ path: '/paiement', query: { tier: plan.tier, interval: plan.interval } })
 
 export const useAuth = () => {
   const router = useRouter()
@@ -46,6 +54,17 @@ export const useAuth = () => {
     }
   }
 
+  // Creates the Karo user if needed and saves what the sign-up form collected. Returns the paid plan to resume.
+  const completeSignIn = async (supabaseUser: SupabaseUser, accessToken: string): Promise<PendingPlan | null> => {
+    localStorage.setItem('token', accessToken)
+    await bootstrap(supabaseUser.email || '')
+    const plan = await applyPendingProfile(supabaseUser)
+
+    // Set last: watchers on the user load the household and features
+    user.value = { id: supabaseUser.id, email: supabaseUser.email || '' }
+    return plan
+  }
+
   const login = async (email: string, password: string) => {
     loading.value = true
     error.value = null
@@ -57,30 +76,11 @@ export const useAuth = () => {
       })
 
       if (signInError) throw signInError
+      if (!data.user || !data.session) throw new Error('User or session not returned from Supabase')
 
-      if (data.user && data.session) {
-        const accessToken = data.session.access_token
-        console.log('Login successful - Token:', accessToken ? 'present' : 'MISSING')
-
-        user.value = {
-          id: data.user.id,
-          email: data.user.email || ''
-        }
-
-        if (accessToken) {
-          localStorage.setItem('token', accessToken)
-          console.log('Token stored in localStorage')
-        } else {
-          console.error('No access token in session!')
-        }
-
-        // Bootstrap user in Karo backend
-        await bootstrap(data.user.email || '')
-
-        await router.push('/dashboard')
-      } else {
-        throw new Error('User or session not returned from Supabase')
-      }
+      // A user who confirmed their email elsewhere finishes the sign-up here
+      const plan = await completeSignIn(data.user, data.session.access_token)
+      await router.push(plan ? paymentRoute(plan) : '/dashboard')
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Login failed'
       console.error('Login error:', err)
@@ -89,30 +89,42 @@ export const useAuth = () => {
     }
   }
 
-  // The language is kept in the account metadata, so the backend knows it on the first sign-in
-  const signup = async (email: string, password: string, language?: string) => {
+  // The sign-up data goes in the account metadata: with email confirmation on there is no session yet, and the user
+  // may confirm on another device. Returns 'confirm' when the email must be confirmed first, 'signed_in' otherwise.
+  // Also used by the checkout page, which handles errors and loading itself.
+  const createAccount = async (email: string, password: string, profile: PendingProfile) => {
+    const { data, error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: toSignupMetadata(profile),
+        emailRedirectTo: `${window.location.origin}${import.meta.env.BASE_URL}`
+      }
+    })
+
+    if (signUpError) throw signUpError
+
+    // Email confirmation on: the account waits for the link (also what Supabase answers for an address already used)
+    if (!data.session || !data.user) return { status: 'confirm' as const, plan: null }
+
+    const plan = await completeSignIn(data.user, data.session.access_token)
+    return { status: 'signed_in' as const, plan }
+  }
+
+  const signup = async (email: string, password: string, profile: PendingProfile): Promise<'confirm' | 'signed_in' | null> => {
     loading.value = true
     error.value = null
 
     try {
-      const { data, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: language ? { data: { language } } : undefined
-      })
-
-      if (signUpError) throw signUpError
-
-      if (data.user) {
-        error.value = 'Check your email to confirm your account'
-        setTimeout(() => {
-          error.value = null
-          router.push('/login')
-        }, 3000)
+      const result = await createAccount(email, password, profile)
+      if (result.status === 'signed_in') {
+        await router.push('/dashboard')
       }
+      return result.status
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Signup failed'
       console.error('Signup error:', err)
+      return null
     } finally {
       loading.value = false
     }
@@ -137,7 +149,7 @@ export const useAuth = () => {
     }
   }
 
-  const checkAuth = async () => {
+  const runCheckAuth = async () => {
     try {
       const { data } = await supabase.auth.getSession()
       console.log('[useAuth] checkAuth - session:', !!data.session)
@@ -162,14 +174,16 @@ export const useAuth = () => {
 
         // Restore householdId from localStorage BEFORE setting user (important for watch timing)
         const storedHouseholdId = localStorage.getItem('householdId')
-        if (storedHouseholdId) {
+        if (storedHouseholdId && !hasPendingProfile(userData.user)) {
           householdId.value = storedHouseholdId
           console.log('[useAuth] Restored householdId from localStorage:', storedHouseholdId)
         } else if (data.session.user.email) {
-          // Bootstrap user if they don't have a householdId yet (e.g., after email confirmation)
+          // First sign-in, e.g. back from the confirmation link (Supabase reads the session from the address):
+          // create the Karo user and save the sign-up data
           try {
-            console.log('[useAuth] No householdId in localStorage, bootstrapping...')
+            console.log('[useAuth] Finishing the first sign-in...')
             await bootstrap(data.session.user.email)
+            pendingPlan.value = await applyPendingProfile(userData.user)
           } catch (err) {
             console.warn('Bootstrap during checkAuth failed (this is often expected):', err)
           }
@@ -195,123 +209,12 @@ export const useAuth = () => {
     }
   }
 
-  const handleEmailConfirmation = async () => {
-    try {
-      if (!window.location.hash) {
-        console.log('No email confirmation hash found')
-        return
-      }
-
-      // A recovery link also signs in, but the reset page must stay open to set the new password
-      if (window.location.pathname.endsWith('/reset-password')) {
-        return
-      }
-
-      console.log('Processing email confirmation hash...')
-
-      // Use listener approach for PKCE flow compatibility
-      return new Promise<void>((resolve) => {
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-          console.log('Auth state changed:', event, !!session)
-
-          if (event === 'SIGNED_IN' && session) {
-            console.log('User signed in via email confirmation')
-            user.value = {
-              id: session.user.id,
-              email: session.user.email || ''
-            }
-            localStorage.setItem('token', session.access_token)
-
-            // Bootstrap after email confirmation
-            if (session.user.email) {
-              try {
-                await bootstrap(session.user.email)
-              } catch (bootstrapErr) {
-                console.warn('Bootstrap after email confirmation failed:', bootstrapErr)
-              }
-            }
-
-            // Update profile if pending data exists
-            const pendingFirstName = localStorage.getItem('pendingFirstName')
-            const pendingLastName = localStorage.getItem('pendingLastName')
-            if (pendingFirstName || pendingLastName) {
-              try {
-                await client.put('/auth/profile', {
-                  firstName: pendingFirstName || '',
-                  lastName: pendingLastName || ''
-                })
-                localStorage.removeItem('pendingFirstName')
-                localStorage.removeItem('pendingLastName')
-              } catch (profileErr) {
-                console.warn('Profile update after email confirmation failed:', profileErr)
-              }
-            }
-
-            await applyPendingProfile()
-
-            // Clean up URL hash
-            window.history.replaceState({}, document.title, window.location.pathname)
-
-            // Unsubscribe
-            subscription?.unsubscribe()
-
-            // Redirect to home
-            await router.push('/dashboard')
-            resolve()
-          } else if (event === 'INITIAL_SESSION' || event === 'USER_UPDATED') {
-            // Check if we got a session from the hash
-            const { data } = await supabase.auth.getSession()
-            if (data.session) {
-              console.log('Got session from hash')
-              user.value = {
-                id: data.session.user.id,
-                email: data.session.user.email || ''
-              }
-              localStorage.setItem('token', data.session.access_token)
-
-              if (data.session.user.email) {
-                try {
-                  await bootstrap(data.session.user.email)
-                } catch (bootstrapErr) {
-                  console.warn('Bootstrap after email confirmation failed:', bootstrapErr)
-                }
-              }
-
-              // Update profile if pending data exists
-              const pendingFirstName = localStorage.getItem('pendingFirstName')
-              const pendingLastName = localStorage.getItem('pendingLastName')
-              if (pendingFirstName || pendingLastName) {
-                try {
-                  await client.put('/auth/profile', {
-                    firstName: pendingFirstName || '',
-                    lastName: pendingLastName || ''
-                  })
-                  localStorage.removeItem('pendingFirstName')
-                  localStorage.removeItem('pendingLastName')
-                } catch (profileErr) {
-                  console.warn('Profile update after email confirmation failed:', profileErr)
-                }
-              }
-
-              await applyPendingProfile()
-
-              window.history.replaceState({}, document.title, window.location.pathname)
-              subscription?.unsubscribe()
-              await router.push('/dashboard')
-              resolve()
-            }
-          }
-        })
-
-        // Safety timeout after 5 seconds
-        setTimeout(() => {
-          console.log('Email confirmation timeout - no session found')
-          resolve()
-        }, 5000)
-      })
-    } catch (err) {
-      console.log('Email confirmation handling:', err)
-    }
+  // The router guard and App.vue both check on start-up: they share one run, so a first sign-in is finished once
+  const checkAuth = () => {
+    checking ??= runCheckAuth().finally(() => {
+      checking = null
+    })
+    return checking
   }
 
   // Sends the Supabase recovery email. Supabase answers the same way for an unknown address,
@@ -370,6 +273,7 @@ export const useAuth = () => {
     updatePassword,
     changePassword,
     checkAuth,
-    handleEmailConfirmation
+    pendingPlan,
+    createAccount
   }
 }

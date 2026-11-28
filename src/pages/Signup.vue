@@ -4,7 +4,6 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuth } from '../composables/useAuth'
 import { resetRedirectFlag } from '../api/client'
-import { savePendingProfile } from '../composables/pendingProfile'
 import { LEGAL_VERSION } from '../legal/version'
 
 const { t, locale } = useI18n()
@@ -18,6 +17,9 @@ const firstName = ref('')
 const lastName = ref('')
 const acceptedPolicy = ref(false)
 
+// Set once the account waits for its confirmation link
+const confirmationSentTo = ref<string | null>(null)
+
 const passwordsMatch = () => password.value === confirmPassword.value
 
 const handleSignup = async () => {
@@ -25,20 +27,19 @@ const handleSignup = async () => {
     return
   }
 
-  // The language the user reads the app in: it sets the language of their emails
-  const language = locale.value === 'en' ? 'en' : 'fr'
-
-  // Store profile info for later (after email confirmation)
-  localStorage.setItem('pendingFirstName', firstName.value)
-  localStorage.setItem('pendingLastName', lastName.value)
-  savePendingProfile({
+  const status = await signup(email.value, password.value, {
+    // The language the user reads the app in: it sets the language of their emails
+    language: locale.value === 'en' ? 'en' : 'fr',
+    firstName: firstName.value.trim(),
+    lastName: lastName.value.trim(),
     // The browser's zone is a good first guess; the profile page can change it
     timeZoneId: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    consentVersion: LEGAL_VERSION,
-    language
+    consentVersion: LEGAL_VERSION
   })
 
-  await signup(email.value, password.value, language)
+  if (status === 'confirm') {
+    confirmationSentTo.value = email.value
+  }
 }
 
 const goToLogin = () => {
@@ -58,11 +59,16 @@ onMounted(() => {
         <p>{{ t('auth.signup') }}</p>
       </div>
 
-      <v-alert v-if="error" :type="error.includes('Check your email') ? 'success' : 'error'" class="mb-4">
+      <v-alert v-if="confirmationSentTo" type="success" class="mb-4">
+        <strong>{{ t('emailConfirmation.title') }}</strong><br />
+        {{ t('emailConfirmation.sent', { email: confirmationSentTo }) }}
+      </v-alert>
+
+      <v-alert v-if="error" type="error" class="mb-4">
         {{ error }}
       </v-alert>
 
-      <v-form @submit.prevent="handleSignup">
+      <v-form v-if="!confirmationSentTo" @submit.prevent="handleSignup">
         <v-text-field
           v-model="email"
           :label="t('auth.email')"

@@ -27,6 +27,11 @@
     "noAccount": "Pas de compte?",
     "alreadyHave": "Vous avez déjà un compte?"
   },
+  "emailConfirmation": {
+    "title": "Vérifie tes courriels",
+    "sent": "Nous avons envoyé un lien de confirmation à {email}. Clique dessus pour activer ton compte. Pense à regarder dans tes courriels indésirables.",
+    "thenPayment": "Une fois ton adresse confirmée, tu arriveras directement à la page de paiement de ton forfait."
+  },
   "passwordReset": {
     "forgotLink": "Mot de passe oublié ?",
     "forgotTitle": "Mot de passe oublié",
